@@ -1,0 +1,113 @@
+   Compiling pyo3-build-config v0.21.2
+   Compiling pyo3-macros-backend v0.21.2
+   Compiling pyo3-ffi v0.21.2
+   Compiling pyo3 v0.21.2
+   Compiling pyo3-macros v0.21.2
+    Checking pywa-crypto v0.1.0 (C:\Users\Arvy Kairi\Desktop\whatsapp\pywa)
+error[E0599]: no function or associated item named `deserialize` found for struct `wa_rs_libsignal::protocol::PreKeySignalMessage` in the current scope
+   --> rust\src\signal.rs:268:40
+    |
+268 |     let message = PreKeySignalMessage::deserialize(ciphertext)
+    |                                        ^^^^^^^^^^^ function or associated item not found in `wa_rs_libsignal::protocol::PreKeySignalMessage`
+    |
+note: if you're trying to build a new `wa_rs_libsignal::protocol::PreKeySignalMessage`, consider using `wa_rs_libsignal::protocol::PreKeySignalMessage::new` which returns `Result<wa_rs_libsignal::protocol::PreKeySignalMessage, SignalProtocolError>`
+   --> C:\Users\Arvy Kairi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\wa-rs-libsignal-0.2.0\src\protocol\protocol.rs:250:5
+    |
+250 | /     pub fn new(
+251 | |         message_version: u8,
+252 | |         registration_id: u32,
+253 | |         pre_key_id: Option<PreKeyId>,
+...   |
+257 | |         message: SignalMessage,
+258 | |     ) -> Result<Self> {
+    | |_____________________^
+help: there is a method `serialized` with a similar name, but with different arguments
+   --> C:\Users\Arvy Kairi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\wa-rs-libsignal-0.2.0\src\protocol\protocol.rs:320:5
+    |
+320 |     pub fn serialized(&self) -> &[u8] {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0061]: this function takes 8 arguments but 4 arguments were supplied
+   --> rust\src\signal.rs:271:30
+    |
+271 |       let plaintext = block_on(message_decrypt_prekey(
+    |  ______________________________^^^^^^^^^^^^^^^^^^^^^^-
+272 | |         &message,
+273 | |         &address,
+274 | |         &mut session_store,
+275 | |         &mut identity_store,
+276 | |     ))
+    | |_____- multiple arguments are missing
+    |
+note: function defined here
+   --> C:\Users\Arvy Kairi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\wa-rs-libsignal-0.2.0\src\protocol\session_cipher.rs:221:14
+    |
+221 | pub async fn message_decrypt_prekey<R: Rng + CryptoRng>(
+    |              ^^^^^^^^^^^^^^^^^^^^^^
+help: provide the arguments
+    |
+271 |     let plaintext = block_on(message_decrypt_prekey(
+...
+275 |         &mut identity_store,
+276 ~         /* &mut dyn wa_rs_libsignal::protocol::PreKeyStore */,
+277 +         /* &dyn wa_rs_libsignal::protocol::SignedPreKeyStore */,
+278 +         /* csprng */,
+279 +         /* UsePQRatchet */,
+280 ~     ))
+    |
+
+error[E0599]: no function or associated item named `deserialize` found for struct `wa_rs_libsignal::protocol::SignalMessage` in the current scope
+   --> rust\src\signal.rs:299:34
+    |
+299 |     let message = SignalMessage::deserialize(ciphertext)
+    |                                  ^^^^^^^^^^^ function or associated item not found in `wa_rs_libsignal::protocol::SignalMessage`
+    |
+note: if you're trying to build a new `wa_rs_libsignal::protocol::SignalMessage`, consider using `wa_rs_libsignal::protocol::SignalMessage::new` which returns `Result<wa_rs_libsignal::protocol::SignalMessage, SignalProtocolError>`
+   --> C:\Users\Arvy Kairi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\wa-rs-libsignal-0.2.0\src\protocol\protocol.rs:77:5
+    |
+ 77 | /     pub fn new(
+ 78 | |         message_version: u8,
+ 79 | |         mac_key: &[u8],
+ 80 | |         sender_ratchet_key: PublicKey,
+...   |
+ 85 | |         receiver_identity_key: &IdentityKey,
+ 86 | |     ) -> Result<Self> {
+    | |_____________________^
+help: there is a method `serialized` with a similar name, but with different arguments
+   --> C:\Users\Arvy Kairi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\wa-rs-libsignal-0.2.0\src\protocol\protocol.rs:132:5
+    |
+132 |     pub fn serialized(&self) -> &[u8] {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0061]: this function takes 8 arguments but 4 arguments were supplied
+   --> rust\src\signal.rs:302:30
+    |
+302 |       let plaintext = block_on(message_decrypt(
+    |  ______________________________^^^^^^^^^^^^^^^-
+303 | |         &message,
+304 | |         &address,
+305 | |         &mut session_store,
+306 | |         &mut identity_store,
+307 | |     ))
+    | |_____- multiple arguments are missing
+    |
+note: function defined here
+   --> C:\Users\Arvy Kairi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\wa-rs-libsignal-0.2.0\src\protocol\session_cipher.rs:186:14
+    |
+186 | pub async fn message_decrypt<R: Rng + CryptoRng>(
+    |              ^^^^^^^^^^^^^^^
+help: provide the arguments
+    |
+302 |     let plaintext = block_on(message_decrypt(
+...
+306 |         &mut identity_store,
+307 ~         /* &mut dyn wa_rs_libsignal::protocol::PreKeyStore */,
+308 +         /* &dyn wa_rs_libsignal::protocol::SignedPreKeyStore */,
+309 +         /* csprng */,
+310 +         /* UsePQRatchet */,
+311 ~     ))
+    |
+
+Some errors have detailed explanations: E0061, E0599.
+For more information about an error, try `rustc --explain E0061`.
+error: could not compile `pywa-crypto` (lib) due to 4 previous errors

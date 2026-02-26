@@ -1,0 +1,28 @@
+[package]
+name = "pywa-crypto"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "pywa_crypto"
+crate-type = ["cdylib"]
+path = "rust/src/lib.rs"
+
+[dependencies]
+pyo3 = { version = "0.21", features = ["extension-module", "abi3-py311"] }
+aes-gcm = "0.10"
+x25519-dalek = { version = "2.0", features = ["static_secrets"] }
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+hkdf = "0.12"
+hmac = "0.12"
+sha2 = "0.10"
+rand = "0.8"
+rand09 = { package = "rand", version = "0.9" }
+curve25519-dalek = "4.1"
+aes = "0.8"
+ctr = "0.9"
+cbc = { version = "0.1", features = ["alloc"] }
+pbkdf2 = { version = "0.12", features = ["simple"] }
+wa-rs-libsignal = "0.2.0"
+async-trait = "0.1"
+futures = "0.3"

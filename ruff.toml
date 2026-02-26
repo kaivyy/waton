@@ -1,0 +1,9 @@
+target-version = "py311"
+line-length = 120
+
+[lint]
+select = ["E", "F", "W", "I", "N", "UP", "ANN", "B", "A", "SIM", "TCH"]
+ignore = ["ANN101", "ANN102", "ANN401"]
+
+[lint.isort]
+known-first-party = ["pywa"]

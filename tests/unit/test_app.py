@@ -1,0 +1,84 @@
+import asyncio
+
+from pywa.app.app import App
+from pywa.app.context import Context
+from pywa.app.middleware import MiddlewarePipeline
+from pywa.app.router import Router
+from pywa.core.entities import Message
+from pywa.protocol.binary_node import BinaryNode
+from pywa.protocol.protobuf import wa_pb2
+
+
+def _run(coro):
+    return asyncio.run(coro)
+
+
+def test_router_dispatches_matching_handlers() -> None:
+    async def _case() -> None:
+        router = Router()
+        calls: list[str] = []
+
+        @router.message()
+        async def h1(ctx):
+            calls.append("h1")
+
+        @router.message(lambda ctx: ctx.text == "ok")
+        async def h2(ctx):
+            calls.append("h2")
+
+        ctx = Context(message=Message(id="1", from_jid="a@s.whatsapp.net", text="ok"), app=None)  # type: ignore[arg-type]
+        await router.dispatch(ctx)
+        assert calls == ["h1", "h2"]
+
+    _run(_case())
+
+
+def test_middleware_pipeline_order() -> None:
+    async def _case() -> None:
+        pipe = MiddlewarePipeline()
+        calls: list[str] = []
+
+        async def mw1(ctx, nxt):
+            calls.append("mw1_before")
+            await nxt()
+            calls.append("mw1_after")
+
+        async def mw2(ctx, nxt):
+            calls.append("mw2_before")
+            await nxt()
+            calls.append("mw2_after")
+
+        async def handler(ctx):
+            calls.append("handler")
+
+        pipe.add(mw1)
+        pipe.add(mw2)
+
+        ctx = Context(message=Message(id="1", from_jid="a@s.whatsapp.net"), app=None)  # type: ignore[arg-type]
+        await pipe.run(ctx, handler)
+        assert calls == ["mw1_before", "mw2_before", "handler", "mw2_after", "mw1_after"]
+
+    _run(_case())
+
+
+def test_app_dispatches_command_handler() -> None:
+    async def _case() -> None:
+        app = App(storage_path=":memory:")
+        seen: list[str] = []
+
+        @app.command("!ping")
+        async def ping(ctx):
+            seen.append(ctx.text or "")
+
+        msg = wa_pb2.Message()
+        msg.conversation = "!ping hello"
+        node = BinaryNode(
+            tag="message",
+            attrs={"id": "m1", "from": "123@s.whatsapp.net", "type": "text"},
+            content=msg.SerializeToString(),
+        )
+        await app._dispatch_message(node)
+        assert seen == ["!ping hello"]
+        await app.media.http.aclose()
+
+    _run(_case())

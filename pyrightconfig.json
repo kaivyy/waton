@@ -1,0 +1,6 @@
+{
+  "include": ["pywa"],
+  "typeCheckingMode": "strict",
+  "pythonVersion": "3.11",
+  "reportMissingTypeStubs": false
+}
