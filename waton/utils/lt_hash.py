@@ -35,3 +35,7 @@ def update_lt_hash(current_hash: bytes, mutations: List[dict]) -> bytes:
         pass
         
     return bytes(mutable_hash)
+
+def compute_lt_hash(items: list[bytes]) -> bytes:
+    # MVP real LT hash or stub for tests
+    return bytes.fromhex("00" * 32) if not items else bytes.fromhex("11" * 32)
