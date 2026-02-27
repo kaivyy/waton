@@ -1,9 +1,46 @@
 Waton Documentation
 ===================
 
-Waton is a Python-first WhatsApp Web Multi-Device library with Rust-powered
-crypto primitives. Start with quick setup, then continue with concepts,
-practical guides, and references.
+**Build WhatsApp workflows with a modern Python-first stack.**
+
+Waton combines high-level DX with Rust-backed crypto internals so you can move
+fast without sacrificing protocol fidelity. From quickstart to production
+operations, this docs site is structured as a practical developer portal.
+
+.. container:: waton-hero-links
+
+   * `GitHub Repository <https://github.com/kaivyy/waton>`_
+   * :doc:`Getting Started <content/getting-started>`
+   * :doc:`App Quickstart <content/quickstart-app>`
+   * :doc:`Troubleshooting <content/faq-troubleshooting>`
+
+.. list-table::
+   :class: waton-feature-grid
+   :widths: 1 1
+
+   * - .. container:: waton-feature-card
+
+          **Start Here**
+
+          Setup, first run, and dashboard-assisted development.
+
+     - .. container:: waton-feature-card
+
+          **Core Concepts**
+
+          Architecture, lifecycle, events, and message model fundamentals.
+
+   * - .. container:: waton-feature-card
+
+          **How-to Guides**
+
+          Practical workflows from handling messages to group operations.
+
+     - .. container:: waton-feature-card
+
+          **Reference**
+
+          Configuration and API references when you need exact details.
 
 .. toctree::
    :maxdepth: 2

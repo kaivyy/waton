@@ -28,8 +28,23 @@ language = "en"
 
 html_theme = "sphinx_book_theme"
 html_title = f"Waton {version} Documentation"
+html_static_path = ["_static"]
+html_css_files = [
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css",
+    "custom.css",
+]
+
 html_theme_options = {
     "repository_url": "https://github.com/kaivyy/waton",
     "use_repository_button": True,
     "show_toc_level": 2,
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/kaivyy/waton",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        }
+    ],
 }
