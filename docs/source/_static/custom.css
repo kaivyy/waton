@@ -26,7 +26,7 @@ body {
   background:
     radial-gradient(circle at 10% -20%, rgba(78, 163, 255, 0.22), transparent 35%),
     radial-gradient(circle at 90% -10%, rgba(114, 227, 255, 0.14), transparent 28%),
-    var(--waton-bg);
+    linear-gradient(180deg, #090f1d 0%, #091126 100%);
 }
 
 .bd-main .bd-content .bd-article-container {
@@ -58,6 +58,51 @@ a {
   margin-bottom: 0.6rem;
 }
 
+.waton-hero-shell {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(114, 227, 255, 0.2);
+  border-radius: 18px;
+  padding: 1.05rem 1.1rem 1.1rem;
+  margin: 0.45rem 0 1.2rem;
+  background: linear-gradient(155deg, rgba(17, 29, 52, 0.92), rgba(12, 21, 40, 0.76));
+  box-shadow: 0 16px 42px rgba(3, 8, 18, 0.42);
+}
+
+.waton-hero-shell::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -80px;
+  top: -100px;
+  background: radial-gradient(circle, rgba(114, 227, 255, 0.2) 0%, transparent 68%);
+  pointer-events: none;
+}
+
+.waton-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+  padding: 0.2rem 0.56rem;
+  border: 1px solid rgba(114, 227, 255, 0.35);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ad9ff;
+}
+
+.waton-kicker::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #52c6ff;
+  box-shadow: 0 0 10px rgba(82, 198, 255, 0.75);
+}
+
 .waton-hero-links {
   margin: 1.25rem 0 1.5rem;
 }
@@ -86,6 +131,7 @@ a {
   padding: 0.5rem 0.95rem;
   font-weight: 600;
   box-shadow: 0 8px 28px rgba(6, 10, 22, 0.34);
+  transition: transform 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .waton-hero-links a::before {
@@ -117,6 +163,11 @@ a {
   border-color: rgba(114, 227, 255, 0.55);
 }
 
+.waton-hero-links a:focus-visible {
+  outline: 2px solid #81d7ff;
+  outline-offset: 2px;
+}
+
 .waton-feature-grid {
   margin: 0.5rem 0 2rem;
   border-collapse: separate;
@@ -138,6 +189,12 @@ a {
   border-radius: 14px;
   padding: 0.95rem 1rem;
   box-shadow: 0 12px 30px rgba(5, 9, 19, 0.35);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.waton-feature-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(114, 227, 255, 0.45);
 }
 
 .waton-feature-card h3 {
@@ -167,4 +224,31 @@ pre {
 .toc-entry a.nav-link.active {
   color: #ffffff;
   font-weight: 600;
+}
+
+.admonition.note {
+  border: 1px solid rgba(114, 227, 255, 0.4);
+  border-left: 4px solid #52c6ff;
+  background: linear-gradient(180deg, rgba(14, 27, 47, 0.93), rgba(12, 23, 42, 0.76));
+  border-radius: 12px;
+}
+
+@media (max-width: 860px) {
+  .waton-hero-shell {
+    padding: 0.95rem 0.9rem 1rem;
+    border-radius: 14px;
+  }
+
+  .waton-hero-links ul {
+    gap: 0.55rem;
+  }
+
+  .waton-hero-links a {
+    padding: 0.44rem 0.78rem;
+    font-size: 0.9rem;
+  }
+
+  .waton-feature-grid {
+    border-spacing: 0.5rem;
+  }
 }

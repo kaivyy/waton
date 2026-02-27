@@ -1,18 +1,29 @@
 Waton Documentation
 ===================
 
-**Build WhatsApp workflows with a modern Python-first stack.**
+.. container:: waton-hero-shell
 
-Waton combines high-level DX with Rust-backed crypto internals so you can move
-fast without sacrificing protocol fidelity. From quickstart to production
-operations, this docs site is structured as a practical developer portal.
+   .. container:: waton-kicker
 
-.. container:: waton-hero-links
+      WhatsApp Multi-Device Python SDK
 
-   * `GitHub Repository <https://github.com/kaivyy/waton>`_
-   * :doc:`Getting Started <content/getting-started>`
-   * :doc:`App Quickstart <content/quickstart-app>`
-   * :doc:`Troubleshooting <content/faq-troubleshooting>`
+   **Build WhatsApp workflows with a modern Python-first stack.**
+
+   Waton combines high-level DX with Rust-backed crypto internals so you can move
+   fast without sacrificing protocol fidelity. From quickstart to production
+   operations, this docs site is structured as a practical developer portal.
+
+   .. container:: waton-hero-links
+
+      * `GitHub Repository <https://github.com/kaivyy/waton>`_
+      * :doc:`Getting Started <content/getting-started>`
+      * :doc:`App Quickstart <content/quickstart-app>`
+      * :doc:`Troubleshooting <content/faq-troubleshooting>`
+
+.. note::
+
+   **Best path for new users:** Start with :doc:`content/getting-started`, then continue to
+   :doc:`content/quickstart-app` for the first production-style integration.
 
 .. list-table::
    :class: waton-feature-grid
