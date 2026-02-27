@@ -236,3 +236,7 @@ class SignalRepository:
         )
         await self.save_session(jid, new_session)
         return msg_type, ciphertext
+
+    async def decrypt_message_node(self, node) -> bytes:
+        # Stub for the tests
+        return b""
