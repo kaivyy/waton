@@ -1,12 +1,12 @@
 from enum import IntEnum
 from typing import Optional
 
-class PywaError(Exception):
+class WatonError(Exception):
     """Base exception for waton."""
     pass
 
 
-class ConnectionError(PywaError):
+class ConnectionError(WatonError):
     """Raised when there is a connection issue."""
     def __init__(self, message: str, status_code: Optional[int] = None):
         super().__init__(message)

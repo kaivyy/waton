@@ -2,7 +2,7 @@ import asyncio
 from typing import Any
 
 from waton.client.client import WAClient
-from waton.core.errors import ConnectionError as PywaConnectionError
+from waton.core.errors import ConnectionError as WatonConnectionError
 from waton.protocol.binary_node import BinaryNode
 from waton.protocol.noise_handler import NoiseHandler
 from waton.utils.auth import init_auth_creds
@@ -127,9 +127,9 @@ def test_stream_error_reason_forwarded_on_disconnect() -> None:
 
         assert seen_nodes and seen_nodes[0].tag == "stream:error"
         assert events and events[-1].status == "close"
-        assert isinstance(events[-1].reason, PywaConnectionError)
+        assert isinstance(events[-1].reason, WatonConnectionError)
         assert events[-1].reason.status_code == 515
-        assert disconnects and isinstance(disconnects[-1], PywaConnectionError)
+        assert disconnects and isinstance(disconnects[-1], WatonConnectionError)
         assert disconnects[-1].status_code == 515
 
     _run(_case())
@@ -154,9 +154,9 @@ def test_failure_reason_forwarded_on_disconnect() -> None:
         await client._handle_ws_disconnect(Exception("raw close"))
 
         assert events and events[-1].status == "close"
-        assert isinstance(events[-1].reason, PywaConnectionError)
+        assert isinstance(events[-1].reason, WatonConnectionError)
         assert events[-1].reason.status_code == 401
-        assert disconnects and isinstance(disconnects[-1], PywaConnectionError)
+        assert disconnects and isinstance(disconnects[-1], WatonConnectionError)
         assert disconnects[-1].status_code == 401
 
     _run(_case())

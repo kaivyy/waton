@@ -12,7 +12,7 @@ from .jid import (
     S_WHATSAPP_NET_GROUP,
     S_WHATSAPP_NET_BROADCAST,
 )
-from .errors import PywaError, ConnectionError, DisconnectReason
+from .errors import WatonError, ConnectionError, DisconnectReason
 
 __all__ = [
     "Jid",
@@ -27,7 +27,7 @@ __all__ = [
     "S_WHATSAPP_NET_LID",
     "S_WHATSAPP_NET_GROUP",
     "S_WHATSAPP_NET_BROADCAST",
-    "PywaError",
+    "WatonError",
     "ConnectionError",
     "DisconnectReason",
 ]

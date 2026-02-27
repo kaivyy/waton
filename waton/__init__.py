@@ -10,7 +10,7 @@ __all__ = [
     "Chat",
     "Contact",
     "GroupMetadata",
-    "PywaError",
+    "WatonError",
     "ConnectionError",
     "DisconnectReason",
     "Jid",
@@ -41,11 +41,11 @@ def __getattr__(name: str) -> object:
             "GroupMetadata": GroupMetadata,
         }[name]
 
-    if name in {"PywaError", "ConnectionError", "DisconnectReason"}:
-        from .core.errors import ConnectionError, DisconnectReason, PywaError
+    if name in {"WatonError", "ConnectionError", "DisconnectReason"}:
+        from .core.errors import ConnectionError, DisconnectReason, WatonError
 
         return {
-            "PywaError": PywaError,
+            "WatonError": WatonError,
             "ConnectionError": ConnectionError,
             "DisconnectReason": DisconnectReason,
         }[name]
