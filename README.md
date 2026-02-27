@@ -1,9 +1,17 @@
+<p align="center">
+  <img src="image/watonimg.png" width="100%" alt="Waton Banner">
+</p>
+
+<div align="center">
+
 # Waton
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Waton** is a lightweight, standalone Python library for WhatsApp Web Multi-Device. Build WhatsApp bots, automation tools, and messaging applications entirely in Python — no Node.js required.
+
+</div>
 
 ## Why Waton?
 
