@@ -1,12 +1,12 @@
 import asyncio
 
-from pywa.app.app import App
-from pywa.app.context import Context
-from pywa.app.middleware import MiddlewarePipeline
-from pywa.app.router import Router
-from pywa.core.entities import Message
-from pywa.protocol.binary_node import BinaryNode
-from pywa.protocol.protobuf import wa_pb2
+from waton.app.app import App
+from waton.app.context import Context
+from waton.app.middleware import MiddlewarePipeline
+from waton.app.router import Router
+from waton.core.entities import Message
+from waton.protocol.binary_node import BinaryNode
+from waton.protocol.protobuf import wa_pb2
 
 
 def _run(coro):

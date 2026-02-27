@@ -1,7 +1,7 @@
 import zlib
 
-from pywa.protocol.binary_node import BinaryNode
-from pywa.protocol.binary_codec import encode_binary_node, decode_binary_node
+from waton.protocol.binary_node import BinaryNode
+from waton.protocol.binary_codec import encode_binary_node, decode_binary_node
 
 def test_simple_node_roundtrip():
     node = BinaryNode(tag="iq", attrs={"type": "get", "to": "s.whatsapp.net"})

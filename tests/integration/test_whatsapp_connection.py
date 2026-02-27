@@ -3,13 +3,13 @@ import os
 
 import pytest
 
-from pywa.client.client import WAClient
-from pywa.infra.storage_sqlite import SQLiteStorage
+from waton.client.client import WAClient
+from waton.infra.storage_sqlite import SQLiteStorage
 
 
 pytestmark = pytest.mark.skipif(
-    os.getenv("PYWA_RUN_WHATSAPP_INTEGRATION") != "1",
-    reason="Set PYWA_RUN_WHATSAPP_INTEGRATION=1 to run live WhatsApp connection test.",
+    os.getenv("WATON_RUN_WHATSAPP_INTEGRATION") != "1",
+    reason="Set WATON_RUN_WHATSAPP_INTEGRATION=1 to run live WhatsApp connection test.",
 )
 
 

@@ -4,12 +4,27 @@ from typing import Any
 
 import pytest
 
-from pywa.client.messages import MessagesAPI
-from pywa.protocol.binary_node import BinaryNode
-from pywa.protocol.protobuf import wa_pb2
-from pywa.utils.media_utils import derive_media_keys
-from pywa.utils.process_message import process_incoming_message
-from pywa.utils.auth import init_auth_creds
+from waton.client.messages import MessagesAPI
+from waton.protocol.binary_node import BinaryNode
+from waton.protocol.protobuf import wa_pb2
+from waton.utils.media_utils import derive_media_keys
+from waton.utils.process_message import process_incoming_message
+from waton.utils.auth import init_auth_creds
+from waton.client.messages import _write_random_pad_max16, _unpad_random_max16
+
+
+def test_padding_unpadding():
+    msg = b"\x01\x02\x03hello"
+    padded = _write_random_pad_max16(msg)
+    assert len(padded) > len(msg)
+    assert len(padded) <= len(msg) + 16
+    unpadded = _unpad_random_max16(padded)
+    assert unpadded == msg
+
+    # invalid padding scenarios
+    assert _unpad_random_max16(b"") == b""
+    assert _unpad_random_max16(b"\x00") == b"\x00"
+    assert _unpad_random_max16(b"hello\x06\x06\x06") == b"hello\x06\x06\x06" # 3 bytes instead of 6
 
 
 class _FakeClient:
@@ -201,8 +216,8 @@ def test_send_text_builds_message_node(monkeypatch: pytest.MonkeyPatch) -> None:
         assert plaintext
         return "msg", b"cipher-" + remote_name.encode("utf-8") + b"-" + str(remote_device).encode("utf-8"), session
 
-    monkeypatch.setattr("pywa.protocol.signal_repo.signal_process_prekey_bundle", _fake_process)
-    monkeypatch.setattr("pywa.protocol.signal_repo.signal_session_encrypt", _fake_encrypt)
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_process_prekey_bundle", _fake_process)
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_session_encrypt", _fake_encrypt)
 
     async def _case() -> None:
         client = _FakeClient()
@@ -256,17 +271,20 @@ def test_send_reaction_and_receipt() -> None:
 
 
 def test_process_incoming_message_extracts_text() -> None:
-    msg = wa_pb2.Message()
-    msg.conversation = "incoming hello"
-    node = BinaryNode(
-        tag="message",
-        attrs={"id": "m1", "from": "999@s.whatsapp.net", "type": "text"},
-        content=msg.SerializeToString(),
-    )
-    parsed = process_incoming_message(node)
-    assert parsed.id == "m1"
-    assert parsed.text == "incoming hello"
-    assert parsed.from_jid == "999@s.whatsapp.net"
+    async def _case() -> None:
+        msg = wa_pb2.Message()
+        msg.conversation = "incoming hello"
+        node = BinaryNode(
+            tag="message",
+            attrs={"id": "m1", "from": "999@s.whatsapp.net", "type": "text"},
+            content=msg.SerializeToString(),
+        )
+        fake_client = _FakeClient()
+        parsed = await process_incoming_message(node, fake_client)
+        assert parsed.id == "m1"
+        assert parsed.text == "incoming hello"
+        assert parsed.from_jid == "999@s.whatsapp.net"
+    _run(_case())
 
 
 def test_derive_media_keys_lengths() -> None:

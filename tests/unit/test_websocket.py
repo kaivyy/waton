@@ -3,8 +3,8 @@ import asyncio
 import pytest
 from websockets.protocol import State
 
-from pywa.core.errors import ConnectionError
-from pywa.infra.websocket import WebSocketTransport
+from waton.core.errors import ConnectionError
+from waton.infra.websocket import WebSocketTransport
 
 
 class _LegacyWs:

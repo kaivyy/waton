@@ -8,7 +8,8 @@ use wa_rs_libsignal::protocol::{
     CiphertextMessageType, Direction, IdentityChange, IdentityKey, IdentityKeyPair,
     IdentityKeyStore, PreKeyBundle, PreKeyId, PrivateKey, ProtocolAddress, PublicKey, SessionRecord,
     SessionStore, SignalProtocolError, SignedPreKeyId, UsePQRatchet, message_encrypt, process_prekey_bundle,
-    message_decrypt, message_decrypt_prekey, PreKeySignalMessage, SignalMessage,
+    message_decrypt_prekey, PreKeySignalMessage, SignalMessage, PreKeyRecord, SignedPreKeyRecord,
+    PreKeyStore, SignedPreKeyStore, message_decrypt_signal, KeyPair, GenericSignedPreKey, Timestamp,
 };
 
 #[derive(Debug)]
@@ -118,6 +119,84 @@ impl IdentityKeyStore for OneIdentityStore {
 
     async fn get_identity(&self, address: &ProtocolAddress) -> SignalResult<Option<IdentityKey>> {
         Ok(self.known.get(address).copied())
+    }
+}
+
+struct OnePreKeyStore {
+    id: Option<u32>,
+    private_key: Option<PrivateKey>,
+}
+
+impl OnePreKeyStore {
+    fn new(prekey_id: Option<u32>, raw_private: Option<&[u8]>) -> Result<Self, String> {
+        let private_key = match raw_private {
+            Some(b) => Some(PrivateKey::deserialize(b).map_err(|e| format!("invalid prekey: {e}"))?),
+            None => None,
+        };
+        Ok(Self { id: prekey_id, private_key })
+    }
+}
+
+#[async_trait]
+impl PreKeyStore for OnePreKeyStore {
+    async fn get_pre_key(&self, prekey_id: PreKeyId) -> SignalResult<PreKeyRecord> {
+        if let Some(id) = self.id {
+            if u32::from(prekey_id) == id {
+                if let Some(ref priv_key) = self.private_key {
+                    let pub_key = priv_key.public_key().map_err(|_| SignalProtocolError::InvalidPreKeyId)?;
+                    let kp = KeyPair {
+                        public_key: pub_key,
+                        private_key: priv_key.clone(),
+                    };
+                    return Ok(PreKeyRecord::new(id.into(), &kp));
+                }
+            }
+        }
+        Err(SignalProtocolError::InvalidPreKeyId)
+    }
+
+    async fn save_pre_key(&mut self, _prekey_id: PreKeyId, _record: &PreKeyRecord) -> SignalResult<()> {
+        Ok(())
+    }
+
+    async fn remove_pre_key(&mut self, _prekey_id: PreKeyId) -> SignalResult<()> {
+        Ok(())
+    }
+}
+
+struct OneSignedPreKeyStore {
+    id: u32,
+    private_key: PrivateKey,
+}
+
+impl OneSignedPreKeyStore {
+    fn new(id: u32, raw_private: &[u8]) -> Result<Self, String> {
+        let private_key = PrivateKey::deserialize(raw_private).map_err(|e| format!("invalid signed prekey: {e}"))?;
+        Ok(Self { id, private_key })
+    }
+}
+
+#[async_trait]
+impl SignedPreKeyStore for OneSignedPreKeyStore {
+    async fn get_signed_pre_key(&self, signed_prekey_id: SignedPreKeyId) -> SignalResult<SignedPreKeyRecord> {
+        if u32::from(signed_prekey_id) == self.id {
+            let pub_key = self.private_key.public_key().map_err(|_| SignalProtocolError::InvalidSignedPreKeyId)?;
+            let kp = KeyPair {
+                public_key: pub_key,
+                private_key: self.private_key.clone(),
+            };
+            return Ok(SignedPreKeyRecord::new(
+                self.id.into(),
+                Timestamp::from_epoch_millis(0),
+                &kp,
+                &[0u8; 64], // Signature isn't needed for local decryption
+            ));
+        }
+        Err(SignalProtocolError::InvalidSignedPreKeyId)
+    }
+
+    async fn save_signed_pre_key(&mut self, _signed_prekey_id: SignedPreKeyId, _record: &SignedPreKeyRecord) -> SignalResult<()> {
+        Ok(())
     }
 }
 
@@ -258,21 +337,32 @@ pub fn decrypt_with_session_prekey(
     registration_id: u32,
     remote_name: &str,
     remote_device: u32,
+    prekey_id: Option<u32>,
+    prekey_private: Option<&[u8]>,
+    signed_prekey_id: u32,
+    signed_prekey_private: &[u8],
     ciphertext: &[u8],
 ) -> Result<EncryptedPayload, String> {
     let address = signal_address(remote_name, remote_device);
     let identity_pair = to_identity_keypair(identity_private)?;
     let mut session_store = OneSessionStore::new(address.clone(), Some(session))?;
     let mut identity_store = OneIdentityStore::new(identity_pair, registration_id);
+    let mut pre_key_store = OnePreKeyStore::new(prekey_id, prekey_private)?;
+    let signed_pre_key_store = OneSignedPreKeyStore::new(signed_prekey_id, signed_prekey_private)?;
 
-    let message = PreKeySignalMessage::deserialize(ciphertext)
+    let message = PreKeySignalMessage::try_from(ciphertext)
         .map_err(|e| format!("invalid prekey message: {}", e))?;
 
+    let mut csprng = rng();
     let plaintext = block_on(message_decrypt_prekey(
         &message,
         &address,
         &mut session_store,
         &mut identity_store,
+        &mut pre_key_store,
+        &signed_pre_key_store,
+        &mut csprng,
+        UsePQRatchet::No,
     ))
     .map_err(|e| format!("signal decryption failed: {}", e))?;
 
@@ -296,14 +386,17 @@ pub fn decrypt_with_session_whisper(
     let mut session_store = OneSessionStore::new(address.clone(), Some(session))?;
     let mut identity_store = OneIdentityStore::new(identity_pair, registration_id);
 
-    let message = SignalMessage::deserialize(ciphertext)
+    let message = SignalMessage::try_from(ciphertext)
         .map_err(|e| format!("invalid whisper message: {}", e))?;
 
-    let plaintext = block_on(message_decrypt(
+    let mut csprng = rng();
+    // For SignalMessage, we only use `message_decrypt_signal` directly which requires fewer args
+    let plaintext = block_on(message_decrypt_signal(
         &message,
         &address,
         &mut session_store,
         &mut identity_store,
+        &mut csprng,
     ))
     .map_err(|e| format!("signal decryption failed: {}", e))?;
 

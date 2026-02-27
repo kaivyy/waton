@@ -11,7 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Multi-device query support**: Messages are now encrypted and sent to ALL devices
   of the recipient (phone, WhatsApp Web, linked devices) via USync device query,
   fixing the issue where messages were ACKed by server but never received
-- New `pywa/client/usync.py` module with `USyncQuery` class for querying device lists
+- **Incoming Message Decryption**: The app now successfully decrypts incoming `pkmsg` and `msg` E2E E2E (End-to-End) encrypted nodes inside the Signal Protocol.
+- **Interactive CLI Chat (`cli_chat.py`)**: Added an interactive terminal application `examples/cli_chat.py` to test receiving and sending messages directly from the terminal.
+- **High-Level App Parser Integration**: The `@app.message()` router now seamlessly unwraps `<enc>` message nodes and yields decrypted `Message` objects.
+- New `waton/client/usync.py` module with `USyncQuery` class for querying device lists
 - Real Rust-backed Signal helper integration (`wa-rs-libsignal`) for session bootstrap
   and session encryption
 - `send_text` E2E relay flow: device key fetch (`iq encrypt`), session injection, per-device
@@ -20,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Runtime guidance for wheel-first installation (end users do not need Rust toolchain)
 
 ### Changed
-- Architecture remains standalone `pywa` (Python API), with Rust used only as internal
+- Architecture remains standalone `waton` (Python API), with Rust used only as internal
   performance/crypto helper
 - No runtime dependency on Node.js/Baileys wrapper layers
 

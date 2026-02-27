@@ -1,10 +1,11 @@
 [package]
-name = "pywa-crypto"
+name = "waton-crypto"
 version = "0.1.0"
 edition = "2021"
+readme = "README.md"
 
 [lib]
-name = "pywa_crypto"
+name = "waton_crypto"
 crate-type = ["cdylib"]
 path = "rust/src/lib.rs"
 

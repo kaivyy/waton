@@ -1,4 +1,4 @@
-from pywa.core.jid import (
+from waton.core.jid import (
     Jid,
     jid_decode,
     jid_encode,

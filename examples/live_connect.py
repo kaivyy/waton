@@ -4,9 +4,9 @@ Usage:
     python examples/live_connect.py
 
 Optional env:
-    PYWA_AUTH_DB=pywa_live.db
-    PYWA_TEST_JID=62812xxxx@s.whatsapp.net
-    PYWA_TEST_TEXT=hello from pywa
+    WATON_AUTH_DB=waton_live.db
+    WATON_TEST_JID=62812xxxx@s.whatsapp.net
+    WATON_TEST_TEXT=hello from waton
 """
 
 from __future__ import annotations
@@ -20,11 +20,13 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from pywa.client.client import WAClient
-from pywa.client.messages import MessagesAPI
-from pywa.core.events import ConnectionEvent
-from pywa.core.errors import DisconnectReason
-from pywa.infra.storage_sqlite import SQLiteStorage
+from waton.client.client import WAClient
+from waton.client.messages import MessagesAPI
+from waton.core.events import ConnectionEvent
+from waton.core.errors import DisconnectReason
+from waton.infra.storage_sqlite import SQLiteStorage
+from waton.utils.process_message import process_incoming_message
+from waton.infra.storage_sqlite import SQLiteStorage
 
 try:
     import qrcode
@@ -46,7 +48,7 @@ def _print_qr_terminal(qr_text: str) -> None:
 
 
 async def main() -> None:
-    db_path = os.getenv("PYWA_AUTH_DB", "pywa_live.db")
+    db_path = os.getenv("WATON_AUTH_DB", "waton_live.db")
     storage = SQLiteStorage(db_path)
     client = WAClient(storage)
     messages = MessagesAPI(client)
@@ -69,7 +71,14 @@ async def main() -> None:
             opened.set()
 
     async def _on_message(node) -> None:
-        print(f"[node] tag={node.tag} attrs={node.attrs}")
+        if node.tag == "message":
+            try:
+                msg = await process_incoming_message(node, client)
+                print(f"[incoming text] from={msg.from_jid} text={msg.text!r}")
+            except Exception as e:
+                print(f"[decrypt error] {e}")
+        else:
+            print(f"[node] tag={node.tag} attrs={node.attrs}")
 
     async def _on_disconnected(exc: Exception) -> None:
         print(f"[disconnect] {exc}")
@@ -91,9 +100,9 @@ async def main() -> None:
         except Exception as exc:
             print(f"Ping test failed: {exc}")
 
-        test_jid = os.getenv("PYWA_TEST_JID")
+        test_jid = os.getenv("WATON_TEST_JID")
         if test_jid:
-            test_text = os.getenv("PYWA_TEST_TEXT", "hello from pywa")
+            test_text = os.getenv("WATON_TEST_TEXT", "hello from waton")
             print(f"Attempting send_text to {test_jid} ...")
             try:
                 msg_id = await messages.send_text(test_jid, test_text)
@@ -101,7 +110,7 @@ async def main() -> None:
             except Exception as exc:
                 print(f"send_text failed: {exc}")
         else:
-            print("Set PYWA_TEST_JID to run send_text test.")
+            print("Set WATON_TEST_JID to run send_text test.")
 
         print("Listening for events. Ctrl+C to stop.")
         while True:

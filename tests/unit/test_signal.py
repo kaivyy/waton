@@ -2,9 +2,9 @@ import asyncio
 
 import pytest
 
-from pywa.protocol.group_cipher import GroupCipher
-from pywa.protocol.signal_repo import SignalRepository
-from pywa.utils.auth import init_auth_creds
+from waton.protocol.group_cipher import GroupCipher
+from waton.protocol.signal_repo import SignalRepository
+from waton.utils.auth import init_auth_creds
 
 
 class _MemoryStorage:
@@ -75,7 +75,7 @@ def test_signal_encrypt_uses_wrapper_and_updates_session(monkeypatch: pytest.Mon
         assert plaintext == b"hello"
         return "pkmsg", b"cipher", b"s1"
 
-    monkeypatch.setattr("pywa.protocol.signal_repo.signal_session_encrypt", _fake_encrypt)
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_session_encrypt", _fake_encrypt)
 
     async def _case() -> None:
         storage = _MemoryStorage()
@@ -90,13 +90,67 @@ def test_signal_encrypt_uses_wrapper_and_updates_session(monkeypatch: pytest.Mon
     _run(_case())
 
 
-def test_signal_decrypt_not_implemented() -> None:
+def test_signal_decrypt_pkmsg(monkeypatch: pytest.MonkeyPatch) -> None:
+    def _fake_decrypt_prekey(
+        session: bytes,
+        identity_private: bytes,
+        registration_id: int,
+        remote_name: str,
+        remote_device: int,
+        prekey_id: int | None,
+        prekey_private: bytes | None,
+        signed_prekey_id: int,
+        signed_prekey_private: bytes,
+        ciphertext: bytes,
+    ):
+        assert prekey_id == 123
+        assert signed_prekey_id == 456
+        assert ciphertext == b"\x33\x08\x7b\x10\xc8\x03"
+        return {"type": "msg", "ciphertext": b"decrypted_payload", "session": b"s1"}
+
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_session_decrypt_prekey", _fake_decrypt_prekey)
+
+    async def _case() -> None:
+        storage = _MemoryStorage()
+        creds = init_auth_creds()
+        # Mock the prekey response
+        await storage.save_prekey(123, b"prekey_private")
+        
+        # Build fake protobuf payload manually: version byte + preKeyId (tag 1) + signedPreKeyId (tag 2)
+        # tag 1, type 0 = 0x08. value = 123 (0x7b)
+        # tag 2, type 0 = 0x10. value = 456 (0xc8 0x03)
+        payload = b"\x33\x08\x7b\x10\xc8\x03"
+        
+        repo = SignalRepository(creds, storage)
+        out = await repo.decrypt_message("user@s.whatsapp.net", "pkmsg", payload)
+        assert out == b"decrypted_payload"
+        assert await storage.get_session("user.0") == b"s1"
+
+    _run(_case())
+
+def test_signal_decrypt_msg(monkeypatch: pytest.MonkeyPatch) -> None:
+    def _fake_decrypt_whisper(
+        session: bytes,
+        identity_private: bytes,
+        registration_id: int,
+        remote_name: str,
+        remote_device: int,
+        ciphertext: bytes,
+    ):
+        assert session == b"s0"
+        return {"type": "msg", "ciphertext": b"whisper_payload", "session": b"s1"}
+
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_session_decrypt_whisper", _fake_decrypt_whisper)
+
     async def _case() -> None:
         storage = _MemoryStorage()
         creds = init_auth_creds()
         repo = SignalRepository(creds, storage)
-        with pytest.raises(NotImplementedError):
-            await repo.decrypt_message("unknown@s.whatsapp.net", "msg", b"x")
+        await storage.save_session("user.0", b"s0")
+        
+        out = await repo.decrypt_message("user@s.whatsapp.net", "msg", b"cipher")
+        assert out == b"whisper_payload"
+        assert await storage.get_session("user.0") == b"s1"
 
     _run(_case())
 
@@ -130,7 +184,7 @@ def test_inject_session_from_prekey_bundle(monkeypatch: pytest.MonkeyPatch) -> N
         assert prekey_public == b"p" * 32
         return b"session-new"
 
-    monkeypatch.setattr("pywa.protocol.signal_repo.signal_process_prekey_bundle", _fake_process)
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_process_prekey_bundle", _fake_process)
 
     async def _case() -> None:
         storage = _MemoryStorage()

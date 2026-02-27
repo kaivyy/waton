@@ -1,4 +1,4 @@
-from pywa.protocol.protobuf.wire import (
+from waton.protocol.protobuf.wire import (
     AppVersion,
     ClientPayload,
     DevicePairingRegistrationData,

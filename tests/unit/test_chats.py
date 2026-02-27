@@ -1,9 +1,9 @@
 import asyncio
 
-from pywa.client.chats import ChatsAPI
-from pywa.client.presence import PresenceAPI
-from pywa.protocol.binary_node import BinaryNode
-from pywa.utils.chat_utils import is_group_chat, is_private_chat, normalize_chat_jid
+from waton.client.chats import ChatsAPI
+from waton.client.presence import PresenceAPI
+from waton.protocol.binary_node import BinaryNode
+from waton.utils.chat_utils import is_group_chat, is_private_chat, normalize_chat_jid
 
 
 class _FakeClient:

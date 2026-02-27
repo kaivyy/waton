@@ -1,7 +1,7 @@
 from base64 import b64decode
 
-from pywa.defaults.config import WA_NOISE_HEADER
-from pywa.utils.auth import init_auth_creds
+from waton.defaults.config import WA_NOISE_HEADER
+from waton.utils.auth import init_auth_creds
 
 
 def test_init_auth_creds_shapes() -> None:

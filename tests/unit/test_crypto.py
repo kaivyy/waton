@@ -1,4 +1,4 @@
-from pywa._crypto import (
+from waton._crypto import (
     aes_gcm_encrypt, aes_gcm_decrypt,
     curve25519_generate_keypair, curve25519_shared_key,
     curve25519_sign, curve25519_verify,

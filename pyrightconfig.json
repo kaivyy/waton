@@ -1,5 +1,5 @@
 {
-  "include": ["pywa"],
+  "include": ["waton"],
   "typeCheckingMode": "strict",
   "pythonVersion": "3.11",
   "reportMissingTypeStubs": false

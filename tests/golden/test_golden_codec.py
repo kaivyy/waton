@@ -1,5 +1,5 @@
-from pywa.protocol.binary_codec import decode_binary_node, encode_binary_node
-from pywa.protocol.binary_node import BinaryNode
+from waton.protocol.binary_codec import decode_binary_node, encode_binary_node
+from waton.protocol.binary_node import BinaryNode
 
 
 def test_golden_codec_alias() -> None:

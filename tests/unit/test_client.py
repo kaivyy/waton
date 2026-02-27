@@ -1,12 +1,12 @@
 import asyncio
 from typing import Any
 
-from pywa.client.client import WAClient
-from pywa.core.errors import ConnectionError as PywaConnectionError
-from pywa.protocol.binary_node import BinaryNode
-from pywa.protocol.noise_handler import NoiseHandler
-from pywa.utils.auth import init_auth_creds
-from pywa.utils.crypto import generate_keypair
+from waton.client.client import WAClient
+from waton.core.errors import ConnectionError as PywaConnectionError
+from waton.protocol.binary_node import BinaryNode
+from waton.protocol.noise_handler import NoiseHandler
+from waton.utils.auth import init_auth_creds
+from waton.utils.crypto import generate_keypair
 
 
 class _DummyStorage:

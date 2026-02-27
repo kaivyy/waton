@@ -83,7 +83,7 @@
     Checking ed25519-dalek v2.2.0
     Checking pbkdf2 v0.12.2
     Checking wa-rs-libsignal v0.2.0
-    Checking pywa-crypto v0.1.0 (C:\Users\Arvy Kairi\Desktop\whatsapp\pywa)
+    Checking waton-crypto v0.1.0 (C:\Users\Arvy Kairi\Desktop\whatsapp\waton)
 error[E0599]: no function or associated item named `deserialize` found for struct `wa_rs_libsignal::protocol::PreKeySignalMessage` in the current scope
    --> rust\src\signal.rs:268:40
     |
@@ -190,4 +190,4 @@ help: provide the arguments
 
 Some errors have detailed explanations: E0061, E0599.
 For more information about an error, try `rustc --explain E0061`.
-error: could not compile `pywa-crypto` (lib) due to 4 previous errors
+error: could not compile `waton-crypto` (lib) due to 4 previous errors

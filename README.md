@@ -1,11 +1,11 @@
-# PyWA
+# Waton
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**PyWA** is a lightweight, standalone Python library for WhatsApp Web Multi-Device. Build WhatsApp bots, automation tools, and messaging applications entirely in Python — no Node.js required.
+**Waton** is a lightweight, standalone Python library for WhatsApp Web Multi-Device. Build WhatsApp bots, automation tools, and messaging applications entirely in Python — no Node.js required.
 
-## Why PyWA?
+## Why Waton?
 
 - **Pure Python** — Native async/await API, integrates seamlessly with your Python stack
 - **Blazing Fast Crypto** — Signal Protocol encryption powered by Rust (via PyO3)
@@ -25,7 +25,7 @@
 ## Installation
 
 ```bash
-pip install pywa
+pip install waton
 ```
 
 > Prebuilt wheels include the Rust crypto extension — no Rust toolchain needed for installation.
@@ -37,51 +37,58 @@ pip install -e .[dev]
 maturin develop
 ```
 
-## Quick Start
+## How To Use
 
-### Basic Connection
+Waton provides both a high-level `App` interface (recommended) and a low-level `WAClient` interface. 
+
+### 1. Interactive CLI Chat (Easiest Way to Test)
+
+We provide a built-in interactive terminal chat. If you just want to test sending and receiving messages via your terminal, run:
+
+```bash
+python examples/cli_chat.py
+```
+
+- When you run this for the first time, it will print a QR code in the terminal. Scan it with your WhatsApp app (Linked Devices).
+- Once connected, any incoming messages to your number will be printed live in the terminal.
+- To send a message, simply type `NOMOR_TUJUAN pesan yang ingin dikirim` (e.g., `628123456789 Halo dari terminal!`) and press Enter.
+
+### 2. High-Level API (`App`)
+
+For building bots or automated tools, use the `App` class. It manages the connection, storage, and message parsing automatically, providing a simple decorator-based router.
 
 ```python
 import asyncio
-from pywa.client.client import WAClient
-from pywa.client.messages import MessagesAPI
-from pywa.infra.storage_sqlite import SQLiteStorage
+from waton.app.app import App
+from waton.app.context import Context
 
-async def main():
-    storage = SQLiteStorage("session.db")
-    client = WAClient(storage)
-    messages = MessagesAPI(client)
+# 1. Initialize App (creates SQLite session DB)
+app = App(storage_path="my_session.db")
 
-    # Handle QR code for pairing
-    async def on_connection(event):
-        if event.qr:
-            print(f"Scan QR: {event.qr}")
-        if event.status == "open":
-            print("Connected!")
-            # Send a message
-            await messages.send_text("1234567890@s.whatsapp.net", "Hello from PyWA!")
+# 2. Listen for incoming messages
+@app.message()
+async def on_message(ctx: Context):
+    msg = ctx.message
+    print(f"Message received from {msg.from_jid}: {msg.text}")
+    
+    # Auto-reply if there is text
+    if msg.text:
+        reply_text = f"Hello! You said: {msg.text}"
+        await ctx.app.messages.send_text(to_jid=msg.from_jid, text=reply_text)
 
-    client.on_connection_update = on_connection
-    await client.connect()
+# 3. Connection ready callback
+@app.on_ready
+async def on_ready(app_instance: App):
+    print("Bot is connected and ready to receive messages!")
 
-    # Keep running
-    while True:
-        await asyncio.sleep(1)
-
-asyncio.run(main())
+# 4. Run the loop
+if __name__ == "__main__":
+    app.run()
 ```
 
-### Run Example
+### 3. Low-Level API (`WAClient`)
 
-```bash
-# Basic connection with QR pairing
-python -u examples/live_connect.py
-
-# With test message
-export PYWA_TEST_JID=628xxxxxxxxx@s.whatsapp.net
-export PYWA_TEST_TEXT="Hello from PyWA!"
-python -u examples/live_connect.py
-```
+If you want direct control over the WebSocket or need to build custom wrappers, you can use the WAClient directly. See `examples/live_connect.py` for a full example.
 
 ## Architecture
 
@@ -104,9 +111,9 @@ python -u examples/live_connect.py
 └─────────────────────────────────────────────────┘
 ```
 
-## PyWA vs Baileys
+## Waton vs Baileys
 
-| Aspect | PyWA (Python) | Baileys (Node.js) |
+| Aspect | Waton (Python) | Baileys (Node.js) |
 |--------|---------------|-------------------|
 | **Runtime** | Python (~30-50MB) | Node.js (~50-100MB) |
 | **Package Size** | ~500KB + deps | ~2MB + node_modules |
@@ -117,7 +124,7 @@ python -u examples/live_connect.py
 | **Maturity** | New | Mature |
 | **Community** | Growing | Large |
 
-### Choose PyWA when:
+### Choose Waton when:
 
 - Building Python-native applications
 - Running on resource-constrained environments (VPS, Raspberry Pi, Docker)
@@ -142,8 +149,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ```bash
 # Setup development environment
-git clone https://github.com/kaivyy/pywa.git
-cd pywa
+git clone https://github.com/kaivyy/waton.git
+cd waton
 pip install -e .[dev]
 maturin develop
 

@@ -1,9 +1,9 @@
 import asyncio
 from pathlib import Path
 
-from pywa.infra.storage_json import JsonStorage
-from pywa.infra.storage_sqlite import SQLiteStorage
-from pywa.utils.auth import init_auth_creds
+from waton.infra.storage_json import JsonStorage
+from waton.infra.storage_sqlite import SQLiteStorage
+from waton.utils.auth import init_auth_creds
 
 
 def _run(coro):

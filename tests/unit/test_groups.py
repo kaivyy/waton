@@ -1,7 +1,7 @@
 import asyncio
 
-from pywa.client.groups import GroupsAPI
-from pywa.protocol.binary_node import BinaryNode
+from waton.client.groups import GroupsAPI
+from waton.protocol.binary_node import BinaryNode
 
 
 class _FakeClient:

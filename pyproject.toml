@@ -3,7 +3,7 @@ requires = ["maturin>=1.4,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "pywa"
+name = "waton"
 version = "0.1.0"
 description = "Python WhatsApp Web Multi-Device library"
 readme = "README.md"
@@ -31,7 +31,7 @@ dev = [
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "."
-module-name = "pywa._crypto"
+module-name = "waton._crypto"
 manifest-path = "Cargo.toml"
 
 [tool.pytest.ini_options]

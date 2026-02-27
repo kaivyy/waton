@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from pywa.app import filters
+from waton.app import filters
 
 
 def _ctx(text: str | None, from_jid: str):

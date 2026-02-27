@@ -166,6 +166,21 @@ fn signal_session_encrypt<'a>(
 }
 
 #[pyfunction]
+#[expect(clippy::too_many_arguments)]
+#[pyo3(
+    signature = (
+        session,
+        identity_private,
+        registration_id,
+        remote_name,
+        remote_device,
+        prekey_id,
+        prekey_private,
+        signed_prekey_id,
+        signed_prekey_private,
+        ciphertext
+    )
+)]
 fn signal_session_decrypt_prekey<'a>(
     py: Python<'a>,
     session: &[u8],
@@ -173,6 +188,10 @@ fn signal_session_decrypt_prekey<'a>(
     registration_id: u32,
     remote_name: &str,
     remote_device: u32,
+    prekey_id: Option<u32>,
+    prekey_private: Option<&[u8]>,
+    signed_prekey_id: u32,
+    signed_prekey_private: &[u8],
     ciphertext: &[u8],
 ) -> PyResult<Bound<'a, PyDict>> {
     let out = signal::decrypt_with_session_prekey(
@@ -181,6 +200,10 @@ fn signal_session_decrypt_prekey<'a>(
         registration_id,
         remote_name,
         remote_device,
+        prekey_id,
+        prekey_private,
+        signed_prekey_id,
+        signed_prekey_private,
         ciphertext,
     )
     .map_err(pyo3::exceptions::PyValueError::new_err)?;

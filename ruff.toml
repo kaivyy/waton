@@ -6,4 +6,4 @@ select = ["E", "F", "W", "I", "N", "UP", "ANN", "B", "A", "SIM", "TCH"]
 ignore = ["ANN101", "ANN102", "ANN401"]
 
 [lint.isort]
-known-first-party = ["pywa"]
+known-first-party = ["waton"]

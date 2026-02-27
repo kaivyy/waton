@@ -1,6 +1,6 @@
-from pywa.defaults.config import WA_NOISE_HEADER
-from pywa.protocol.noise_handler import NoiseHandler, TransportState
-from pywa.utils.crypto import generate_keypair
+from waton.defaults.config import WA_NOISE_HEADER
+from waton.protocol.noise_handler import NoiseHandler, TransportState
+from waton.utils.crypto import generate_keypair
 
 
 def test_noise_encode_frame_sends_intro_once() -> None:
