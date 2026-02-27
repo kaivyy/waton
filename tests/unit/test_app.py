@@ -82,3 +82,10 @@ def test_app_dispatches_command_handler() -> None:
         await app.media.http.aclose()
 
     _run(_case())
+
+
+def test_app_exposes_community_and_newsletter_clients() -> None:
+    app = App(storage_path=":memory:")
+    assert app.communities is not None
+    assert app.newsletter is not None
+    _run(app.media.http.aclose())

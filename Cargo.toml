@@ -3,6 +3,21 @@ name = "waton-crypto"
 version = "0.1.0"
 edition = "2021"
 readme = "README.md"
+exclude = [
+    "/docs/*",
+    "/examples/*",
+    "/tests/*",
+    "/tools/*",
+    "/scripts/*",
+    "/image/*",
+    "/.claude/*",
+    "/.worktrees/*",
+    "/.pytest_cache/*",
+    "/.ruff_cache/*",
+    "/target/*",
+    "/test_image.jpg",
+    "/waton_live.db",
+]
 
 [lib]
 name = "waton_crypto"

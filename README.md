@@ -45,6 +45,19 @@ pip install -e .[dev]
 maturin develop
 ```
 
+### Package Footprint (`pip install waton`)
+
+Published artifacts are intentionally runtime-only:
+- included: `waton/`, Rust extension module, metadata files
+- excluded from source distribution: `docs/`, `examples/`, `tests/`, `tools/`
+
+Quick verification commands:
+
+```bash
+python -m pip wheel . --no-deps -w .tmp-wheel
+python -m maturin sdist --manifest-path Cargo.toml --out .tmp-sdist
+```
+
 ## How To Use
 
 Waton provides both a high-level `App` interface (recommended) and a low-level `WAClient` interface. 
@@ -60,6 +73,30 @@ python examples/cli_chat.py
 - When you run this for the first time, it will print a QR code in the terminal. Scan it with your WhatsApp app (Linked Devices).
 - Once connected, any incoming messages to your number will be printed live in the terminal.
 - To send a message, simply type `NOMOR_TUJUAN pesan yang ingin dikirim` (e.g., `628123456789 Halo dari terminal!`) and press Enter.
+
+### 1.5 One-Command Live Reliability Check
+
+To validate connect/ping/send-ack/reconnect in one command:
+
+```bash
+python scripts/live_check.py --auth-db waton_live.db --test-jid 628123456789@s.whatsapp.net --test-text "hello from waton"
+```
+
+If `--test-jid` is omitted, the check still validates connect/ping/reconnect without send-ack.
+
+### 1.6 One-Command Release Preflight
+
+Run all release gates (tests, parity scan, and optional lint/typecheck/live):
+
+```bash
+python scripts/preflight_check.py
+```
+
+Fast local run (skip lint/typecheck):
+
+```bash
+python scripts/preflight_check.py --skip-lint --skip-typecheck
+```
 
 ### 2. High-Level API (`App`)
 

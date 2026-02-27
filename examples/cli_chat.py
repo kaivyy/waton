@@ -38,8 +38,14 @@ async def on_ready(a: App) -> None:
 @app.message()
 async def on_incoming_message(ctx: Context) -> None:
     msg = ctx.message
-    if msg.text:
+    if msg.text and msg.media_url:
+        print(f"\n[PESAN MASUK - MEDIA] dari {msg.from_jid}: {msg.text} (URL: {msg.media_url})")
+        print("> ", end="", flush=True)
+    elif msg.text:
         print(f"\n[PESAN MASUK] dari {msg.from_jid}: {msg.text}")
+        print("> ", end="", flush=True)
+    elif msg.media_url:
+        print(f"\n[PESAN MASUK - MEDIA] dari {msg.from_jid} (URL: {msg.media_url})")
         print("> ", end="", flush=True)
     else:
         print(f"\n[PESAN MASUK (NON-TEKS)] dari {msg.from_jid}: tag={msg.raw_node.tag}")
@@ -48,8 +54,8 @@ async def on_incoming_message(ctx: Context) -> None:
 # Also intercept all messages before router to see if it even reaches App
 original_dispatch = app._dispatch_message
 async def debug_dispatch(node):
-    if node.tag == "message":
-        print(f"\n[DEBUG] Menerima <message> node: {node.attrs}")
+    if node.tag not in ("iq", "success"):
+        print(f"\n[DEBUG] Incoming node: <{node.tag}> attrs={node.attrs}")
         print("> ", end="", flush=True)
     await original_dispatch(node)
 app.client.on_message = debug_dispatch
@@ -83,9 +89,21 @@ async def cli_input_loop(a: App) -> None:
             
         try:
             print(f"[Debug] is_authenticated={a.client.is_authenticated} creds.me={a.client.creds.me if a.client.creds else None}")
-            print(f"[System] Mengirim pesan ke {target_number}...")
-            msg_id = await a.messages.send_text(target_number, text_message)
-            print(f"[System] Berhasil! Message ID: {msg_id}")
+            if text_message.startswith("/image "):
+                image_path = text_message[7:].strip()
+                caption = "Sent from Waton CLI"
+                if not os.path.exists(image_path):
+                    print(f"[System] File tidak ditemukan: {image_path}")
+                    continue
+                with open(image_path, "rb") as f:
+                    image_bytes = f.read()
+                print(f"[System] Mengirim gambar ke {target_number}...")
+                msg_id = await a.messages.send_image(target_number, image_bytes, caption)
+                print(f"[System] Berhasil kirim gambar! Message ID: {msg_id}")
+            else:
+                print(f"[System] Mengirim pesan ke {target_number}...")
+                msg_id = await a.messages.send_text(target_number, text_message)
+                print(f"[System] Berhasil! Message ID: {msg_id}")
         except Exception as e:
             print(f"[System] Gagal mengirim pesan: {e}")
 

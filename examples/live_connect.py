@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 """Live WhatsApp connection runner for QR/connect/manual test.
 
 Usage:
@@ -12,6 +13,7 @@ Optional env:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 import sys
 from pathlib import Path
@@ -22,11 +24,10 @@ if str(ROOT_DIR) not in sys.path:
 
 from waton.client.client import WAClient
 from waton.client.messages import MessagesAPI
-from waton.core.events import ConnectionEvent
 from waton.core.errors import DisconnectReason
 from waton.infra.storage_sqlite import SQLiteStorage
+from waton.utils.live_probe import LiveProbe
 from waton.utils.process_message import process_incoming_message
-from waton.infra.storage_sqlite import SQLiteStorage
 
 try:
     import qrcode
@@ -52,25 +53,33 @@ async def main() -> None:
     storage = SQLiteStorage(db_path)
     client = WAClient(storage)
     messages = MessagesAPI(client)
+    probe = LiveProbe()
 
     opened = asyncio.Event()
 
-    async def _on_connection_update(event: ConnectionEvent) -> None:
-        print(f"[connection] status={event.status}")
-        if event.qr:
-            _print_qr_terminal(event.qr)
-        if event.reason:
-            code = getattr(event.reason, "status_code", None)
+    async def _on_connection_update(event: object) -> None:
+        await probe.handle_connection_update(event)
+        status = getattr(event, "status", None)
+        qr = getattr(event, "qr", None)
+        reason = getattr(event, "reason", None)
+        print(f"[connection] status={status}")
+        if qr:
+            _print_qr_terminal(qr)
+        if reason:
+            code = getattr(reason, "status_code", None)
             if code is None:
-                print(f"[connection] reason={event.reason}")
+                print(f"[connection] reason={reason}")
             else:
-                print(f"[connection] reason={event.reason} (code={code})")
+                print(f"[connection] reason={reason} (code={code})")
                 if code == int(DisconnectReason.RESTART_REQUIRED):
                     print("[connection] restart required detected, reconnecting...")
-        if event.status == "open":
+        if status == "open":
             opened.set()
 
-    async def _on_message(node) -> None:
+    async def _on_message(node: object) -> None:
+        await probe.handle_message_node(node)
+        if not hasattr(node, "tag") or not hasattr(node, "attrs"):
+            return
         if node.tag == "message":
             try:
                 msg = await process_incoming_message(node, client)
@@ -80,12 +89,73 @@ async def main() -> None:
         else:
             print(f"[node] tag={node.tag} attrs={node.attrs}")
 
+    async def _on_event(event: dict) -> None:
+        await probe.handle_event(event)
+        event_type = event.get("type")
+        if event_type == "messages.receipt":
+            receipt = event.get("receipt", {})
+            print(
+                f"[receipt] from={receipt.get('from')} "
+                f"type={receipt.get('receipt_type')} ids={receipt.get('message_ids', [])}"
+            )
+        elif event_type == "messages.retry_request":
+            receipt = event.get("receipt", {})
+            print(
+                f"[retry] from={receipt.get('from')} ids={receipt.get('message_ids', [])} "
+                f"count={receipt.get('retry', {}).get('count')} allowed={event.get('retry_allowed')}"
+            )
+        elif event_type == "messages.retry_request_sent":
+            req = event.get("retry_request", {})
+            print(
+                f"[retry-sent] to={req.get('to')} id={req.get('id')} "
+                f"count={req.get('count')} sent={req.get('sent')}"
+            )
+        elif event_type == "messages.bad_ack":
+            bad_ack = event.get("bad_ack", {})
+            print(
+                f"[bad-ack] jid={bad_ack.get('remote_jid')} id={bad_ack.get('message_id')} "
+                f"error={bad_ack.get('error')}"
+            )
+        elif event_type == "messages.notification":
+            notif = event.get("notification", {})
+            print(
+                f"[notification] kind={notif.get('kind')} "
+                f"from={notif.get('from')} children={notif.get('children', [])}"
+            )
+            if notif.get("newsletter_event"):
+                print(f"[newsletter-notification] {notif.get('newsletter_event')}")
+        elif event_type == "messages.protocol_notification":
+            notif = event.get("protocol_notification", {})
+            print(f"[protocol] from={notif.get('from')} children={notif.get('children', [])}")
+        elif event_type in {
+            "messages.revoke",
+            "messages.edit",
+            "messages.history_sync",
+            "messages.app_state_sync_key_share",
+            "messages.group_member_label_change",
+            "messages.ephemeral_setting",
+            "messages.reaction_encrypted",
+            "messages.poll_update_encrypted",
+            "messages.event_response_encrypted",
+            "messages.protocol",
+        }:
+            protocol = event.get("protocol", {})
+            if protocol:
+                print(
+                    f"[protocol-message] type={protocol.get('type_name')} "
+                    f"target={protocol.get('target_message_id')} id={event.get('message', {}).get('id')}"
+                )
+            else:
+                print(f"[encrypted-addon] type={event_type} id={event.get('message', {}).get('id')}")
+
     async def _on_disconnected(exc: Exception) -> None:
+        await probe.handle_disconnect(exc)
         print(f"[disconnect] {exc}")
         opened.clear()
 
     client.on_connection_update = _on_connection_update
     client.on_message = _on_message
+    client.on_event = _on_event
     client.on_disconnected = _on_disconnected
 
     try:
@@ -103,10 +173,22 @@ async def main() -> None:
         test_jid = os.getenv("WATON_TEST_JID")
         if test_jid:
             test_text = os.getenv("WATON_TEST_TEXT", "hello from waton")
+            ack_timeout = float(os.getenv("WATON_ACK_TIMEOUT", "45"))
             print(f"Attempting send_text to {test_jid} ...")
             try:
                 msg_id = await messages.send_text(test_jid, test_text)
                 print(f"send_text queued with msg_id={msg_id}")
+                try:
+                    ack = await probe.wait_for_message_ack(msg_id, timeout=ack_timeout)
+                    if ack.status == "ok":
+                        print(f"[send-ack] id={msg_id} status=ok remote={ack.remote_jid}")
+                    else:
+                        print(
+                            f"[send-ack] id={msg_id} status=error "
+                            f"remote={ack.remote_jid} error={ack.error}"
+                        )
+                except TimeoutError:
+                    print(f"[send-ack] timeout waiting ack for id={msg_id} after {ack_timeout:.1f}s")
             except Exception as exc:
                 print(f"send_text failed: {exc}")
         else:
@@ -121,7 +203,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    try:
+    with contextlib.suppress(KeyboardInterrupt):
         asyncio.run(main())
-    except KeyboardInterrupt:
-        pass

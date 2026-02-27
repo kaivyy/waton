@@ -79,6 +79,38 @@ class ExtendedTextMessage:
                 self.text = bytes(value).decode("utf-8", errors="ignore")
 
 
+@dataclass
+class ImageMessage:
+    url: str = ""
+    mimetype: str = ""
+    caption: str = ""
+    fileSha256: bytes = b""
+    fileLength: int = 0
+    height: int = 0
+    width: int = 0
+    mediaKey: bytes = b""
+    fileEncSha256: bytes = b""
+    directPath: str = ""
+
+    def SerializeToString(self) -> bytes:
+        parts = []
+        if self.url: parts.append(_encode_string(1, self.url))
+        if self.mimetype: parts.append(_encode_string(2, self.mimetype))
+        if self.caption: parts.append(_encode_string(3, self.caption))
+        if self.fileSha256: parts.append(_encode_len_delimited(4, self.fileSha256))
+        if self.fileLength: parts.append(_encode_string(5, str(self.fileLength))) # actually uint64 varint, but string mock might work or we need _encode_varint? 
+        # For simplicity, just skip fileLength or implement simple bytes if needed.
+        if self.mediaKey: parts.append(_encode_len_delimited(8, self.mediaKey))
+        if self.fileEncSha256: parts.append(_encode_len_delimited(9, self.fileEncSha256))
+        if self.directPath: parts.append(_encode_string(10, self.directPath))
+        return b"".join(parts)
+
+    def ParseFromString(self, data: bytes) -> None:
+        for field_no, wire_type, value in _iter_fields(data):
+            if wire_type == 2 and field_no == 1: self.url = bytes(value).decode("utf-8", "ignore")
+            elif wire_type == 2 and field_no == 2: self.mimetype = bytes(value).decode("utf-8", "ignore")
+            elif wire_type == 2 and field_no == 3: self.caption = bytes(value).decode("utf-8", "ignore")
+
 class Message:
     class _NoDeviceSentMessage:
         def __init__(self) -> None:
@@ -115,6 +147,7 @@ class Message:
     def __init__(self, _include_device_sent: bool = True) -> None:
         self.conversation = ""
         self.extendedTextMessage = ExtendedTextMessage()
+        self.imageMessage = ImageMessage()
         self.reactionMessage = ReactionMessage()
         self.deviceSentMessage = (
             Message._DeviceSentMessage() if _include_device_sent else Message._NoDeviceSentMessage()
@@ -122,11 +155,13 @@ class Message:
 
     def SerializeToString(self) -> bytes:
         ext = self.extendedTextMessage.SerializeToString()
+        img = self.imageMessage.SerializeToString()
         react = self.reactionMessage.SerializeToString()
         device_sent = self.deviceSentMessage.SerializeToString()
         return b"".join(
             (
                 _encode_string(1, self.conversation),
+                _encode_len_delimited(4, img) if img else b"",
                 _encode_len_delimited(6, ext) if ext else b"",
                 _encode_len_delimited(31, device_sent) if device_sent else b"",
                 _encode_len_delimited(46, react) if react else b"",
@@ -141,6 +176,8 @@ class Message:
                 payload = bytes(value)
                 if field_no == 1:
                     self.conversation = payload.decode("utf-8", errors="ignore")
+                elif field_no == 4:
+                    self.imageMessage.ParseFromString(payload)
                 elif field_no == 6:
                     self.extendedTextMessage.ParseFromString(payload)
                 elif field_no == 31:

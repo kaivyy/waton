@@ -11,9 +11,11 @@ from waton.app.middleware import MiddlewarePipeline
 from waton.app.router import Router
 from waton.client.chats import ChatsAPI
 from waton.client.client import WAClient
+from waton.client.communities import CommunitiesAPI
 from waton.client.groups import GroupsAPI
 from waton.client.media import MediaManager
 from waton.client.messages import MessagesAPI
+from waton.client.newsletter import NewsletterAPI
 from waton.client.presence import PresenceAPI
 from waton.core.entities import Message
 from waton.infra.storage_sqlite import SQLiteStorage
@@ -34,6 +36,8 @@ class App:
         self.messages = MessagesAPI(self.client)
         self.chats = ChatsAPI(self.client)
         self.groups = GroupsAPI(self.client)
+        self.communities = CommunitiesAPI(self.client)
+        self.newsletter = NewsletterAPI(self.client)
         self.media = MediaManager()
         self.presence = PresenceAPI(self.client)
 
@@ -90,6 +94,23 @@ class App:
             from_jid=parsed.from_jid,
             participant=parsed.participant,
             text=parsed.text,
+            media_url=parsed.media_url,
+            reaction=parsed.reaction,
+            reaction_target_id=parsed.reaction_target_id,
+            destination_jid=parsed.destination_jid,
+            protocol_type=parsed.protocol_type,
+            protocol_code=parsed.protocol_code,
+            target_message_id=parsed.target_message_id,
+            edited_text=parsed.edited_text,
+            ephemeral_expiration=parsed.ephemeral_expiration,
+            history_sync_type=parsed.history_sync_type,
+            app_state_key_ids=parsed.app_state_key_ids,
+            encrypted_reaction=parsed.encrypted_reaction,
+            poll_update=parsed.poll_update,
+            event_response=parsed.event_response,
+            content_type=parsed.content_type,
+            content=parsed.content,
+            message_secret_b64=parsed.message_secret_b64,
             raw_node=node,
             message_type=parsed.message_type,
         )

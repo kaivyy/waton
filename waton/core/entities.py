@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
 @dataclass
@@ -11,6 +11,22 @@ class Message:
     message_type: str = ""
     text: Optional[str] = None
     media_url: Optional[str] = None
+    reaction: Optional[str] = None
+    reaction_target_id: Optional[str] = None
+    destination_jid: Optional[str] = None
+    protocol_type: Optional[str] = None
+    protocol_code: Optional[int] = None
+    target_message_id: Optional[str] = None
+    edited_text: Optional[str] = None
+    ephemeral_expiration: Optional[int] = None
+    history_sync_type: Optional[int] = None
+    app_state_key_ids: list[str] = field(default_factory=list)
+    encrypted_reaction: Optional[dict[str, Any]] = None
+    poll_update: Optional[dict[str, Any]] = None
+    event_response: Optional[dict[str, Any]] = None
+    content_type: Optional[str] = None
+    content: dict[str, Any] = field(default_factory=dict)
+    message_secret_b64: Optional[str] = None
     raw_node: Any = None
 
 @dataclass

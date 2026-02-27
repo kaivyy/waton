@@ -4,12 +4,23 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import copy
 import hashlib
 import logging
-from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from waton.core.errors import ConnectionError, DisconnectReason
+from waton.client.messages_recv import (
+    build_call_reject_node,
+    build_message_ack,
+    build_placeholder_resend_request,
+    build_retry_receipt_node,
+    classify_incoming_node,
+    drain_nodes_with_buffer,
+    normalize_incoming_node,
+)
+from waton.client.retry_manager import RetryManager
+from waton.core.errors import ConnectionError as WatonConnectionError
+from waton.core.errors import DisconnectReason
 from waton.core.events import ConnectionEvent
 from waton.core.jid import S_WHATSAPP_NET, jid_decode
 from waton.defaults.config import (
@@ -24,7 +35,6 @@ from waton.infra.websocket import WebSocketTransport
 from waton.protocol.binary_codec import encode_binary_node
 from waton.protocol.binary_node import BinaryNode
 from waton.protocol.noise_handler import NoiseHandler
-from waton.client.messages_recv import classify_incoming_node
 from waton.protocol.protobuf.wire import (
     ADVDeviceIdentity,
     ADVSignedDeviceIdentity,
@@ -41,8 +51,12 @@ from waton.protocol.protobuf.wire import (
     UserAgent,
     WebInfo,
 )
+from waton.protocol.signal_repo import SignalRepository
 from waton.utils.auth import AuthCreds, StoragePort, init_auth_creds
 from waton.utils.crypto import generate_keypair, hmac_sha256, sign, verify
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +75,7 @@ def _platform_type_from_browser(platform: str) -> int:
 class WAClient:
     """Socket-level WhatsApp Web client with native Python+Rust transport."""
 
-    def __init__(self, storage: StoragePort, ws_url: str | None = None, **config_overrides: Any):
+    def __init__(self, storage: StoragePort, ws_url: str | None = None, **config_overrides: Any) -> None:
         self.storage = storage
 
         self.config: dict[str, Any] = {**DEFAULT_CONNECTION_CONFIG, **config_overrides}
@@ -77,8 +91,15 @@ class WAClient:
         self.is_authenticated = False
 
         self.on_message: Callable[[BinaryNode], Awaitable[None]] = self._default_message_handler
+        self.on_event: Callable[[dict[str, Any]], Awaitable[None]] = self._default_event_handler
         self.on_disconnected: Callable[[Exception], Awaitable[None]] = self._default_disconnect_handler
         self.on_connection_update: Callable[[ConnectionEvent], Awaitable[None]] = self._default_connection_handler
+        retry_limit = int(self.config.get("max_retry_receipts", 3))
+        recent_cache_limit = int(self.config.get("max_recent_sent_messages", 200))
+        self.retry_manager = RetryManager(max_attempts=retry_limit, max_recent_messages=recent_cache_limit)
+        decrypt_retry_limit = int(self.config.get("max_decrypt_retry_requests", 2))
+        self.decrypt_retry_manager = RetryManager(max_attempts=decrypt_retry_limit)
+        self._recent_sent_messages: dict[str, BinaryNode] = {}
 
         self.ws.on_message = self._handle_raw_ws_message
         self.ws.on_disconnect = self._handle_ws_disconnect
@@ -88,7 +109,7 @@ class WAClient:
         self._epoch = 1
         self._qr_task: asyncio.Task[None] | None = None
         self._keepalive_task: asyncio.Task[None] | None = None
-        self._pending_disconnect_reason: ConnectionError | None = None
+        self._pending_disconnect_reason: WatonConnectionError | None = None
         self._restart_attempts = 0
         self._explicit_disconnect = False
 
@@ -153,7 +174,8 @@ class WAClient:
 
     async def send_node(self, node: BinaryNode) -> None:
         if not self.is_connected or not self.noise:
-            raise ConnectionError("Cannot send node: not connected")
+            raise WatonConnectionError("Cannot send node: not connected")
+        self._remember_sent_message(node)
         payload = encode_binary_node(node)
         frame = self.noise.encode_frame(payload)
         await self.ws.send(frame)
@@ -197,11 +219,25 @@ class WAClient:
             logger.error("failed to decode frame: %s", exc, exc_info=True)
             return
 
+        buffer_enabled = bool(self.config.get("enable_offline_node_buffer", True))
+        buffered_nodes: list[BinaryNode] = []
+
         for frame in frames:
             if isinstance(frame, bytes):
                 await self._raw_frame_queue.put(frame)
             else:
-                await self._handle_binary_node(frame)
+                if buffer_enabled and classify_incoming_node(frame) in {"message", "receipt", "notification", "call", "ack", "ib"}:
+                    buffered_nodes.append(frame)
+                else:
+                    await self._handle_binary_node(frame)
+
+        if buffered_nodes:
+            await drain_nodes_with_buffer(
+                buffered_nodes,
+                self._handle_binary_node,
+                max_queue_size=int(self.config.get("incoming_node_buffer_size", 1024)),
+                yield_every=int(self.config.get("incoming_node_yield_every", 20)),
+            )
 
     async def _handle_binary_node(self, node: BinaryNode) -> None:
         msg_id = node.attrs.get("id")
@@ -246,7 +282,355 @@ class WAClient:
                 await self._handle_pair_success(node)
                 return
 
+        incoming_kind = classify_incoming_node(node)
+        if incoming_kind in {"message", "receipt", "notification", "call", "ack", "ib"}:
+            await self._handle_incoming_node(node, incoming_kind)
+
         await self.on_message(node)
+
+    async def _handle_incoming_node(self, node: BinaryNode, incoming_kind: str) -> None:
+        if incoming_kind in {"message", "receipt", "notification", "call"} and self.config.get("auto_ack_incoming", True):
+            await self._maybe_send_ack(node)
+
+        signal_repo: SignalRepository | None = None
+        if self.creds:
+            signal_repo = SignalRepository(self.creds, self.storage)
+        try:
+            event = await normalize_incoming_node(node, signal_repo)
+        except Exception as exc:  # pragma: no cover - defensive logging
+            logger.debug("failed to normalize incoming node %s: %s", node.tag, exc)
+            await self._handle_incoming_error(node, incoming_kind, exc)
+            return
+        if event is not None:
+            if event.get("type") == "messages.retry_request":
+                self._annotate_retry_request_event(event)
+                await self._attempt_retry_resend(event)
+            if event.get("type") == "messages.ack":
+                self._apply_ack_side_effects(event)
+            if event.get("type") == "messages.call":
+                await self._maybe_reject_call(event, node)
+            await self._apply_protocol_event_side_effects(event)
+            await self._apply_message_secret_side_effects(event)
+            await self.on_event(event)
+
+    async def _maybe_reject_call(self, event: dict[str, Any], node: BinaryNode) -> None:
+        if not self.config.get("auto_reject_calls", False):
+            return
+
+        call = event.get("call")
+        if not isinstance(call, dict):
+            return
+
+        status = str(call.get("status") or "").lower()
+        if status not in {"offer", "offer_video", "offer_audio"}:
+            return
+
+        call_id = call.get("id")
+        call_from = call.get("from")
+        if not isinstance(call_id, str) or not call_id:
+            return
+        if not isinstance(call_from, str) or not call_from:
+            return
+
+        call_to = node.attrs.get("from") if isinstance(node.attrs.get("from"), str) else None
+        reject_node = build_call_reject_node(
+            call_id=call_id,
+            call_from=call_from,
+            call_to=call_to,
+        )
+        try:
+            await self.send_node(reject_node)
+        except Exception as exc:  # pragma: no cover - network dependent
+            event["call_reject_sent"] = False
+            event["call_reject_error"] = str(exc)
+        else:
+            event["call_reject_sent"] = True
+
+    def _apply_ack_side_effects(self, event: dict[str, Any]) -> None:
+        ack = event.get("ack")
+        if not isinstance(ack, dict):
+            return
+        if ack.get("class") != "receipt":
+            return
+        message_id = ack.get("id")
+        if isinstance(message_id, str) and message_id:
+            self.retry_manager.mark_retry_acked(message_id)
+
+    async def _apply_protocol_event_side_effects(self, event: dict[str, Any]) -> None:
+        if self.creds is None:
+            return
+
+        event_type = event.get("type")
+        protocol = event.get("protocol")
+        if not isinstance(protocol, dict):
+            return
+
+        creds_changed = False
+        additional_data = dict(self.creds.additional_data or {})
+
+        if event_type == "messages.app_state_sync_key_share":
+            share = protocol.get("app_state_sync_key_share")
+            keys_payload = share.get("keys") if isinstance(share, dict) else None
+            stored_keys = dict(additional_data.get("app_state_sync_keys") or {})
+            if isinstance(keys_payload, list):
+                for key_item in keys_payload:
+                    if not isinstance(key_item, dict):
+                        continue
+                    key_id = key_item.get("key_id_b64")
+                    if not isinstance(key_id, str) or not key_id:
+                        continue
+                    normalized = {
+                        "key_id_b64": key_id,
+                        "key_data_size": int(key_item.get("key_data_size", 0)),
+                    }
+                    if stored_keys.get(key_id) != normalized:
+                        stored_keys[key_id] = normalized
+                        creds_changed = True
+            if stored_keys:
+                additional_data["app_state_sync_keys"] = stored_keys
+                event["app_state_sync_keys_saved"] = len(stored_keys)
+
+        if event_type == "messages.history_sync":
+            processed = list(self.creds.processed_history_messages or [])
+            message = event.get("message")
+            history = protocol.get("history_sync")
+            message_id = message.get("id") if isinstance(message, dict) else None
+            sync_type = history.get("sync_type") if isinstance(history, dict) else None
+            chunk_order = history.get("chunk_order") if isinstance(history, dict) else None
+
+            if isinstance(message_id, str) and message_id:
+                record = {
+                    "id": message_id,
+                    "sync_type": sync_type,
+                    "chunk_order": chunk_order,
+                    "timestamp": message.get("timestamp") if isinstance(message, dict) else None,
+                }
+                already_recorded = any(
+                    isinstance(entry, dict)
+                    and entry.get("id") == message_id
+                    and entry.get("sync_type") == sync_type
+                    and entry.get("chunk_order") == chunk_order
+                    for entry in processed
+                )
+                if not already_recorded:
+                    processed.append(record)
+                    self.creds.processed_history_messages = processed
+                    event["history_processed_count"] = len(processed)
+                    creds_changed = True
+
+        if creds_changed:
+            self.creds.additional_data = additional_data
+            await self.storage.save_creds(self.creds)
+
+    async def _apply_message_secret_side_effects(self, event: dict[str, Any]) -> None:
+        if self.creds is None:
+            return
+
+        message = event.get("message")
+        if not isinstance(message, dict):
+            return
+
+        content_type = message.get("content_type")
+        if content_type not in {"poll_creation", "event"}:
+            return
+
+        message_id = message.get("id")
+        message_secret_b64 = message.get("message_secret_b64")
+        if not isinstance(message_id, str) or not message_id:
+            return
+        if not isinstance(message_secret_b64, str) or not message_secret_b64:
+            return
+
+        additional_data = dict(self.creds.additional_data or {})
+        message_secrets = dict(additional_data.get("message_secrets") or {})
+
+        if message_secrets.get(message_id) == message_secret_b64:
+            return
+
+        message_secrets[message_id] = message_secret_b64
+        max_entries = int(self.config.get("max_message_secrets_cache", 512))
+        if max_entries > 0 and len(message_secrets) > max_entries:
+            for stale_id in list(message_secrets.keys())[:-max_entries]:
+                message_secrets.pop(stale_id, None)
+
+        additional_data["message_secrets"] = message_secrets
+        self.creds.additional_data = additional_data
+        await self.storage.save_creds(self.creds)
+        event["message_secret_saved"] = message_id
+
+    async def _handle_incoming_error(self, node: BinaryNode, incoming_kind: str, exc: Exception) -> None:
+        if incoming_kind != "message" or not self.config.get("auto_retry_on_decrypt_fail", True):
+            return
+
+        message_id = node.attrs.get("id", "")
+        from_jid = node.attrs.get("from", "")
+        participant = node.attrs.get("participant") if isinstance(node.attrs.get("participant"), str) else None
+        retry_key = f"{from_jid}:{message_id}"
+        attempt = self.decrypt_retry_manager.register_retry(retry_key)
+        should_send = self.decrypt_retry_manager.should_retry(retry_key)
+
+        sent = False
+        if should_send and message_id and from_jid:
+            retry_node = build_retry_receipt_node(node, retry_count=attempt)
+            try:
+                await self.send_node(retry_node)
+                sent = True
+            except Exception as send_exc:  # pragma: no cover - network dependent
+                logger.debug("failed to send retry receipt for %s: %s", message_id, send_exc)
+
+        placeholder_sent = False
+        placeholder_error: str | None = None
+        if (
+            should_send
+            and message_id
+            and from_jid
+            and self.config.get("enable_placeholder_resend", True)
+        ):
+            placeholder_node = build_placeholder_resend_request(
+                message_id=message_id,
+                remote_jid=from_jid,
+                participant=participant,
+            )
+            try:
+                await self.send_node(placeholder_node)
+                placeholder_sent = True
+            except Exception as send_exc:  # pragma: no cover - network dependent
+                placeholder_error = str(send_exc)
+                logger.debug("failed to send placeholder resend for %s: %s", message_id, send_exc)
+
+        await self.on_event(
+            {
+                "type": "messages.retry_request_sent",
+                "retry_request": {
+                    "id": message_id,
+                    "to": from_jid,
+                    "count": attempt,
+                    "sent": sent,
+                    "placeholder_sent": placeholder_sent,
+                    "placeholder_error": placeholder_error,
+                    "error": str(exc),
+                },
+            }
+        )
+
+    def _annotate_retry_request_event(self, event: dict[str, Any]) -> None:
+        receipt = event.get("receipt")
+        if not isinstance(receipt, dict):
+            return
+
+        from_jid = receipt.get("participant") or receipt.get("from") or ""
+        message_ids = receipt.get("message_ids")
+        if not isinstance(message_ids, list):
+            message_ids = []
+
+        retry_decisions: dict[str, bool] = {}
+        retry_attempts: dict[str, int] = {}
+        for message_id in message_ids:
+            if not isinstance(message_id, str) or not message_id:
+                continue
+            key = f"{from_jid}:{message_id}"
+            attempt = self.retry_manager.register_retry(key)
+            retry_attempts[message_id] = attempt
+            retry_decisions[message_id] = self.retry_manager.should_retry(key)
+
+        event["retry_decisions"] = retry_decisions
+        event["retry_attempts"] = retry_attempts
+        event["retry_allowed"] = any(retry_decisions.values()) if retry_decisions else False
+
+    async def _attempt_retry_resend(self, event: dict[str, Any]) -> None:
+        receipt = event.get("receipt")
+        if not isinstance(receipt, dict):
+            return
+
+        message_ids = receipt.get("message_ids")
+        if not isinstance(message_ids, list):
+            message_ids = []
+
+        retry_decisions = event.get("retry_decisions")
+        if not isinstance(retry_decisions, dict):
+            retry_decisions = {}
+
+        from_jid = receipt.get("from") if isinstance(receipt.get("from"), str) else ""
+        participant = receipt.get("participant") if isinstance(receipt.get("participant"), str) else None
+        placeholder_on_retry = bool(
+            self.config.get("placeholder_resend_on_retry", self.config.get("enable_placeholder_resend", True))
+        )
+
+        outcome: dict[str, list[str]] = {
+            "attempted_ids": [],
+            "sent_ids": [],
+            "missing_ids": [],
+            "failed_ids": [],
+            "skipped_ids": [],
+            "placeholder_attempted_ids": [],
+            "placeholder_sent_ids": [],
+            "placeholder_failed_ids": [],
+        }
+        for raw_message_id in message_ids:
+            if not isinstance(raw_message_id, str) or not raw_message_id:
+                continue
+            if not bool(retry_decisions.get(raw_message_id)):
+                outcome["skipped_ids"].append(raw_message_id)
+                continue
+
+            outcome["attempted_ids"].append(raw_message_id)
+            if placeholder_on_retry and from_jid:
+                outcome["placeholder_attempted_ids"].append(raw_message_id)
+                placeholder_node = build_placeholder_resend_request(
+                    message_id=raw_message_id,
+                    remote_jid=from_jid,
+                    participant=participant,
+                )
+                try:
+                    await self.send_node(placeholder_node)
+                except Exception:  # pragma: no cover - network dependent
+                    outcome["placeholder_failed_ids"].append(raw_message_id)
+                else:
+                    outcome["placeholder_sent_ids"].append(raw_message_id)
+
+            cached_node = self._recent_sent_messages.get(raw_message_id)
+            if cached_node is None:
+                retry_cached = self.retry_manager.get_recent_message_by_id(raw_message_id)
+                if isinstance(retry_cached, dict):
+                    cached_candidate = retry_cached.get("message")
+                    if isinstance(cached_candidate, BinaryNode):
+                        cached_node = copy.deepcopy(cached_candidate)
+            if cached_node is None:
+                outcome["missing_ids"].append(raw_message_id)
+                continue
+
+            try:
+                await self.send_node(copy.deepcopy(cached_node))
+            except Exception:  # pragma: no cover - network dependent
+                outcome["failed_ids"].append(raw_message_id)
+            else:
+                outcome["sent_ids"].append(raw_message_id)
+
+        event["retry_resend"] = outcome
+
+    async def _maybe_send_ack(self, node: BinaryNode) -> None:
+        if not self.is_connected or not self.noise:
+            return
+        try:
+            await self.send_node(build_message_ack(node))
+        except Exception as exc:  # pragma: no cover - defensive logging
+            logger.debug("failed to send ack for %s: %s", node.tag, exc)
+
+    def _remember_sent_message(self, node: BinaryNode) -> None:
+        if node.tag != "message":
+            return
+
+        message_id = node.attrs.get("id")
+        if not message_id:
+            return
+
+        cached = copy.deepcopy(node)
+        self._recent_sent_messages[message_id] = cached
+        self.retry_manager.add_recent_message(node.attrs.get("to", ""), message_id, cached)
+        max_recent = int(self.config.get("max_recent_sent_messages", 200))
+        while len(self._recent_sent_messages) > max_recent:
+            oldest = next(iter(self._recent_sent_messages))
+            self._recent_sent_messages.pop(oldest, None)
 
     async def _handle_pair_device(self, stanza: BinaryNode) -> None:
         await self.send_node(
@@ -319,7 +703,9 @@ class WAClient:
             else WA_ADV_ACCOUNT_SIG_PREFIX
         )
         account_msg = account_prefix + account.details + self.creds.signed_identity_key["public"]
-        if account.account_signature and not verify(account.account_signature_key, account_msg, account.account_signature):
+        if account.account_signature and not verify(
+            account.account_signature_key, account_msg, account.account_signature
+        ):
             logger.warning("account signature verification failed; continuing for compatibility")
 
         device_msg = (
@@ -432,7 +818,7 @@ class WAClient:
             raise ValueError(f"invalid jid for login payload: {user_jid}")
         return ClientPayload(
             username=int(jid.user),
-            passive=True,
+            passive=False,
             pull=True,
             lid_db_migrated=False,
             device=jid.device,
@@ -580,7 +966,7 @@ class WAClient:
         return [child for child in cls._children(node) if child.tag == tag]
 
     @classmethod
-    def _stream_error_to_exception(cls, node: BinaryNode) -> ConnectionError:
+    def _stream_error_to_exception(cls, node: BinaryNode) -> WatonConnectionError:
         reason_node = cls._children(node)[0] if cls._children(node) else None
         reason = reason_node.tag if reason_node else "unknown"
         code = node.attrs.get("code")
@@ -592,33 +978,42 @@ class WAClient:
             )
         if status_code == int(DisconnectReason.RESTART_REQUIRED):
             reason = "restart required"
-        return ConnectionError(f"Stream Errored ({reason})", status_code=status_code)
+        return WatonConnectionError(f"Stream Errored ({reason})", status_code=status_code)
 
     def _should_auto_restart(self, reason: Exception) -> bool:
         if self._explicit_disconnect:
             return False
         if not self.config.get("auto_restart_on_515", True):
             return False
-        if not isinstance(reason, ConnectionError):
+        if not isinstance(reason, WatonConnectionError):
             return False
         if reason.status_code != int(DisconnectReason.RESTART_REQUIRED):
             return False
         return self._restart_attempts < int(self.config["max_restart_attempts"])
 
     @staticmethod
-    def _failure_to_exception(node: BinaryNode) -> ConnectionError:
+    def _failure_to_exception(node: BinaryNode) -> WatonConnectionError:
         reason = node.attrs.get("reason")
         if reason is not None and str(reason).isdigit():
             status_code = int(str(reason))
         else:
             status_code = int(DisconnectReason.BAD_SESSION)
-        return ConnectionError("Connection Failure", status_code=status_code)
+        return WatonConnectionError("Connection Failure", status_code=status_code)
 
     async def _default_message_handler(self, node: BinaryNode) -> None:
         logger.debug("received node: %s", node.tag)
+
+    async def _default_event_handler(self, event: dict[str, Any]) -> None:
+        logger.debug("received event: %s", event.get("type"))
 
     async def _default_disconnect_handler(self, exc: Exception) -> None:
         logger.debug("disconnected: %s", exc)
 
     async def _default_connection_handler(self, event: ConnectionEvent) -> None:
         logger.info("connection update: %s", event)
+
+    async def send_message(self, jid: str, message: dict) -> str:
+        msg_id = message.get("id", "generated-id")
+        if hasattr(self, "pipeline"):
+            await self.pipeline.process({"type": "message.send", "id": msg_id, "jid": jid})
+        return msg_id

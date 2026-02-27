@@ -6,9 +6,9 @@ from waton.core.jid import jid_decode
 from waton.utils.crypto import (
     generate_keypair,
     signal_process_prekey_bundle,
-    signal_session_encrypt,
     signal_session_decrypt_prekey,
     signal_session_decrypt_whisper,
+    signal_session_encrypt,
 )
 
 if TYPE_CHECKING:
@@ -112,23 +112,24 @@ class SignalRepository:
         """
         signal_name, signal_device = self.jid_to_signal_address(jid)
         session = await self.get_session(jid)
-        
+
         if type_str == "pkmsg":
             # parse the protobuf to get prekey_id and signed_prekey_id without WAProto
             # The signal ciphertext starts with a version byte (typically 0x33 for version 3).
             # The protobuf follows.
             data = ciphertext[1:]
-            
+
             p_id = None
             sp_id = None
             i = 0
             while i < len(data):
-                if i >= len(data): break
+                if i >= len(data):
+                    break
                 tag_wire = data[i]
                 i += 1
                 tag = tag_wire >> 3
                 wire_type = tag_wire & 7
-                
+
                 if wire_type == 0:
                     val = 0
                     shift = 0
@@ -141,7 +142,7 @@ class SignalRepository:
                             break
                     if tag == 1:
                         p_id = val
-                    elif tag == 2:
+                    elif tag in (2, 6):
                         sp_id = val
                 elif wire_type == 2:
                     length = 0
@@ -160,15 +161,10 @@ class SignalRepository:
                     i += 4
                 else:
                     break
-                    
-                # We can stop early if we have both, but preKeyId (tag 1) is optional.
-                # Usually signedPreKeyId (tag 2) is present.
-                if sp_id is not None and tag > 2:
-                    break
-            
+
             prekey_id = p_id
-            signed_prekey_id = sp_id if sp_id is not None else 0
-            
+            signed_prekey_id = sp_id if sp_id is not None else int(self.creds.signed_pre_key.get("keyId", 1))
+
             prekey_private = None
             if prekey_id is not None:
                 prekey_private = await self.get_prekey(prekey_id)
@@ -178,9 +174,9 @@ class SignalRepository:
 
             # Our signed prekey
             signed_prekey_private = self.creds.signed_pre_key["keyPair"]["private"]
-            
+
             safe_session = session or b""
-            
+
             res = signal_session_decrypt_prekey(
                 session=safe_session,
                 identity_private=self.creds.signed_identity_key["private"],
@@ -193,7 +189,7 @@ class SignalRepository:
                 signed_prekey_private=signed_prekey_private,
                 ciphertext=ciphertext,
             )
-            
+
             # update session
             await self.save_session(jid, res["session"])
             return res["ciphertext"]
@@ -201,7 +197,7 @@ class SignalRepository:
         elif type_str == "msg":
             if not session:
                 raise ValueError(f"No active session for {jid}, cannot decrypt 'msg'")
-            
+
             res = signal_session_decrypt_whisper(
                 session=session,
                 identity_private=self.creds.signed_identity_key["private"],
@@ -210,10 +206,10 @@ class SignalRepository:
                 remote_device=int(signal_device),
                 ciphertext=ciphertext,
             )
-            
+
             await self.save_session(jid, res["session"])
             return res["ciphertext"]
-            
+
         else:
             raise ValueError(f"Unknown message type: {type_str}")
 
@@ -237,6 +233,6 @@ class SignalRepository:
         await self.save_session(jid, new_session)
         return msg_type, ciphertext
 
-    async def decrypt_message_node(self, node) -> bytes:
+    async def decrypt_message_node(self, node: object) -> bytes:
         # Stub for the tests
         return b""
