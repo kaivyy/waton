@@ -26,3 +26,4 @@ extract.js
 .tmp-curve25519-index.js
 howtouse.md
 .claude/
+.worktrees/
