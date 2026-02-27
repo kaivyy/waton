@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-02-27
+
 ### Added
 - **Multi-device query support**: Messages are now encrypted and sent to ALL devices
   of the recipient (phone, WhatsApp Web, linked devices) via USync device query,
