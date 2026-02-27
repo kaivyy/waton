@@ -6,7 +6,7 @@
 
 # Waton
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Waton** is a lightweight, standalone Python library for WhatsApp Web Multi-Device. Build WhatsApp bots, automation tools, and messaging applications entirely in Python — no Node.js required.
@@ -43,6 +43,32 @@ For development:
 ```bash
 pip install -e .[dev]
 maturin develop
+```
+
+### Windows troubleshooting: `os error 32` during editable install
+
+If you get:
+
+- `failed to copy ... waton\\_crypto.pyd`
+- `The process cannot access the file because it is being used by another process. (os error 32)`
+
+then `_crypto.pyd` is locked by another running Python process (usually `examples/cli_chat.py` or `examples/live_connect.py`).
+
+Fix:
+
+```powershell
+# from project root
+Get-CimInstance Win32_Process -Filter "name='python.exe'" `
+  | Where-Object { $_.CommandLine -match 'examples/cli_chat.py|examples/live_connect.py' } `
+  | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
+
+python -m pip install -e .[dashboard]
+```
+
+If you only want the browser dashboard and do not need reinstall, you can skip editable reinstall and just run:
+
+```powershell
+python -m tools.dashboard.server --host 127.0.0.1 --port 8080
 ```
 
 ### Package Footprint (`pip install waton`)
@@ -97,6 +123,33 @@ Fast local run (skip lint/typecheck):
 ```bash
 python scripts/preflight_check.py --skip-lint --skip-typecheck
 ```
+
+### 1.7 Browser Dashboard for Quick Testing
+
+If you want a browser UI instead of terminal-only testing:
+
+```bash
+pip install -e .[dashboard]
+python -m tools.dashboard.server --host 127.0.0.1 --port 8080
+```
+
+Open `http://127.0.0.1:8080`.
+
+- The dashboard is isolated in `tools/dashboard/` and does not modify core runtime modules.
+- It uses real WhatsApp connection flow (QR pairing + real send API).
+- Status will show:
+  - `connected` when WA session is open and authenticated
+  - `connecting` while waiting QR/pairing
+  - `disconnected` when socket is not connected
+- In disconnected state, you must connect and scan QR first before sending.
+- UI follows WhatsApp Web style:
+  - left panel: chat list (auto-populates from real incoming/outgoing chats)
+  - right panel: active chat thread
+  - if new message arrives from another number, it appears in left list and can be opened in right thread
+  - footer composer is WhatsApp-like (attach/emoji placeholders + autosize text input + send button)
+- Debug endpoint for root-cause tracing:
+  - open `http://127.0.0.1:8080/api/debug/summary`
+  - check `chat_count`, `chats`, and `events_tail` to verify whether incoming nodes are reaching dashboard runtime.
 
 ### 2. High-Level API (`App`)
 
@@ -184,7 +237,7 @@ If you want direct control over the WebSocket or need to build custom wrappers, 
 
 ## Requirements
 
-- Python 3.10+
+- Python 3.11+
 - WhatsApp account (phone number)
 - Internet connection
 
@@ -201,6 +254,17 @@ maturin develop
 
 # Run tests
 pytest tests/
+```
+
+## Documentation (Read the Docs)
+
+Sphinx docs source is in `docs/source/` with RTD config in `.readthedocs.yaml`.
+
+Local docs build:
+
+```bash
+pip install -e .[docs]
+python -m sphinx -b html docs/source docs/build/html
 ```
 
 ## License
