@@ -27,6 +27,14 @@ dev = [
     "pyright>=1.1",
     "maturin>=1.4",
 ]
+dashboard = [
+    "flask>=3.0",
+]
+docs = [
+    "sphinx>=8,<10",
+    "myst-parser>=4,<6",
+    "sphinx-book-theme>=1.1,<2",
+]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
