@@ -1,0 +1,7 @@
+{
+  "domains": {
+    "messages-recv": { "status": "missing" },
+    "app-state-sync": { "status": "missing" },
+    "retry-manager": { "status": "missing" }
+  }
+}
