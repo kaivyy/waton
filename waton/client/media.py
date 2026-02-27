@@ -68,3 +68,12 @@ class MediaManager:
         actual_ciphertext = encrypted_data[:-10]
         
         return aes_cbc_decrypt(actual_ciphertext, cipher_key, iv)
+
+from waton.utils.media_utils import _upload_once, _verify_remote_checksum
+
+def upload_with_retry(data: bytes, max_attempts: int = 3) -> dict:
+    for attempt in range(1, max_attempts + 1):
+        url = _upload_once(data)
+        if _verify_remote_checksum(url, data):
+            return {"url": url, "attempts": attempt, "verified": True}
+    raise RuntimeError("upload failed after retries")

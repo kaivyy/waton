@@ -242,6 +242,26 @@ fn signal_session_decrypt_whisper<'a>(
     Ok(dict)
 }
 
+#[pyfunction]
+fn group_encrypt<'a>(py: Python<'a>, sender_key: &[u8], plaintext: &[u8]) -> PyResult<Bound<'a, PyDict>> {
+    let (ct, next_key) = signal::group_encrypt(sender_key, plaintext)
+        .map_err(pyo3::exceptions::PyValueError::new_err)?;
+    let dict = PyDict::new_bound(py);
+    dict.set_item("ciphertext", PyBytes::new_bound(py, &ct))?;
+    dict.set_item("next_key", PyBytes::new_bound(py, &next_key))?;
+    Ok(dict)
+}
+
+#[pyfunction]
+fn group_decrypt<'a>(py: Python<'a>, sender_key: &[u8], ciphertext: &[u8]) -> PyResult<Bound<'a, PyDict>> {
+    let (pt, next_key) = signal::group_decrypt(sender_key, ciphertext)
+        .map_err(pyo3::exceptions::PyValueError::new_err)?;
+    let dict = PyDict::new_bound(py);
+    dict.set_item("plaintext", PyBytes::new_bound(py, &pt))?;
+    dict.set_item("next_key", PyBytes::new_bound(py, &next_key))?;
+    Ok(dict)
+}
+
 #[pymodule]
 fn _crypto(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", "0.1.0")?;
@@ -260,5 +280,7 @@ fn _crypto(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(signal_session_encrypt, m)?)?;
     m.add_function(wrap_pyfunction!(signal_session_decrypt_prekey, m)?)?;
     m.add_function(wrap_pyfunction!(signal_session_decrypt_whisper, m)?)?;
+    m.add_function(wrap_pyfunction!(group_encrypt, m)?)?;
+    m.add_function(wrap_pyfunction!(group_decrypt, m)?)?;
     Ok(())
 }

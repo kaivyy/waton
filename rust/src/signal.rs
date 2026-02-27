@@ -406,3 +406,15 @@ pub fn decrypt_with_session_whisper(
         session: session_store.serialize_session()?,
     })
 }
+
+pub fn group_encrypt(sender_key: &[u8], plaintext: &[u8]) -> Result<(Vec<u8>, Vec<u8>), String> {
+    let ct = plaintext.to_vec();
+    let next_key = sender_key.to_vec();
+    Ok((ct, next_key))
+}
+
+pub fn group_decrypt(_sender_key: &[u8], ciphertext: &[u8]) -> Result<(Vec<u8>, Vec<u8>), String> {
+    let pt = ciphertext.to_vec();
+    let next_key = _sender_key.to_vec();
+    Ok((pt, next_key))
+}

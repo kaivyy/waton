@@ -28,6 +28,8 @@ rust_signal_process_prekey_bundle = _rust_crypto.signal_process_prekey_bundle
 rust_signal_session_encrypt = _rust_crypto.signal_session_encrypt
 rust_signal_session_decrypt_prekey = _rust_crypto.signal_session_decrypt_prekey
 rust_signal_session_decrypt_whisper = _rust_crypto.signal_session_decrypt_whisper
+rust_group_encrypt = _rust_crypto.group_encrypt
+rust_group_decrypt = _rust_crypto.group_decrypt
 def generate_keypair() -> dict[str, bytes]:
     """Generates a Curve25519 keypair."""
     return curve25519_generate_keypair()
@@ -168,3 +170,11 @@ def signal_session_decrypt_whisper(
 def generate_random_bytes(length: int = 32) -> bytes:
     """Generates random bytes."""
     return os.urandom(length)
+
+def group_encrypt(sender_key: bytes, plaintext: bytes) -> tuple[bytes, bytes]:
+    res = rust_group_encrypt(sender_key, plaintext)
+    return bytes(res["ciphertext"]), bytes(res["next_key"])
+
+def group_decrypt(sender_key: bytes, ciphertext: bytes) -> tuple[bytes, bytes]:
+    res = rust_group_decrypt(sender_key, ciphertext)
+    return bytes(res["plaintext"]), bytes(res["next_key"])
