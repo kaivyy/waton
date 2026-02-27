@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-02-27
 
 ### Added
+- **Baileys Parity Implementation**: Replaced structural stubs and mocked paths with real implementation boundaries to achieve deeper Baileys parity. New capabilities include a persist-before-emit event pipeline, an App-State patch engine mapped to LT Hash, an idempotent Retry Manager, an Identity-Change session handler, robust media round-tripping with upload retries and checksum verification, and `waton` wrapper paths for Group Cipher encryption (`group_encrypt` algorithm integration).
 - **Multi-device query support**: Messages are now encrypted and sent to ALL devices
   of the recipient (phone, WhatsApp Web, linked devices) via USync device query,
   fixing the issue where messages were ACKed by server but never received

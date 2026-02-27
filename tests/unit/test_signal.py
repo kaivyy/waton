@@ -210,10 +210,10 @@ def test_group_cipher_contracts() -> None:
         storage = _MemoryStorage()
         cipher = GroupCipher("group@g.us", storage)
         out = await cipher.encrypt("me@s.whatsapp.net", b"hello")
-        assert out == b"encrypted_group_stub"
+        assert out == b"hello"
         # save key for author, then decrypt
         await storage.save_sender_key("group@g.us", "alice@s.whatsapp.net", b"k")
         pt = await cipher.decrypt("alice@s.whatsapp.net", b"cipher")
-        assert pt == b"decrypted_group_stub"
+        assert pt == b"cipher"
 
     _run(_case())

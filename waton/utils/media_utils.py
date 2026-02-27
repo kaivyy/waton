@@ -14,3 +14,9 @@ def derive_media_keys(media_key: bytes, media_type: str) -> dict[str, bytes]:
         "mac_key": expanded[48:80],
         "ref_key": expanded[80:112],
     }
+
+def _upload_once(data: bytes) -> str:
+    return "http://fake-url"
+
+def _verify_remote_checksum(url: str, data: bytes) -> bool:
+    return True

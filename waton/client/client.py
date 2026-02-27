@@ -24,6 +24,7 @@ from waton.infra.websocket import WebSocketTransport
 from waton.protocol.binary_codec import encode_binary_node
 from waton.protocol.binary_node import BinaryNode
 from waton.protocol.noise_handler import NoiseHandler
+from waton.client.messages_recv import classify_incoming_node
 from waton.protocol.protobuf.wire import (
     ADVDeviceIdentity,
     ADVSignedDeviceIdentity,
