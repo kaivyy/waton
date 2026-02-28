@@ -1,0 +1,16 @@
+{
+  "domains": {
+    "messages-recv": {
+      "description": "Receive pipeline fixtures"
+    },
+    "app-state-sync": {
+      "description": "App state sync fixtures"
+    },
+    "retry-manager": {
+      "description": "Retry manager fixtures"
+    },
+    "group-signal": {
+      "description": "Group signal fixtures"
+    }
+  }
+}
