@@ -887,3 +887,202 @@ def test_message_secret_from_message_event_saved_to_creds(monkeypatch: pytest.Mo
         assert events and events[0]["message_secret_saved"] == "m-secret"
 
     _run(_case())
+
+
+def test_handle_success_sends_active_passive_iq_and_unified_session() -> None:
+    async def _case() -> None:
+        storage = _DummyStorage()
+        storage.creds = init_auth_creds()
+        storage.creds.me = {"id": "628123456789:1@s.whatsapp.net"}
+        storage.creds.registered = True
+
+        client = WAClient(storage)
+        client.creds = storage.creds
+
+        events: list[Any] = []
+        sent_nodes: list[BinaryNode] = []
+
+        async def _capture_event(event: Any) -> None:
+            events.append(event)
+
+        async def _capture_send(node: BinaryNode) -> None:
+            sent_nodes.append(node)
+
+        client.on_connection_update = _capture_event
+        client.send_node = _capture_send  # type: ignore[method-assign]
+        client.is_connected = True
+        client.noise = NoiseHandler(generate_keypair())
+
+        await client._handle_success(BinaryNode(tag="success", attrs={"lid": "226822071566383:67@lid"}))
+
+        passive_nodes = [
+            n
+            for n in sent_nodes
+            if n.tag == "iq" and n.attrs.get("xmlns") == "passive" and n.attrs.get("type") == "set"
+        ]
+        assert passive_nodes
+        assert isinstance(passive_nodes[0].content, list)
+        assert passive_nodes[0].content[0].tag == "active"
+
+        unified_nodes = [n for n in sent_nodes if n.tag == "ib"]
+        assert unified_nodes
+        assert isinstance(unified_nodes[0].content, list)
+        assert unified_nodes[0].content[0].tag == "unified_session"
+        assert unified_nodes[0].content[0].attrs.get("id")
+
+        assert events and events[-1].status == "open"
+
+    _run(_case())
+
+
+def test_handle_binary_node_offline_preview_requests_offline_batch() -> None:
+    async def _case() -> None:
+        client = WAClient(_DummyStorage())
+        sent_nodes: list[BinaryNode] = []
+
+        async def _capture_send(node: BinaryNode) -> None:
+            sent_nodes.append(node)
+
+        client.send_node = _capture_send  # type: ignore[method-assign]
+        client.is_connected = True
+        client.noise = NoiseHandler(generate_keypair())
+
+        await client._handle_binary_node(
+            BinaryNode(
+                tag="ib",
+                attrs={"from": "s.whatsapp.net"},
+                content=[BinaryNode(tag="offline_preview", attrs={"count": "50"})],
+            )
+        )
+
+        offline_batch_nodes = [
+            n
+            for n in sent_nodes
+            if n.tag == "ib"
+            and isinstance(n.content, list)
+            and n.content
+            and n.content[0].tag == "offline_batch"
+        ]
+        assert offline_batch_nodes
+        assert offline_batch_nodes[0].content[0].attrs.get("count") == "100"
+
+    _run(_case())
+
+
+def test_offline_preview_ignores_non_whatsapp_source() -> None:
+    async def _case() -> None:
+        client = WAClient(_DummyStorage())
+        sent_nodes: list[BinaryNode] = []
+
+        async def _capture_send(node: BinaryNode) -> None:
+            sent_nodes.append(node)
+
+        client.send_node = _capture_send  # type: ignore[method-assign]
+        client.is_connected = True
+        client.noise = NoiseHandler(generate_keypair())
+
+        await client._handle_binary_node(
+            BinaryNode(
+                tag="ib",
+                attrs={"from": "not-whatsapp.net"},
+                content=[BinaryNode(tag="offline_preview", attrs={"count": "50"})],
+            )
+        )
+
+        offline_batch_nodes = [
+            n
+            for n in sent_nodes
+            if n.tag == "ib"
+            and isinstance(n.content, list)
+            and n.content
+            and n.content[0].tag == "offline_batch"
+        ]
+        assert offline_batch_nodes == []
+
+    _run(_case())
+
+
+def test_offline_preview_requests_offline_batch_only_once() -> None:
+    async def _case() -> None:
+        client = WAClient(_DummyStorage())
+        sent_nodes: list[BinaryNode] = []
+
+        async def _capture_send(node: BinaryNode) -> None:
+            sent_nodes.append(node)
+
+        client.send_node = _capture_send  # type: ignore[method-assign]
+        client.is_connected = True
+        client.noise = NoiseHandler(generate_keypair())
+
+        preview_node = BinaryNode(
+            tag="ib",
+            attrs={"from": "s.whatsapp.net"},
+            content=[BinaryNode(tag="offline_preview", attrs={"count": "50"})],
+        )
+        await client._handle_binary_node(preview_node)
+        await client._handle_binary_node(preview_node)
+
+        offline_batch_nodes = [
+            n
+            for n in sent_nodes
+            if n.tag == "ib"
+            and isinstance(n.content, list)
+            and n.content
+            and n.content[0].tag == "offline_batch"
+        ]
+        assert len(offline_batch_nodes) == 1
+
+    _run(_case())
+
+
+def test_unified_session_id_uses_server_time_offset(monkeypatch: pytest.MonkeyPatch) -> None:
+    client = WAClient(_DummyStorage())
+    fixed_now_s = 2_000_000
+    monkeypatch.setattr("waton.client.client.time.time", lambda: float(fixed_now_s))
+
+    client._update_server_time_offset(BinaryNode(tag="iq", attrs={"t": "2000100"}))
+
+    week_ms = 7 * 24 * 60 * 60 * 1000
+    offset_ms = 3 * 24 * 60 * 60 * 1000
+    expected = str(((2_000_100 * 1000) + offset_ms) % week_ms)
+    assert client._get_unified_session_id() == expected
+
+
+def test_handle_success_uses_server_time_for_unified_session_id(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def _case() -> None:
+        storage = _DummyStorage()
+        storage.creds = init_auth_creds()
+        storage.creds.me = {"id": "628123456789:1@s.whatsapp.net"}
+        storage.creds.registered = True
+
+        client = WAClient(storage)
+        client.creds = storage.creds
+        client.is_connected = True
+        client.noise = NoiseHandler(generate_keypair())
+
+        sent_nodes: list[BinaryNode] = []
+
+        async def _capture_send(node: BinaryNode) -> None:
+            sent_nodes.append(node)
+
+        client.send_node = _capture_send  # type: ignore[method-assign]
+        monkeypatch.setattr("waton.client.client.time.time", lambda: float(2_000_000))
+
+        await client._handle_success(BinaryNode(tag="success", attrs={"lid": "226822071566383:67@lid", "t": "2000100"}))
+
+        unified_nodes = [
+            n
+            for n in sent_nodes
+            if n.tag == "ib"
+            and isinstance(n.content, list)
+            and n.content
+            and n.content[0].tag == "unified_session"
+        ]
+        assert unified_nodes
+
+        week_ms = 7 * 24 * 60 * 60 * 1000
+        offset_ms = 3 * 24 * 60 * 60 * 1000
+        expected_id = str(((2_000_100 * 1000) + offset_ms) % week_ms)
+        assert unified_nodes[0].content[0].attrs.get("id") == expected_id
+
+    _run(_case())

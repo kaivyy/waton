@@ -21,6 +21,12 @@ from waton.app.context import Context
 
 db_path = os.getenv("WATON_AUTH_DB", "waton_live.db")
 app = App(storage_path=db_path)
+debug_nodes_enabled = os.getenv("WATON_CLI_DEBUG_NODES", "").strip().lower() in {"1", "true", "yes", "on"}
+debug_include_ib = os.getenv("WATON_CLI_DEBUG_IB", "").strip().lower() in {"1", "true", "yes", "on"}
+
+if not debug_nodes_enabled:
+    # Keep CLI clean by default so input prompt remains usable.
+    logging.getLogger("waton.utils.process_message").setLevel(logging.ERROR)
 
 @app.on_ready
 async def on_ready(a: App) -> None:
@@ -38,6 +44,10 @@ async def on_ready(a: App) -> None:
 @app.message()
 async def on_incoming_message(ctx: Context) -> None:
     msg = ctx.message
+    if msg.text is None and msg.raw_node.tag == "message" and msg.message_type == "text":
+        print(f"\n[PESAN MASUK - UNDECRYPTED] dari {msg.from_jid}: id={msg.id}")
+        print("> ", end="", flush=True)
+        return
     if msg.text and msg.media_url:
         print(f"\n[PESAN MASUK - MEDIA] dari {msg.from_jid}: {msg.text} (URL: {msg.media_url})")
         print("> ", end="", flush=True)
@@ -51,21 +61,33 @@ async def on_incoming_message(ctx: Context) -> None:
         print(f"\n[PESAN MASUK (NON-TEKS)] dari {msg.from_jid}: tag={msg.raw_node.tag}")
         print("> ", end="", flush=True)
 
-# Also intercept all messages before router to see if it even reaches App
-original_dispatch = app._dispatch_message
-async def debug_dispatch(node):
-    if node.tag not in ("iq", "success"):
+# Optional node-level debug (disabled by default to avoid flooding prompt).
+if debug_nodes_enabled:
+    original_dispatch = app._dispatch_message
+
+    async def debug_dispatch(node):
+        if node.tag in ("iq", "success"):
+            await original_dispatch(node)
+            return
+        if node.tag == "ib" and not debug_include_ib:
+            await original_dispatch(node)
+            return
         print(f"\n[DEBUG] Incoming node: <{node.tag}> attrs={node.attrs}")
         print("> ", end="", flush=True)
-    await original_dispatch(node)
-app.client.on_message = debug_dispatch
+        await original_dispatch(node)
+
+    app.client.on_message = debug_dispatch
 
 
 async def cli_input_loop(a: App) -> None:
     loop = asyncio.get_running_loop()
     while True:
         # Run standard python input() without blocking the async event loop
-        line = await loop.run_in_executor(None, input, "> ")
+        try:
+            line = await loop.run_in_executor(None, input, "> ")
+        except (EOFError, KeyboardInterrupt):
+            print("\nExiting...")
+            os._exit(0)
         line = line.strip()
         
         if not line:

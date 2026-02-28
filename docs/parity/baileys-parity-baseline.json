@@ -2,8 +2,8 @@
   "domains": {
     "messages-recv": {
       "status": "done",
-      "ratio": 0.8058,
-      "waton_lines": 1344,
+      "ratio": 0.8429,
+      "waton_lines": 1406,
       "baileys_lines": 1668
     },
     "app-state-sync": {
@@ -32,8 +32,8 @@
     },
     "process-message": {
       "status": "done",
-      "ratio": 1.0373,
-      "waton_lines": 695,
+      "ratio": 1.1343,
+      "waton_lines": 760,
       "baileys_lines": 670
     },
     "groups-api": {
@@ -56,8 +56,8 @@
     },
     "connection-core": {
       "status": "done",
-      "ratio": 0.8931,
-      "waton_lines": 1019,
+      "ratio": 0.9641,
+      "waton_lines": 1100,
       "baileys_lines": 1141
     }
   }

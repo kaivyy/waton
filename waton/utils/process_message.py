@@ -53,6 +53,34 @@ def _resolve_key_jid(message_key: dict[str, object] | None, fallback: str) -> st
     return fallback
 
 
+def _is_lid_user(jid: str | None) -> bool:
+    return bool(jid and (jid.endswith("@lid") or jid.endswith("@hosted.lid")))
+
+
+def _is_pn_user(jid: str | None) -> bool:
+    return bool(jid and (jid.endswith("@s.whatsapp.net") or jid.endswith("@hosted")))
+
+
+def _extract_sender_alt(node: BinaryNode, sender: str) -> str | None:
+    attrs = node.attrs
+    addressing_mode = attrs.get("addressing_mode") or ("lid" if _is_lid_user(sender) else "pn")
+    if addressing_mode == "lid":
+        candidate = (
+            attrs.get("participant_pn")
+            or attrs.get("sender_pn")
+            or attrs.get("peer_recipient_pn")
+            or attrs.get("recipient_pn")
+        )
+    else:
+        candidate = (
+            attrs.get("participant_lid")
+            or attrs.get("sender_lid")
+            or attrs.get("peer_recipient_lid")
+            or attrs.get("recipient_lid")
+        )
+    return candidate if isinstance(candidate, str) and candidate else None
+
+
 def extract_text_from_payload(
     payload: bytes,
 ) -> tuple[str | None, str | None, str | None, str | None, str | None, str]:
@@ -81,17 +109,54 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
         if enc_node and isinstance(enc_node.content, bytes):
             v = enc_node.attrs.get("v")
             enc_type = enc_node.attrs.get("type", "msg")
-            if v == "2" and client.creds:
+            if (v is None or v == "2") and client.creds:
                 repo = SignalRepository(client.creds, client.storage)
                 try:
                     from waton.client.messages import _unpad_random_max16
 
                     participant = node.attrs.get("participant") or node.attrs.get("from")
-                    if participant:
-                        decrypted = await repo.decrypt_message(participant, enc_type, enc_node.content)
-                        raw = _unpad_random_max16(decrypted)
+                    sender = participant if isinstance(participant, str) else None
+                    if sender:
+                        sender_alt = _extract_sender_alt(node, sender)
+                        if sender_alt and ((_is_pn_user(sender) and _is_lid_user(sender_alt)) or (_is_lid_user(sender) and _is_pn_user(sender_alt))):
+                            pn_jid = sender if _is_pn_user(sender) else sender_alt
+                            lid_jid = sender if _is_lid_user(sender) else sender_alt
+                            await repo.store_lid_pn_mapping(lid_jid, pn_jid)
+                            await repo.migrate_session(pn_jid, lid_jid)
+
+                        decryption_candidates: list[str] = []
+                        if _is_pn_user(sender):
+                            mapped_lid = await repo.get_lid_for_pn(sender)
+                            if mapped_lid:
+                                decryption_candidates.append(mapped_lid)
+                        decryption_candidates.append(sender)
+                        if _is_lid_user(sender):
+                            mapped_pn = await repo.get_pn_for_lid(sender)
+                            if mapped_pn:
+                                decryption_candidates.append(mapped_pn)
+
+                        tried: set[str] = set()
+                        last_error: Exception | None = None
+                        for candidate in decryption_candidates:
+                            if candidate in tried:
+                                continue
+                            tried.add(candidate)
+                            try:
+                                decrypted = await repo.decrypt_message(candidate, enc_type, enc_node.content)
+                                raw = _unpad_random_max16(decrypted)
+                                last_error = None
+                                break
+                            except Exception as decrypt_error:
+                                last_error = decrypt_error
+
+                        if last_error is not None and not raw:
+                            raise last_error
                 except Exception as e:
-                    logger.warning("Failed to decrypt message from %s: %r", participant, e)
+                    err_text = str(e).lower()
+                    if "old counter" in err_text:
+                        logger.debug("Failed to decrypt message from %s: %r", participant, e)
+                    else:
+                        logger.warning("Failed to decrypt message from %s: %r", participant, e)
 
     protocol: dict[str, object] | None = None
     content_type: str | None = None

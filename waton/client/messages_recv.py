@@ -94,6 +94,58 @@ def _status_from_receipt_type(receipt_type: str) -> str:
     return receipt_type
 
 
+def _is_lid_user(jid: str | None) -> bool:
+    return bool(jid and (jid.endswith("@lid") or jid.endswith("@hosted.lid")))
+
+
+def _is_pn_user(jid: str | None) -> bool:
+    return bool(jid and (jid.endswith("@s.whatsapp.net") or jid.endswith("@hosted")))
+
+
+def _extract_sender_alt(attrs: dict[str, Any], sender: str) -> str | None:
+    addressing_mode = attrs.get("addressing_mode") or ("lid" if _is_lid_user(sender) else "pn")
+    if addressing_mode == "lid":
+        candidate = (
+            attrs.get("participant_pn")
+            or attrs.get("sender_pn")
+            or attrs.get("peer_recipient_pn")
+            or attrs.get("recipient_pn")
+        )
+    else:
+        candidate = (
+            attrs.get("participant_lid")
+            or attrs.get("sender_lid")
+            or attrs.get("peer_recipient_lid")
+            or attrs.get("recipient_lid")
+        )
+    return candidate if isinstance(candidate, str) and candidate else None
+
+
+def _decryption_candidates(attrs: dict[str, Any]) -> list[str]:
+    sender = attrs.get("participant") or attrs.get("from")
+    if not isinstance(sender, str) or not sender:
+        return []
+
+    sender_alt = _extract_sender_alt(attrs, sender)
+    candidates: list[str] = []
+
+    if _is_pn_user(sender):
+        if isinstance(sender_alt, str) and _is_lid_user(sender_alt):
+            candidates.append(sender_alt)
+        candidates.append(sender)
+    elif _is_lid_user(sender):
+        candidates.append(sender)
+        if isinstance(sender_alt, str) and _is_pn_user(sender_alt):
+            candidates.append(sender_alt)
+    else:
+        candidates.append(sender)
+        if isinstance(sender_alt, str) and sender_alt:
+            candidates.append(sender_alt)
+
+    # De-duplicate while preserving order.
+    return list(dict.fromkeys(candidates))
+
+
 def _jid_userpart(value: str | None) -> str:
     if not value:
         return ""
@@ -148,11 +200,21 @@ def classify_incoming_node(node: BinaryNode) -> str:
 async def _extract_message_payload(node: BinaryNode, signal_repo: SignalRepository) -> bytes:
     enc_node = _get_child(node, "enc")
     if enc_node and isinstance(enc_node.content, (bytes, bytearray)):
-        jid = node.attrs.get("participant") or node.attrs.get("from")
         enc_type = enc_node.attrs.get("type", "msg")
-        if jid:
-            return await signal_repo.decrypt_message(jid, enc_type, bytes(enc_node.content))
-        if hasattr(signal_repo, "decrypt_message_node"):
+        ciphertext = bytes(enc_node.content)
+        candidates = _decryption_candidates(node.attrs)
+
+        last_error: Exception | None = None
+        for jid in candidates:
+            try:
+                return await signal_repo.decrypt_message(jid, enc_type, ciphertext)
+            except Exception as exc:  # pragma: no cover - candidate fallback
+                last_error = exc
+
+        if last_error is not None:
+            raise last_error
+
+        if not candidates and hasattr(signal_repo, "decrypt_message_node"):
             return await signal_repo.decrypt_message_node(node)
         return b""
 

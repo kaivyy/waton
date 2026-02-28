@@ -7,6 +7,7 @@ import base64
 import copy
 import hashlib
 import logging
+import time
 from typing import TYPE_CHECKING, Any
 
 from waton.client.messages_recv import (
@@ -112,9 +113,12 @@ class WAClient:
         self._pending_disconnect_reason: WatonConnectionError | None = None
         self._restart_attempts = 0
         self._explicit_disconnect = False
+        self._server_time_offset_ms = 0
+        self._requested_offline_batch = False
 
     async def connect(self) -> None:
         self._explicit_disconnect = False
+        self._requested_offline_batch = False
         self.creds = await self.storage.get_creds()
         if not self.creds:
             self.creds = init_auth_creds()
@@ -240,6 +244,7 @@ class WAClient:
             )
 
     async def _handle_binary_node(self, node: BinaryNode) -> None:
+        self._update_server_time_offset(node)
         msg_id = node.attrs.get("id")
         if msg_id:
             waiter = self._pending_queries.get(msg_id)
@@ -283,6 +288,9 @@ class WAClient:
                 return
 
         incoming_kind = classify_incoming_node(node)
+        if incoming_kind == "ib":
+            await self._handle_ib_node(node)
+
         if incoming_kind in {"message", "receipt", "notification", "call", "ack", "ib"}:
             await self._handle_incoming_node(node, incoming_kind)
 
@@ -761,6 +769,7 @@ class WAClient:
     async def _handle_success(self, node: BinaryNode) -> None:
         self.is_authenticated = True
         self._restart_attempts = 0
+        self._update_server_time_offset(node)
         if self._qr_task:
             self._qr_task.cancel()
             self._qr_task = None
@@ -772,7 +781,9 @@ class WAClient:
             self.creds.registered = True
             await self.storage.save_creds(self.creds)
 
+        await self._send_passive_iq("active")
         await self.on_connection_update(ConnectionEvent(status="open", qr=None))
+        await self._send_unified_session()
         self._start_keepalive()
 
     async def _emit_qr_loop(self, refs: list[str]) -> None:
@@ -793,6 +804,76 @@ class WAClient:
                 await asyncio.sleep(initial_timeout if idx == 0 else next_timeout)
             except asyncio.CancelledError:
                 return
+
+    async def _handle_ib_node(self, node: BinaryNode) -> None:
+        if self._requested_offline_batch:
+            return
+        if node.attrs.get("from") != S_WHATSAPP_NET:
+            return
+        if self._get_child(node, "offline_preview") is not None:
+            await self._send_offline_batch_request()
+
+    async def _send_passive_iq(self, mode: str) -> None:
+        if not self.is_connected or not self.noise:
+            return
+        try:
+            await self.send_node(
+                BinaryNode(
+                    tag="iq",
+                    attrs={"to": S_WHATSAPP_NET, "xmlns": "passive", "type": "set"},
+                    content=[BinaryNode(tag=mode, attrs={})],
+                )
+            )
+        except Exception as exc:  # pragma: no cover - network dependent
+            logger.debug("failed to send passive iq %s: %s", mode, exc)
+
+    def _get_unified_session_id(self) -> str:
+        offset_ms = 3 * 24 * 60 * 60 * 1000
+        now_ms = int(time.time() * 1000) + self._server_time_offset_ms
+        week_ms = 7 * 24 * 60 * 60 * 1000
+        return str((now_ms + offset_ms) % week_ms)
+
+    async def _send_unified_session(self) -> None:
+        if not self.is_connected or not self.noise:
+            return
+        try:
+            await self.send_node(
+                BinaryNode(
+                    tag="ib",
+                    attrs={},
+                    content=[BinaryNode(tag="unified_session", attrs={"id": self._get_unified_session_id()})],
+                )
+            )
+        except Exception as exc:  # pragma: no cover - network dependent
+            logger.debug("failed to send unified_session telemetry: %s", exc)
+
+    async def _send_offline_batch_request(self) -> None:
+        if not self.is_connected or not self.noise or self._requested_offline_batch:
+            return
+        try:
+            await self.send_node(
+                BinaryNode(
+                    tag="ib",
+                    attrs={},
+                    content=[BinaryNode(tag="offline_batch", attrs={"count": "100"})],
+                )
+            )
+            self._requested_offline_batch = True
+        except Exception as exc:  # pragma: no cover - network dependent
+            logger.debug("failed to send offline_batch request: %s", exc)
+
+    def _update_server_time_offset(self, node: BinaryNode) -> None:
+        t_value = node.attrs.get("t")
+        if t_value is None:
+            return
+        try:
+            parsed = int(str(t_value))
+        except ValueError:
+            return
+        if parsed <= 0:
+            return
+        local_ms = int(time.time() * 1000)
+        self._server_time_offset_ms = parsed * 1000 - local_ms
 
     def _start_keepalive(self) -> None:
         if self._keepalive_task:

@@ -1,5 +1,6 @@
 import asyncio
 from base64 import b64encode
+import logging
 from typing import Any
 
 import pytest
@@ -1063,6 +1064,201 @@ def test_process_incoming_message_decrypts_event_response_when_secret_exists() -
         assert parsed.event_response["decrypted"] is True
         assert parsed.event_response["decrypted_response"]["response_type"] == 1
         assert parsed.event_response["decrypted_response"]["timestamp_ms"] == 123
+
+    _run(_case())
+
+
+def test_process_incoming_message_old_counter_decrypt_logs_debug(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    async def _case() -> None:
+        async def _raise_old_counter(*args: object, **kwargs: object) -> bytes:
+            del args, kwargs
+            raise ValueError("signal decryption failed: message with old counter 4 / 0")
+
+        monkeypatch.setattr("waton.protocol.signal_repo.SignalRepository.decrypt_message", _raise_old_counter)
+        caplog.set_level(logging.DEBUG, logger="waton.utils.process_message")
+
+        fake_client = _FakeClient()
+        await process_incoming_message(
+            BinaryNode(
+                tag="message",
+                attrs={"id": "m-old-counter", "from": "999@s.whatsapp.net", "type": "text"},
+                content=[BinaryNode(tag="enc", attrs={"type": "msg", "v": "2"}, content=b"cipher")],
+            ),
+            fake_client,
+        )
+
+        warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
+        debugs = [r for r in caplog.records if r.levelno == logging.DEBUG]
+        assert warnings == []
+        assert any("old counter" in r.getMessage().lower() for r in debugs)
+
+    _run(_case())
+
+
+def test_process_incoming_message_other_decrypt_error_logs_warning(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    async def _case() -> None:
+        async def _raise_other(*args: object, **kwargs: object) -> bytes:
+            del args, kwargs
+            raise ValueError("signal decryption failed: invalid mac")
+
+        monkeypatch.setattr("waton.protocol.signal_repo.SignalRepository.decrypt_message", _raise_other)
+        caplog.set_level(logging.DEBUG, logger="waton.utils.process_message")
+
+        fake_client = _FakeClient()
+        await process_incoming_message(
+            BinaryNode(
+                tag="message",
+                attrs={"id": "m-invalid-mac", "from": "999@s.whatsapp.net", "type": "text"},
+                content=[BinaryNode(tag="enc", attrs={"type": "msg", "v": "2"}, content=b"cipher")],
+            ),
+            fake_client,
+        )
+
+        warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
+        assert any("invalid mac" in r.getMessage().lower() for r in warnings)
+
+    _run(_case())
+
+
+def test_process_incoming_message_uses_lid_mapping_for_pn_sender(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def _case() -> None:
+        plaintext = wa_pb2.Message()
+        plaintext.conversation = "hello from mapped lid"
+        padded = _write_random_pad_max16(plaintext.SerializeToString())
+
+        async def _mapped_lid(self: object, pn_jid: str) -> str | None:
+            del self
+            assert pn_jid == "999@s.whatsapp.net"
+            return "111@lid"
+
+        async def _decrypt(self: object, jid: str, type_str: str, ciphertext: bytes) -> bytes:
+            del self, ciphertext
+            assert jid == "111@lid"
+            assert type_str == "msg"
+            return padded
+
+        monkeypatch.setattr("waton.protocol.signal_repo.SignalRepository.get_lid_for_pn", _mapped_lid)
+        monkeypatch.setattr("waton.protocol.signal_repo.SignalRepository.decrypt_message", _decrypt)
+
+        fake_client = _FakeClient()
+        parsed = await process_incoming_message(
+            BinaryNode(
+                tag="message",
+                attrs={"id": "m-lid-map", "from": "999@s.whatsapp.net", "type": "text"},
+                content=[BinaryNode(tag="enc", attrs={"type": "msg", "v": "2"}, content=b"cipher")],
+            ),
+            fake_client,
+        )
+        assert parsed.text == "hello from mapped lid"
+
+    _run(_case())
+
+
+def test_process_incoming_message_decrypts_enc_when_v_attr_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def _case() -> None:
+        plaintext = wa_pb2.Message()
+        plaintext.conversation = "works without enc.v"
+        padded = _write_random_pad_max16(plaintext.SerializeToString())
+
+        async def _decrypt(self: object, jid: str, type_str: str, ciphertext: bytes) -> bytes:
+            del self, ciphertext
+            assert jid == "999@s.whatsapp.net"
+            assert type_str == "msg"
+            return padded
+
+        monkeypatch.setattr("waton.protocol.signal_repo.SignalRepository.decrypt_message", _decrypt)
+
+        fake_client = _FakeClient()
+        parsed = await process_incoming_message(
+            BinaryNode(
+                tag="message",
+                attrs={"id": "m-no-v", "from": "999@s.whatsapp.net", "type": "text"},
+                content=[BinaryNode(tag="enc", attrs={"type": "msg"}, content=b"cipher")],
+            ),
+            fake_client,
+        )
+        assert parsed.text == "works without enc.v"
+
+    _run(_case())
+
+
+def test_process_incoming_message_falls_back_to_pn_after_lid_decrypt_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def _case() -> None:
+        plaintext = wa_pb2.Message()
+        plaintext.conversation = "fallback works"
+        padded = _write_random_pad_max16(plaintext.SerializeToString())
+        attempts: list[str] = []
+
+        async def _mapped_lid(self: object, pn_jid: str) -> str | None:
+            del self
+            assert pn_jid == "999@s.whatsapp.net"
+            return "111@lid"
+
+        async def _decrypt(self: object, jid: str, type_str: str, ciphertext: bytes) -> bytes:
+            del self, type_str, ciphertext
+            attempts.append(jid)
+            if jid == "111@lid":
+                raise ValueError("No active session for 111@lid, cannot decrypt 'msg'")
+            return padded
+
+        monkeypatch.setattr("waton.protocol.signal_repo.SignalRepository.get_lid_for_pn", _mapped_lid)
+        monkeypatch.setattr("waton.protocol.signal_repo.SignalRepository.decrypt_message", _decrypt)
+
+        fake_client = _FakeClient()
+        parsed = await process_incoming_message(
+            BinaryNode(
+                tag="message",
+                attrs={"id": "m-lid-fallback", "from": "999@s.whatsapp.net", "type": "text"},
+                content=[BinaryNode(tag="enc", attrs={"type": "msg", "v": "2"}, content=b"cipher")],
+            ),
+            fake_client,
+        )
+        assert attempts == ["111@lid", "999@s.whatsapp.net"]
+        assert parsed.text == "fallback works"
+
+    _run(_case())
+
+
+def test_process_incoming_message_stores_mapping_from_recipient_pn(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def _case() -> None:
+        plaintext = wa_pb2.Message()
+        plaintext.conversation = "store mapping from recipient pn"
+        padded = _write_random_pad_max16(plaintext.SerializeToString())
+
+        async def _decrypt(self: object, jid: str, type_str: str, ciphertext: bytes) -> bytes:
+            del self, jid, type_str, ciphertext
+            return padded
+
+        monkeypatch.setattr("waton.protocol.signal_repo.SignalRepository.decrypt_message", _decrypt)
+
+        fake_client = _FakeClient()
+        await process_incoming_message(
+            BinaryNode(
+                tag="message",
+                attrs={
+                    "id": "m-map-recipient",
+                    "from": "179981124669483:0@lid",
+                    "recipient_pn": "628980145555@s.whatsapp.net",
+                    "type": "text",
+                },
+                content=[BinaryNode(tag="enc", attrs={"type": "msg", "v": "2"}, content=b"cipher")],
+            ),
+            fake_client,
+        )
+
+        lid_mapping = (fake_client.creds.additional_data or {}).get("lid_mapping", {})
+        assert lid_mapping.get("lid_to_pn_user", {}).get("179981124669483") == "628980145555"
+        assert lid_mapping.get("pn_to_lid_user", {}).get("628980145555") == "179981124669483"
 
     _run(_case())
 

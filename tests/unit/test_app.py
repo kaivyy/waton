@@ -1,5 +1,7 @@
 import asyncio
 
+import pytest
+
 from waton.app.app import App
 from waton.app.context import Context
 from waton.app.middleware import MiddlewarePipeline
@@ -89,3 +91,32 @@ def test_app_exposes_community_and_newsletter_clients() -> None:
     assert app.communities is not None
     assert app.newsletter is not None
     _run(app.media.http.aclose())
+
+
+def test_app_dispatch_falls_back_when_message_parse_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def _case() -> None:
+        app = App(storage_path=":memory:")
+        seen: list[tuple[str, str]] = []
+
+        @app.message()
+        async def on_message(ctx: Context) -> None:
+            seen.append((ctx.message.from_jid, ctx.message.message_type))
+
+        async def _raise_parse_error(node: BinaryNode, client: object) -> object:
+            del node, client
+            raise ValueError("broken parser")
+
+        monkeypatch.setattr("waton.app.app.process_incoming_message", _raise_parse_error)
+
+        await app._dispatch_message(
+            BinaryNode(
+                tag="message",
+                attrs={"id": "m-fallback", "from": "628111111111@s.whatsapp.net", "type": "text"},
+                content=b"broken",
+            )
+        )
+
+        assert seen == [("628111111111@s.whatsapp.net", "text")]
+        await app.media.http.aclose()
+
+    _run(_case())

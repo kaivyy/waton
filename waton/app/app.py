@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections.abc import Awaitable, Callable
 
 from waton.app import filters as filters_module
@@ -24,6 +25,7 @@ from waton.utils.process_message import process_incoming_message
 
 
 ReadyCallback = Callable[["App"], Awaitable[None] | None]
+logger = logging.getLogger(__name__)
 
 
 class App:
@@ -88,32 +90,42 @@ class App:
         if node.tag != "message":
             return
 
-        parsed = await process_incoming_message(node, self.client)
-        message = Message(
-            id=parsed.id,
-            from_jid=parsed.from_jid,
-            participant=parsed.participant,
-            text=parsed.text,
-            media_url=parsed.media_url,
-            reaction=parsed.reaction,
-            reaction_target_id=parsed.reaction_target_id,
-            destination_jid=parsed.destination_jid,
-            protocol_type=parsed.protocol_type,
-            protocol_code=parsed.protocol_code,
-            target_message_id=parsed.target_message_id,
-            edited_text=parsed.edited_text,
-            ephemeral_expiration=parsed.ephemeral_expiration,
-            history_sync_type=parsed.history_sync_type,
-            app_state_key_ids=parsed.app_state_key_ids,
-            encrypted_reaction=parsed.encrypted_reaction,
-            poll_update=parsed.poll_update,
-            event_response=parsed.event_response,
-            content_type=parsed.content_type,
-            content=parsed.content,
-            message_secret_b64=parsed.message_secret_b64,
-            raw_node=node,
-            message_type=parsed.message_type,
-        )
+        try:
+            parsed = await process_incoming_message(node, self.client)
+            message = Message(
+                id=parsed.id,
+                from_jid=parsed.from_jid,
+                participant=parsed.participant,
+                text=parsed.text,
+                media_url=parsed.media_url,
+                reaction=parsed.reaction,
+                reaction_target_id=parsed.reaction_target_id,
+                destination_jid=parsed.destination_jid,
+                protocol_type=parsed.protocol_type,
+                protocol_code=parsed.protocol_code,
+                target_message_id=parsed.target_message_id,
+                edited_text=parsed.edited_text,
+                ephemeral_expiration=parsed.ephemeral_expiration,
+                history_sync_type=parsed.history_sync_type,
+                app_state_key_ids=parsed.app_state_key_ids,
+                encrypted_reaction=parsed.encrypted_reaction,
+                poll_update=parsed.poll_update,
+                event_response=parsed.event_response,
+                content_type=parsed.content_type,
+                content=parsed.content,
+                message_secret_b64=parsed.message_secret_b64,
+                raw_node=node,
+                message_type=parsed.message_type,
+            )
+        except Exception as exc:  # pragma: no cover - defensive fallback
+            logger.warning("failed to parse incoming message %s: %s", node.attrs.get("id"), exc)
+            message = Message(
+                id=node.attrs.get("id", ""),
+                from_jid=node.attrs.get("from", ""),
+                participant=node.attrs.get("participant"),
+                raw_node=node,
+                message_type=node.attrs.get("type", "unknown"),
+            )
         ctx = Context(message=message, app=self)
 
         await self.middleware.run(ctx, self.router.dispatch)

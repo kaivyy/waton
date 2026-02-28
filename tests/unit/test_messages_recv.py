@@ -58,6 +58,38 @@ async def test_decrypt_and_normalize_enc_message(monkeypatch: pytest.MonkeyPatch
 
 
 @pytest.mark.asyncio
+async def test_decrypt_and_normalize_enc_message_falls_back_lid_to_pn() -> None:
+    attempts: list[str] = []
+
+    class FakeRepo:
+        async def decrypt_message(self, jid: str, type_str: str, ciphertext: bytes) -> bytes:
+            attempts.append(jid)
+            assert type_str == "msg"
+            assert ciphertext == b"ciphertext"
+            if jid == "179981124669483:0@lid":
+                raise ValueError("No active session for 179981124669483:0@lid, cannot decrypt 'msg'")
+            msg = wa_pb2.Message()
+            msg.conversation = "fallback text"
+            return msg.SerializeToString()
+
+    enc_node = BinaryNode(
+        tag="message",
+        attrs={
+            "from": "179981124669483:0@lid",
+            "recipient_pn": "628980145555@s.whatsapp.net",
+            "id": "m-1b",
+            "t": "124",
+        },
+        content=[BinaryNode(tag="enc", attrs={"type": "msg", "v": "2"}, content=b"ciphertext")],
+    )
+    event = await decode_incoming_message_node(enc_node, FakeRepo())
+    assert attempts == ["179981124669483:0@lid", "628980145555@s.whatsapp.net"]
+    assert event["type"] == "messages.upsert"
+    assert event["message"]["id"] == "m-1b"
+    assert event["message"]["text"] == "fallback text"
+
+
+@pytest.mark.asyncio
 async def test_decode_plain_device_sent_message_fallback() -> None:
     class FakeRepo:
         async def decrypt_message(self, jid: str, type_str: str, ciphertext: bytes) -> bytes:
