@@ -120,3 +120,37 @@ def test_app_dispatch_falls_back_when_message_parse_fails(monkeypatch: pytest.Mo
         await app.media.http.aclose()
 
     _run(_case())
+
+
+def test_app_dispatch_fallback_prefers_participant_as_sender_when_present(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def _case() -> None:
+        app = App(storage_path=":memory:")
+        seen: list[tuple[str, str, str | None]] = []
+
+        @app.message()
+        async def on_message(ctx: Context) -> None:
+            seen.append((ctx.message.from_jid, ctx.message.message_type, ctx.message.participant))
+
+        async def _raise_parse_error(node: BinaryNode, client: object) -> object:
+            del node, client
+            raise ValueError("broken parser")
+
+        monkeypatch.setattr("waton.app.app.process_incoming_message", _raise_parse_error)
+
+        await app._dispatch_message(
+            BinaryNode(
+                tag="message",
+                attrs={
+                    "id": "m-fallback-participant",
+                    "from": "120363999999999999@g.us",
+                    "participant": "628111111111@s.whatsapp.net",
+                    "type": "text",
+                },
+                content=b"broken",
+            )
+        )
+
+        assert seen == [("628111111111@s.whatsapp.net", "text", "628111111111@s.whatsapp.net")]
+        await app.media.http.aclose()
+
+    _run(_case())

@@ -104,21 +104,28 @@ def _is_pn_user(jid: str | None) -> bool:
 
 def _extract_sender_alt(attrs: dict[str, Any], sender: str) -> str | None:
     addressing_mode = attrs.get("addressing_mode") or ("lid" if _is_lid_user(sender) else "pn")
-    if addressing_mode == "lid":
+
+    def _pick_pn() -> str | None:
         candidate = (
             attrs.get("participant_pn")
             or attrs.get("sender_pn")
             or attrs.get("peer_recipient_pn")
             or attrs.get("recipient_pn")
         )
-    else:
+        return candidate if isinstance(candidate, str) and candidate else None
+
+    def _pick_lid() -> str | None:
         candidate = (
             attrs.get("participant_lid")
             or attrs.get("sender_lid")
             or attrs.get("peer_recipient_lid")
             or attrs.get("recipient_lid")
         )
-    return candidate if isinstance(candidate, str) and candidate else None
+        return candidate if isinstance(candidate, str) and candidate else None
+
+    if addressing_mode == "lid":
+        return _pick_pn() or _pick_lid()
+    return _pick_lid() or _pick_pn()
 
 
 def _decryption_candidates(attrs: dict[str, Any]) -> list[str]:

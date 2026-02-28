@@ -396,7 +396,8 @@ class WAClient:
                         creds_changed = True
             if stored_keys:
                 additional_data["app_state_sync_keys"] = stored_keys
-                event["app_state_sync_keys_saved"] = len(stored_keys)
+                if creds_changed:
+                    event["app_state_sync_keys_saved"] = len(stored_keys)
 
         if event_type == "messages.history_sync":
             processed = list(self.creds.processed_history_messages or [])

@@ -10,6 +10,7 @@ from waton.app import filters as filters_module
 from waton.app.context import Context
 from waton.app.middleware import MiddlewarePipeline
 from waton.app.router import Router
+from waton.client.business import BusinessAPI
 from waton.client.chats import ChatsAPI
 from waton.client.client import WAClient
 from waton.client.communities import CommunitiesAPI
@@ -40,6 +41,7 @@ class App:
         self.groups = GroupsAPI(self.client)
         self.communities = CommunitiesAPI(self.client)
         self.newsletter = NewsletterAPI(self.client)
+        self.business = BusinessAPI(self.client)
         self.media = MediaManager()
         self.presence = PresenceAPI(self.client)
 
@@ -119,10 +121,12 @@ class App:
             )
         except Exception as exc:  # pragma: no cover - defensive fallback
             logger.warning("failed to parse incoming message %s: %s", node.attrs.get("id"), exc)
+            participant = node.attrs.get("participant") if isinstance(node.attrs.get("participant"), str) else None
+            fallback_from = participant or node.attrs.get("from", "")
             message = Message(
                 id=node.attrs.get("id", ""),
-                from_jid=node.attrs.get("from", ""),
-                participant=node.attrs.get("participant"),
+                from_jid=fallback_from,
+                participant=participant,
                 raw_node=node,
                 message_type=node.attrs.get("type", "unknown"),
             )

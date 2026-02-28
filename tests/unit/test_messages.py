@@ -1227,6 +1227,46 @@ def test_process_incoming_message_falls_back_to_pn_after_lid_decrypt_failure(
     _run(_case())
 
 
+def test_process_incoming_message_falls_back_to_recipient_pn_when_addressing_mode_is_pn(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def _case() -> None:
+        plaintext = wa_pb2.Message()
+        plaintext.conversation = "fallback via recipient pn"
+        padded = _write_random_pad_max16(plaintext.SerializeToString())
+        attempts: list[str] = []
+
+        async def _decrypt(self: object, jid: str, type_str: str, ciphertext: bytes) -> bytes:
+            del self, type_str, ciphertext
+            attempts.append(jid)
+            if jid == "179981124669483:0@lid":
+                raise ValueError("No active session for 179981124669483:0@lid, cannot decrypt 'msg'")
+            return padded
+
+        monkeypatch.setattr("waton.protocol.signal_repo.SignalRepository.decrypt_message", _decrypt)
+
+        fake_client = _FakeClient()
+        parsed = await process_incoming_message(
+            BinaryNode(
+                tag="message",
+                attrs={
+                    "id": "m-map-recipient-fallback",
+                    "from": "179981124669483:0@lid",
+                    "addressing_mode": "pn",
+                    "recipient_pn": "628980145555@s.whatsapp.net",
+                    "type": "text",
+                },
+                content=[BinaryNode(tag="enc", attrs={"type": "msg", "v": "2"}, content=b"cipher")],
+            ),
+            fake_client,
+        )
+
+        assert attempts == ["179981124669483:0@lid", "628980145555:0@s.whatsapp.net"]
+        assert parsed.text == "fallback via recipient pn"
+
+    _run(_case())
+
+
 def test_process_incoming_message_stores_mapping_from_recipient_pn(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
