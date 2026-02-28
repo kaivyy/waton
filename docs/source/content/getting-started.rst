@@ -22,6 +22,38 @@ For local development:
     pip install -e .[dev]
     maturin develop
 
+Fastest bot start (simple callback API)
+----------------------------------------
+
+For the most minimal import-first workflow:
+
+.. code-block:: python
+
+    from waton import simple
+
+    client = simple(storage_path="my_session.db")
+
+    @client.on_message
+    async def on_message(msg):
+        if msg.text:
+            await msg.reply(f"Echo: {msg.text}")
+
+    @client.on_ready
+    async def on_ready(bot):
+        print("ready")
+
+    if __name__ == "__main__":
+        client.run()
+
+``msg`` exposes ergonomic fields/methods:
+
+- ``msg.id``
+- ``msg.text``
+- ``msg.from_jid``
+- ``msg.sender``
+- ``await msg.reply(text)``
+- ``await msg.react(emoji)``
+
 First connection test
 ---------------------
 

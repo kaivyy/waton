@@ -28,6 +28,13 @@ Open in browser:
 
     http://127.0.0.1:8080
 
+Security note
+-------------
+
+Keep the dashboard bound to ``127.0.0.1`` for local use. If you bind to
+non-local interfaces, place it behind a trusted reverse proxy/auth layer
+before exposing it.
+
 API endpoints
 -------------
 

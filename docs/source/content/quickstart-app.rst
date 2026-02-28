@@ -1,7 +1,8 @@
 Quickstart: App (Recommended)
 =============================
 
-This is the fastest way to build a WhatsApp bot with Waton.
+This page covers the high-level ``App`` framework. For the shortest callback-based
+setup, you can start with ``from waton import simple`` in the Getting Started page.
 
 Prerequisites
 -------------

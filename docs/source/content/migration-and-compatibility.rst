@@ -28,6 +28,18 @@ Message/event compatibility
 Waton supports a broad message/event model, including encrypted add-ons for
 poll/event responses. These features rely on internal message-secret persistence.
 
+API compatibility note
+----------------------
+
+A new additive simple callback API is available:
+
+- ``from waton import simple``
+- ``client = simple(storage_path=...)``
+- ``@client.on_message`` and ``@client.on_ready``
+
+This does not replace existing APIs. ``App`` and ``WAClient`` remain supported,
+so current integrations can keep running without migration pressure.
+
 Migration checklist for apps
 ----------------------------
 

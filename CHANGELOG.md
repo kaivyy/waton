@@ -8,6 +8,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New simple callback API surface for drop-in usage: `from waton import simple` with `SimpleClient` and `SimpleIncomingMessage` wrappers for minimal `on_message`/`on_ready` flows.
+- New unit coverage for simple API behavior in `tests/unit/test_simple_api.py`.
+- New isolated browser dashboard devtool at `tools/dashboard/` with Flask API + HTML UI for real WhatsApp browser testing (`/api/connect`, `/api/disconnect`, `/api/connection`, `/api/qr`, `/api/events`, `/api/send`) without touching `waton/*` runtime code.
+- New unit coverage for dashboard state and API validation in `tests/unit/test_dashboard.py`.
+- Read the Docs foundation for Waton:
+  - `.readthedocs.yaml`
+  - Sphinx config at `docs/source/conf.py`
+  - initial docs pages under `docs/source/content/` (`getting-started`, `testing`, `browser-dashboard`, `readthedocs`).
+- Windows troubleshooting guidance for editable install file-lock failure (`os error 32` on `waton/_crypto.pyd`) in README and docs testing guide.
+- WhatsApp Web-style dashboard layout with chat list pane (left) and active message thread pane (right), backed by real runtime chat APIs (`/api/chats`, `/api/chats/<jid>/messages`, `/api/chats/<jid>/read`).
+
+### Changed
+- README and Read the Docs pages now include `waton.simple` onboarding path (`getting-started`, `quickstart-app`, `app-framework-reference`, and migration/readthedocs operational notes).
+- Incoming E2EE decryption path in `waton/utils/process_message.py` now applies
+  PNâ†”LID candidate fallback (Baileys-style) instead of single-JID decrypt attempt.
+- `SignalRepository` now supports lightweight PNâ†”LID mapping helpers and
+  session migration primitives used during incoming decrypt recovery.
+- Browser dashboard composer now uses a WhatsApp-Web-style footer layout with
+  action icons, autosize input box, and cleaner send ergonomics for browser tests.
+- Dashboard thread rendering now keeps manual scroll position unless new
+  messages arrive, so long chat history remains readable while polling.
+- `waton/client/client.py` now performs post-login bootstrap actions aligned with
+  Baileys flow: sending passive-active IQ and `ib/unified_session` telemetry after
+  login success.
+- `waton/client/client.py` now handles `ib/offline_preview` by requesting
+  `ib/offline_batch` once per connection, with source guard for
+  `from=s.whatsapp.net`.
+- Unified-session ID generation now uses tracked server-time offset from stanza
+  timestamps for deterministic session telemetry IDs.
+
+
+### Fixed
+- CLI receive flow no longer silently drops inbound messages when parse/decrypt
+  edges occur; undecryptable text stanzas are surfaced explicitly and fallback
+  routing remains active.
+- Reduced false-positive noise by downgrading known stale-counter decrypt
+  failures (`old counter`) to debug-level logging.
+- Incoming decrypt path now accepts encrypted message stanzas where `enc.v`
+  is omitted (treated same as legacy v2 path), preventing false
+  `[undecrypted message]` results on valid incoming text envelopes.
+- Dashboard incoming chat stream now correctly normalizes PN/LID/device JIDs and
+  no longer drops updates due background handler attribute mismatches, so new
+  messages appear in left chat list and right thread view.
+- Dashboard incoming routing now handles MD envelopes where `from` is self JID
+  by inferring peer JID from alternate stanza attrs (`participant_*`, `sender_*`,
+  `recipient`), preventing inbound messages from being mis-threaded into self-chat.
+- Added dashboard troubleshooting endpoint `GET /api/debug/summary` for quick
+  visibility into connection state, cached chats, and recent node/event tails.
+- Added unit coverage in `tests/unit/test_client.py` for post-login bootstrap
+  parity behavior (`active` passive IQ + unified session), offline-preview
+  handling guard/deduplication, and deterministic server-time offset usage.
+- Refreshed `docs/parity/baileys-parity-baseline.json` from current code via
+  `tools/parity/scan_baileys_parity.py`; all tracked domains remain `done`
+  including `connection-core`, `messages-recv`, and `process-message`.
+
+## [0.1.1] - 2026-02-27
+
+### Added
 - One-command release preflight CLI at `scripts/preflight_check.py` that runs
   tests, optional lint/typecheck, parity scan, and optional live check in a
   consistent gate flow.

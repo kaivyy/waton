@@ -86,7 +86,39 @@ python -m maturin sdist --manifest-path Cargo.toml --out .tmp-sdist
 
 ## How To Use
 
-Waton provides both a high-level `App` interface (recommended) and a low-level `WAClient` interface. 
+Waton now provides a **simple callback API** for fastest onboarding, plus the existing high-level `App` and low-level `WAClient` interfaces.
+
+### 0. Simple Callback API (Drop-in Easiest)
+
+If you want the shortest path from import to running bot:
+
+```python
+from waton import simple
+
+client = simple(storage_path="my_session.db")
+
+@client.on_message
+async def on_message(msg):
+    if msg.text:
+        await msg.reply(f"Echo: {msg.text}")
+
+@client.on_ready
+async def on_ready(bot):
+    print("Waton simple client is connected")
+
+if __name__ == "__main__":
+    client.run()
+```
+
+`msg` provides:
+- `msg.id`
+- `msg.text`
+- `msg.from_jid`
+- `msg.sender`
+- `await msg.reply(text)`
+- `await msg.react(emoji)`
+
+Use this mode when you want minimal boilerplate while keeping the same core runtime.
 
 ### 1. Interactive CLI Chat (Easiest Way to Test)
 
@@ -135,6 +167,7 @@ python -m tools.dashboard.server --host 127.0.0.1 --port 8080
 
 Open `http://127.0.0.1:8080`.
 
+- Security note: keep dashboard bound to local host (`127.0.0.1`) unless protected by a trusted reverse proxy/auth layer.
 - The dashboard is isolated in `tools/dashboard/` and does not modify core runtime modules.
 - It uses real WhatsApp connection flow (QR pairing + real send API).
 - Status will show:

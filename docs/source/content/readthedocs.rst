@@ -43,7 +43,7 @@ Before release/tag:
 3. Build docs locally and confirm success.
 4. Push branch/tag and verify RTD build result.
 5. Open published docs and smoke-test key pages:
-   - Getting Started
+   - Getting Started (including ``waton.simple`` snippet)
    - Quickstart App
    - Event Model
    - Browser Dashboard

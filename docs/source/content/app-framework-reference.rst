@@ -85,6 +85,7 @@ Notes
 -----
 
 - ``App`` is the easiest way to build handlers quickly.
+- For an even simpler callback surface, use ``from waton import simple``.
 - For full protocol/event control, attach to ``WAClient`` directly.
 
 Next steps
