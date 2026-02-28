@@ -36,6 +36,9 @@ class BusinessAPI:
             "description": str(profile.attrs.get("description") or ""),
             "email": str(profile.attrs.get("email") or ""),
             "category": str(profile.attrs.get("category") or ""),
+            "address": str(profile.attrs.get("address") or ""),
+            "website": str(profile.attrs.get("website") or ""),
+            "hours": str(profile.attrs.get("hours") or ""),
         }
 
     async def update_business_profile(
@@ -46,6 +49,9 @@ class BusinessAPI:
         description: str | None = None,
         email: str | None = None,
         category: str | None = None,
+        address: str | None = None,
+        website: str | None = None,
+        hours: str | None = None,
     ) -> None:
         normalized_jid = self._normalize_jid(jid)
         attrs: dict[str, str] = {"jid": normalized_jid}
@@ -57,6 +63,12 @@ class BusinessAPI:
             attrs["email"] = email
         if category is not None:
             attrs["category"] = category
+        if address is not None:
+            attrs["address"] = address
+        if website is not None:
+            attrs["website"] = website
+        if hours is not None:
+            attrs["hours"] = hours
 
         await self.client.query(
             BinaryNode(
@@ -68,6 +80,56 @@ class BusinessAPI:
                     "id": self._generate_id(),
                 },
                 content=[BinaryNode(tag="business_profile", attrs=attrs)],
+            )
+        )
+
+    async def business_catalog(self, jid: str) -> dict[str, str]:
+        normalized_jid = self._normalize_jid(jid)
+        result = await self.client.query(
+            BinaryNode(
+                tag="iq",
+                attrs={
+                    "to": normalized_jid,
+                    "type": "get",
+                    "xmlns": "w:biz",
+                    "id": self._generate_id(),
+                },
+                content=[BinaryNode(tag="catalog", attrs={"jid": normalized_jid})],
+            )
+        )
+        catalog = self._find_child(result, "catalog")
+        if catalog is None:
+            raise ValueError("business catalog response missing catalog node")
+        return {
+            "jid": str(catalog.attrs.get("jid") or normalized_jid),
+            "status": str(catalog.attrs.get("status") or ""),
+        }
+
+    async def update_order_status(self, jid: str, *, order_id: str, status: str) -> None:
+        normalized_jid = self._normalize_jid(jid)
+        if not isinstance(order_id, str) or not order_id.strip():
+            raise ValueError("order_id must be a non-empty string")
+        if not isinstance(status, str) or not status.strip():
+            raise ValueError("status must be a non-empty string")
+
+        await self.client.query(
+            BinaryNode(
+                tag="iq",
+                attrs={
+                    "to": normalized_jid,
+                    "type": "set",
+                    "xmlns": "w:biz",
+                    "id": self._generate_id(),
+                },
+                content=[
+                    BinaryNode(
+                        tag="order",
+                        attrs={
+                            "id": order_id.strip(),
+                            "status": status.strip(),
+                        },
+                    )
+                ],
             )
         )
 
