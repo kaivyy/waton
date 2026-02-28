@@ -89,6 +89,22 @@ def scan_parity(waton_root: str, baileys_src: str) -> dict:
             [waton / "client" / "newsletter.py"],
             [baileys / "Socket" / "newsletter.ts"],
         ),
+        "business-api": _domain_status(
+            [waton / "client" / "business.py"],
+            [baileys / "Socket" / "business.ts", baileys / "Utils" / "business.ts"],
+        ),
+        "usync-api": _domain_status(
+            [waton / "client" / "usync.py"],
+            [baileys / "WAUSync" / "USyncQuery.ts", baileys / "WAUSync" / "Protocols" / "USyncContactProtocol.ts", baileys / "WAUSync" / "Protocols" / "USyncStatusProtocol.ts", baileys / "WAUSync" / "Protocols" / "UsyncLIDProtocol.ts", baileys / "WAUSync" / "Protocols" / "USyncDisappearingModeProtocol.ts"],
+        ),
+        "mex-api": _domain_status(
+            [waton / "client" / "mex.py"],
+            [baileys / "Socket" / "mex.ts"],
+        ),
+        "wam-protocol": _domain_status(
+            [waton / "protocol" / "wam.py"],
+            [baileys / "WAM" / "encode.ts", baileys / "WAM" / "BinaryInfo.ts"],
+        ),
         "connection-core": _domain_status(
             [waton / "client" / "client.py"],
             [baileys / "Socket" / "socket.ts"],

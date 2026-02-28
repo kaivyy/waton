@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New targeted `BusinessAPI` surface (`app.business`) for business profile fetch/update operations.
+- New `MexAPI` minimal wrapper for `w:mex` query envelopes and normalized attrs response.
+- New practical `waton.protocol.wam.encode_wam_event(...)` subset for deterministic telemetry framing.
+- Expanded `USyncQuery` protocol coverage with `contact/status/lid/disappearing_mode` query support.
+- New unit coverage for business/usync/mex/wam in `tests/unit/test_business.py`, `tests/unit/test_usync.py`, `tests/unit/test_mex.py`, and `tests/unit/test_wam.py`.
 - New simple callback API surface for drop-in usage: `from waton import simple` with `SimpleClient` and `SimpleIncomingMessage` wrappers for minimal `on_message`/`on_ready` flows.
 - New unit coverage for simple API behavior in `tests/unit/test_simple_api.py`.
 - New isolated browser dashboard devtool at `tools/dashboard/` with Flask API + HTML UI for real WhatsApp browser testing (`/api/connect`, `/api/disconnect`, `/api/connection`, `/api/qr`, `/api/events`, `/api/send`) without touching `waton/*` runtime code.
@@ -20,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WhatsApp Web-style dashboard layout with chat list pane (left) and active message thread pane (right), backed by real runtime chat APIs (`/api/chats`, `/api/chats/<jid>/messages`, `/api/chats/<jid>/read`).
 
 ### Changed
+- README and Read the Docs pages now include `waton.simple` onboarding path (`getting-started`, `quickstart-app`, `app-framework-reference`, and migration/readthedocs operational notes), plus simple API guardrails (async handler requirement and non-empty `to_jid`).
+- Read the Docs references now include BusinessAPI, MexAPI, expanded USync protocol usage, and WAM practical subset notes.
 - README and Read the Docs pages now include `waton.simple` onboarding path (`getting-started`, `quickstart-app`, `app-framework-reference`, and migration/readthedocs operational notes).
 - Incoming E2EE decryption path in `waton/utils/process_message.py` now applies
   PNâ†”LID candidate fallback (Baileys-style) instead of single-JID decrypt attempt.

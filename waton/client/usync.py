@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class USyncQuery:
-    """Query WhatsApp server for user device information."""
+    """Query WhatsApp server for user device information and selected profile protocols."""
 
     def __init__(self, client: WAClient):
         self.client = client
@@ -27,25 +27,39 @@ class USyncQuery:
         if not jids:
             return {}
 
-        # Build usync query node
+        query_node = self._build_usync_query(jids=jids, protocols=["devices"], context="message")
+        result = await self.client.query(query_node)
+        return self._parse_device_result(result)
+
+    async def get_contact_status_lid_and_disappearing_mode(self, jids: list[str]) -> dict[str, dict[str, dict[str, str]]]:
+        if not jids:
+            return {}
+
+        query_node = self._build_usync_query(
+            jids=jids,
+            protocols=["contact", "status", "lid", "disappearing_mode"],
+            context="interactive",
+        )
+        result = await self.client.query(query_node)
+        return self._parse_multi_protocol_result(result, ["contact", "status", "lid", "disappearing_mode"])
+
+    def _build_usync_query(self, *, jids: list[str], protocols: list[str], context: str) -> BinaryNode:
         user_nodes = []
         for jid in jids:
             decoded = jid_decode(jid)
             if not decoded:
                 continue
-            # Normalize to user JID without device
             user_jid = jid_encode(decoded.user, decoded.server)
-            user_nodes.append(
-                BinaryNode(
-                    tag="user",
-                    attrs={"jid": user_jid},
-                )
-            )
+            user_nodes.append(BinaryNode(tag="user", attrs={"jid": user_jid}))
 
-        if not user_nodes:
-            return {}
+        protocol_nodes: list[BinaryNode] = []
+        for protocol in protocols:
+            if protocol == "devices":
+                protocol_nodes.append(BinaryNode(tag="devices", attrs={"version": "2"}))
+            else:
+                protocol_nodes.append(BinaryNode(tag=protocol, attrs={}))
 
-        query_node = BinaryNode(
+        return BinaryNode(
             tag="iq",
             attrs={
                 "to": S_WHATSAPP_NET,
@@ -60,31 +74,44 @@ class USyncQuery:
                         "mode": "query",
                         "last": "true",
                         "index": "0",
-                        "context": "message",
+                        "context": context,
                     },
                     content=[
-                        BinaryNode(
-                            tag="query",
-                            attrs={},
-                            content=[
-                                BinaryNode(
-                                    tag="devices",
-                                    attrs={"version": "2"},
-                                )
-                            ],
-                        ),
-                        BinaryNode(
-                            tag="list",
-                            attrs={},
-                            content=user_nodes,
-                        ),
+                        BinaryNode(tag="query", attrs={}, content=protocol_nodes),
+                        BinaryNode(tag="list", attrs={}, content=user_nodes),
                     ],
                 )
             ],
         )
 
-        result = await self.client.query(query_node)
-        return self._parse_device_result(result)
+    def _parse_multi_protocol_result(self, node: BinaryNode, protocols: list[str]) -> dict[str, dict[str, dict[str, str]]]:
+        result: dict[str, dict[str, dict[str, str]]] = {}
+
+        usync_node = self._get_child(node, "usync")
+        if not usync_node:
+            return result
+
+        list_node = self._get_child(usync_node, "list")
+        if not list_node or not isinstance(list_node.content, list):
+            return result
+
+        for user_node in list_node.content:
+            if user_node.tag != "user":
+                continue
+            user_jid = user_node.attrs.get("jid")
+            if not user_jid:
+                continue
+
+            row: dict[str, dict[str, str]] = {}
+            for protocol in protocols:
+                protocol_node = self._get_child(user_node, protocol)
+                if protocol_node:
+                    row[protocol] = {k: str(v) for k, v in protocol_node.attrs.items()}
+                else:
+                    row[protocol] = {}
+            result[user_jid] = row
+
+        return result
 
     def _parse_device_result(self, node: BinaryNode) -> dict[str, list[str]]:
         """Parse usync result to extract device JIDs."""

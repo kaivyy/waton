@@ -22,6 +22,7 @@ Supporting APIs (available from ``App``):
 - ``GroupsAPI`` for group operations
 - ``ChatsAPI`` for profile/privacy/chat modifications
 - ``NewsletterAPI`` for channel/newsletter features
+- ``BusinessAPI`` for business profile read/update
 - ``PresenceAPI`` for presence updates
 
 Message model

@@ -2,8 +2,8 @@
   "domains": {
     "messages-recv": {
       "status": "done",
-      "ratio": 0.8429,
-      "waton_lines": 1406,
+      "ratio": 0.8471,
+      "waton_lines": 1413,
       "baileys_lines": 1668
     },
     "app-state-sync": {
@@ -32,8 +32,8 @@
     },
     "process-message": {
       "status": "done",
-      "ratio": 1.1343,
-      "waton_lines": 760,
+      "ratio": 1.1448,
+      "waton_lines": 767,
       "baileys_lines": 670
     },
     "groups-api": {
@@ -54,10 +54,34 @@
       "waton_lines": 226,
       "baileys_lines": 229
     },
+    "business-api": {
+      "status": "partial",
+      "ratio": 0.1282,
+      "waton_lines": 91,
+      "baileys_lines": 710
+    },
+    "usync-api": {
+      "status": "partial",
+      "ratio": 0.6282,
+      "waton_lines": 174,
+      "baileys_lines": 277
+    },
+    "mex-api": {
+      "status": "done",
+      "ratio": 0.8448,
+      "waton_lines": 49,
+      "baileys_lines": 58
+    },
+    "wam-protocol": {
+      "status": "partial",
+      "ratio": 0.1657,
+      "waton_lines": 30,
+      "baileys_lines": 181
+    },
     "connection-core": {
       "status": "done",
-      "ratio": 0.9641,
-      "waton_lines": 1100,
+      "ratio": 0.9649,
+      "waton_lines": 1101,
       "baileys_lines": 1141
     }
   }

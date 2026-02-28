@@ -9,10 +9,13 @@ Business-related behavior
 Current implementation includes business-aware metadata handling during pairing
 and device registration payload preparation.
 
-Support status: **partial**
+Support status: **implemented (targeted profile surface)**
 
 - Connection/auth paths include business-compatible fields.
-- A dedicated high-level Business profile API is not yet exposed as a separate module.
+- Dedicated ``BusinessAPI`` is available as ``app.business`` for profile read/update:
+
+  - ``business_profile(jid)``
+  - ``update_business_profile(jid, *, name=None, description=None, email=None, category=None)``
 
 Newsletter API
 --------------

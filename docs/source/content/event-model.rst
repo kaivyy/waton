@@ -46,6 +46,19 @@ Notifications, calls, and ack lane:
 - ``messages.bad_ack``
 - ``messages.protocol_notification``
 
+WAM practical subset
+--------------------
+
+Waton includes a practical WAM encoder subset at ``waton.protocol.wam`` for
+telemetry framing use-cases where full constant-table parity is unnecessary.
+
+Available helper:
+
+- ``encode_wam_event(event_name, event_code, fields)``
+
+Output format is deterministic and typed (string/int/float/bool scalars), suitable
+for internal telemetry pipelines and test assertions.
+
 Payload shape (high-level)
 --------------------------
 

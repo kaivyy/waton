@@ -71,6 +71,17 @@ NewsletterAPI
 - update name/description
 - react, fetch messages, subscribe live updates
 
+BusinessAPI
+-----------
+
+- ``business_profile(jid)``
+- ``update_business_profile(jid, *, name=None, description=None, email=None, category=None)``
+
+MexAPI
+------
+
+- ``query(operation, params=None)`` for minimal ``w:mex`` request/response wrapper.
+
 Support status guidance
 -----------------------
 
