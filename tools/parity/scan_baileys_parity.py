@@ -48,7 +48,7 @@ def _domain_status(
     }
 
 
-def scan_parity(waton_root: str, baileys_src: str) -> dict:
+def scan_parity(waton_root: str, baileys_src: str, evidence: dict | None = None) -> dict:
     waton = Path(waton_root)
     baileys = Path(baileys_src)
 
@@ -94,7 +94,15 @@ def scan_parity(waton_root: str, baileys_src: str) -> dict:
             [baileys / "Socket" / "socket.ts"],
         ),
     }
-    return {"domains": domains}
+
+    report = {"domains": domains}
+
+    if evidence and isinstance(evidence.get("domains"), dict):
+        for domain, payload in report["domains"].items():
+            ev = evidence["domains"].get(domain, {})
+            payload["evidence"] = ev if isinstance(ev, dict) else {}
+
+    return report
 
 
 def main() -> None:
@@ -102,9 +110,14 @@ def main() -> None:
     parser.add_argument("--waton", required=True, help="Path to waton package root (e.g. .../waton/waton)")
     parser.add_argument("--baileys", required=True, help="Path to baileys src root (e.g. .../Baileys/src)")
     parser.add_argument("--out", help="Optional output JSON path")
+    parser.add_argument("--evidence", help="Optional parity evidence JSON path")
     args = parser.parse_args()
 
-    report = scan_parity(args.waton, args.baileys)
+    evidence = None
+    if args.evidence:
+        evidence = json.loads(Path(args.evidence).read_text(encoding="utf-8"))
+
+    report = scan_parity(args.waton, args.baileys, evidence=evidence)
     payload = json.dumps(report, indent=2)
     if args.out:
         Path(args.out).write_text(payload + "\n", encoding="utf-8")
