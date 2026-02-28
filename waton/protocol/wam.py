@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 
@@ -12,6 +13,8 @@ def _typed_scalar(value: Any) -> str:
         return f"i:{value}"
     if isinstance(value, float):
         return f"f:{value}"
+    if isinstance(value, (dict, list)):
+        return f"j:{json.dumps(value, sort_keys=True, separators=(',', ':'))}"
     return f"s:{value}"
 
 
@@ -20,7 +23,7 @@ def encode_wam_event(*, event_name: str, event_code: int, fields: dict[str, Any]
         raise ValueError("event_name must be a non-empty string")
 
     rows = [
-        "WAM1",
+        "WAM2",
         f"event:{event_name.strip()}",
         f"code:{int(event_code)}",
     ]

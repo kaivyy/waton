@@ -56,8 +56,8 @@
     },
     "business-api": {
       "status": "partial",
-      "ratio": 0.1282,
-      "waton_lines": 91,
+      "ratio": 0.2155,
+      "waton_lines": 153,
       "baileys_lines": 710
     },
     "usync-api": {
@@ -74,8 +74,8 @@
     },
     "wam-protocol": {
       "status": "partial",
-      "ratio": 0.1657,
-      "waton_lines": 30,
+      "ratio": 0.1823,
+      "waton_lines": 33,
       "baileys_lines": 181
     },
     "connection-core": {
