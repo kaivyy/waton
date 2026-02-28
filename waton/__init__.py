@@ -16,6 +16,9 @@ __all__ = [
     "Jid",
     "jid_decode",
     "jid_encode",
+    "simple",
+    "SimpleClient",
+    "SimpleIncomingMessage",
 ]
 
 
@@ -57,6 +60,15 @@ def __getattr__(name: str) -> object:
             "Jid": Jid,
             "jid_decode": jid_decode,
             "jid_encode": jid_encode,
+        }[name]
+
+    if name in {"simple", "SimpleClient", "SimpleIncomingMessage"}:
+        from .simple_api import SimpleClient, SimpleIncomingMessage, simple
+
+        return {
+            "simple": simple,
+            "SimpleClient": SimpleClient,
+            "SimpleIncomingMessage": SimpleIncomingMessage,
         }[name]
 
     raise AttributeError(f"module 'waton' has no attribute {name!r}")
