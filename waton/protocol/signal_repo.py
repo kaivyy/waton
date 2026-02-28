@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from waton.core.jid import jid_decode
+from waton.core.jid import jid_decode, jid_encode
 from waton.utils.crypto import (
     generate_keypair,
     signal_process_prekey_bundle,
@@ -43,6 +43,88 @@ class SignalRepository:
 
     async def save_session(self, jid: str, session_data: bytes) -> None:
         await self.storage.save_session(self._session_key(jid), session_data)
+
+    def _lid_mapping_state(self) -> tuple[dict[str, str], dict[str, str]]:
+        additional_data = self.creds.additional_data
+        if not isinstance(additional_data, dict):
+            additional_data = {}
+            self.creds.additional_data = additional_data
+
+        mapping_state = additional_data.get("lid_mapping")
+        if not isinstance(mapping_state, dict):
+            mapping_state = {}
+            additional_data["lid_mapping"] = mapping_state
+
+        pn_to_lid = mapping_state.get("pn_to_lid_user")
+        if not isinstance(pn_to_lid, dict):
+            pn_to_lid = {}
+            mapping_state["pn_to_lid_user"] = pn_to_lid
+
+        lid_to_pn = mapping_state.get("lid_to_pn_user")
+        if not isinstance(lid_to_pn, dict):
+            lid_to_pn = {}
+            mapping_state["lid_to_pn_user"] = lid_to_pn
+
+        return pn_to_lid, lid_to_pn
+
+    async def store_lid_pn_mapping(self, lid_jid: str, pn_jid: str) -> bool:
+        lid_decoded = jid_decode(lid_jid)
+        pn_decoded = jid_decode(pn_jid)
+        if not lid_decoded or not pn_decoded:
+            return False
+
+        if lid_decoded.server not in {"lid", "hosted.lid"}:
+            return False
+        if pn_decoded.server not in {"s.whatsapp.net", "hosted"}:
+            return False
+
+        pn_to_lid, lid_to_pn = self._lid_mapping_state()
+        pn_changed = pn_to_lid.get(pn_decoded.user) != lid_decoded.user
+        lid_changed = lid_to_pn.get(lid_decoded.user) != pn_decoded.user
+        changed = pn_changed or lid_changed
+        pn_to_lid[pn_decoded.user] = lid_decoded.user
+        lid_to_pn[lid_decoded.user] = pn_decoded.user
+
+        if changed:
+            await self.storage.save_creds(self.creds)
+        return changed
+
+    async def get_lid_for_pn(self, pn_jid: str) -> str | None:
+        pn_decoded = jid_decode(pn_jid)
+        if not pn_decoded:
+            return None
+        if pn_decoded.server not in {"s.whatsapp.net", "hosted"}:
+            return None
+
+        pn_to_lid, _ = self._lid_mapping_state()
+        lid_user = pn_to_lid.get(pn_decoded.user)
+        if not lid_user:
+            return None
+        lid_server = "hosted.lid" if pn_decoded.server == "hosted" else "lid"
+        return jid_encode(lid_user, lid_server, pn_decoded.device)
+
+    async def get_pn_for_lid(self, lid_jid: str) -> str | None:
+        lid_decoded = jid_decode(lid_jid)
+        if not lid_decoded:
+            return None
+        if lid_decoded.server not in {"lid", "hosted.lid"}:
+            return None
+
+        _, lid_to_pn = self._lid_mapping_state()
+        pn_user = lid_to_pn.get(lid_decoded.user)
+        if not pn_user:
+            return None
+        pn_server = "hosted" if lid_decoded.server == "hosted.lid" else "s.whatsapp.net"
+        return jid_encode(pn_user, pn_server, lid_decoded.device)
+
+    async def migrate_session(self, from_jid: str, to_jid: str) -> bool:
+        from_session = await self.get_session(from_jid)
+        if not from_session:
+            return False
+        if await self.get_session(to_jid):
+            return False
+        await self.save_session(to_jid, from_session)
+        return True
 
     async def get_prekey(self, key_id: int) -> bytes | None:
         return await self.storage.get_prekey(key_id)
