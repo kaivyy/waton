@@ -84,3 +84,49 @@ def test_simple_send_text_delegates_to_app_messages_api() -> None:
         await client.app.media.http.aclose()
 
     _run(_case())
+
+
+def test_simple_on_message_rejects_non_async_handler() -> None:
+    client = simple(storage_path=":memory:")
+
+    def _sync_handler(_msg):
+        return None
+
+    try:
+        client.on_message(_sync_handler)  # type: ignore[arg-type]
+    except TypeError as exc:
+        assert "async" in str(exc).lower()
+    else:
+        raise AssertionError("expected TypeError for non-async on_message handler")
+
+    _run(client.app.media.http.aclose())
+
+
+def test_simple_on_ready_rejects_non_async_handler() -> None:
+    client = simple(storage_path=":memory:")
+
+    def _sync_ready(_client):
+        return None
+
+    try:
+        client.on_ready(_sync_ready)  # type: ignore[arg-type]
+    except TypeError as exc:
+        assert "async" in str(exc).lower()
+    else:
+        raise AssertionError("expected TypeError for non-async on_ready handler")
+
+    _run(client.app.media.http.aclose())
+
+
+def test_simple_send_text_rejects_empty_target_jid() -> None:
+    async def _case() -> None:
+        client = simple(storage_path=":memory:")
+        try:
+            await client.send_text("", "halo")
+        except ValueError as exc:
+            assert "to_jid" in str(exc)
+        else:
+            raise AssertionError("expected ValueError for empty to_jid")
+        await client.app.media.http.aclose()
+
+    _run(_case())

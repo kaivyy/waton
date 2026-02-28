@@ -54,6 +54,11 @@ For the most minimal import-first workflow:
 - ``await msg.reply(text)``
 - ``await msg.react(emoji)``
 
+Simple API guardrails:
+
+- ``@client.on_message`` and ``@client.on_ready`` handlers must be ``async def``.
+- ``client.send_text(...)`` requires non-empty ``to_jid``.
+
 First connection test
 ---------------------
 

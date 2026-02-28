@@ -118,6 +118,10 @@ if __name__ == "__main__":
 - `await msg.reply(text)`
 - `await msg.react(emoji)`
 
+Guardrails in simple API:
+- `@client.on_message` and `@client.on_ready` handlers must be `async def`
+- `client.send_text(...)` requires non-empty `to_jid`
+
 Use this mode when you want minimal boilerplate while keeping the same core runtime.
 
 ### 1. Interactive CLI Chat (Easiest Way to Test)

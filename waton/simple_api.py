@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Awaitable, Callable
 
 from waton.app.app import App
@@ -44,10 +45,17 @@ class SimpleClient:
     def __init__(self, storage_path: str = "waton.db") -> None:
         self.app = App(storage_path=storage_path)
 
+    @staticmethod
+    def _ensure_async_handler(handler: Callable[..., Awaitable[None]], name: str) -> None:
+        if not inspect.iscoroutinefunction(handler):
+            raise TypeError(f"{name} handler must be an async function")
+
     def on_message(
         self,
         handler: Callable[[SimpleIncomingMessage], Awaitable[None]],
     ) -> Callable[[SimpleIncomingMessage], Awaitable[None]]:
+        self._ensure_async_handler(handler, "on_message")
+
         @self.app.message()
         async def _dispatch(ctx: Context) -> None:
             await handler(SimpleIncomingMessage(ctx))
@@ -58,6 +66,8 @@ class SimpleClient:
         self,
         handler: Callable[["SimpleClient"], Awaitable[None]],
     ) -> Callable[["SimpleClient"], Awaitable[None]]:
+        self._ensure_async_handler(handler, "on_ready")
+
         @self.app.on_ready
         async def _dispatch(_: App) -> None:
             await handler(self)
@@ -65,7 +75,9 @@ class SimpleClient:
         return handler
 
     async def send_text(self, to_jid: str, text: str) -> str:
-        return await self.app.messages.send_text(to_jid, text)
+        if not isinstance(to_jid, str) or not to_jid.strip():
+            raise ValueError("to_jid must be a non-empty string")
+        return await self.app.messages.send_text(to_jid.strip(), text)
 
     def run(self) -> None:
         self.app.run()
