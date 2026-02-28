@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Waton Web Dashboard</title>
+  <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+  <main class="wa-shell">
+    <aside class="wa-sidebar">
+      <header class="wa-sidebar-header">
+        <div class="brand">
+          <strong>Waton Web</strong>
+          <span id="status-pill" class="status disconnected">disconnected</span>
+        </div>
+        <div class="header-actions">
+          <button id="connect-btn" type="button">Connect</button>
+          <button id="disconnect-btn" type="button" class="ghost">Disconnect</button>
+        </div>
+      </header>
+
+      <section class="wa-search">
+        <input id="chat-search" placeholder="Search or start new chat" />
+      </section>
+
+      <section class="wa-new-chat">
+        <input id="new-chat-jid" placeholder="6281234567890 or jid" />
+        <button id="open-chat-btn" type="button">Open</button>
+      </section>
+
+      <section id="chat-list" class="wa-chat-list"></section>
+    </aside>
+
+    <section class="wa-main">
+      <header class="wa-main-header">
+        <div id="chat-title">No chat selected</div>
+        <div id="chat-subtitle" class="chat-subtitle">Connect WhatsApp and pick a chat.</div>
+      </header>
+
+      <section id="qr-panel" class="wa-qr-panel">
+        <img id="qr-image" alt="WhatsApp QR" class="qr-image">
+        <textarea id="qr-text" readonly placeholder="QR will appear while connecting..."></textarea>
+      </section>
+
+      <section id="message-thread" class="wa-thread"></section>
+
+      <footer class="wa-composer">
+        <button type="button" class="icon-btn" title="Attach (coming soon)" disabled aria-label="Attach">
+          +
+        </button>
+        <button type="button" class="icon-btn" title="Emoji (coming soon)" disabled aria-label="Emoji">
+          :)
+        </button>
+        <div class="composer-input-wrap">
+          <textarea id="send-text" rows="1" placeholder="Type a message"></textarea>
+        </div>
+        <button id="send-btn" type="button" class="icon-btn send-btn" aria-label="Send message">
+          &#10148;
+        </button>
+      </footer>
+    </section>
+  </main>
+
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>
