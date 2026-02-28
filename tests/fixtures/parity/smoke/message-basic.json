@@ -1,0 +1,10 @@
+{
+  "input": {
+    "name": "message-basic",
+    "note": "placeholder input abstraction for smoke harness"
+  },
+  "expected": {
+    "event_type": "message",
+    "normalized": true
+  }
+}
