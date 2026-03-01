@@ -46,6 +46,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Fail if any done domains are missing required evidence fields",
     )
+    parser.add_argument(
+        "--parity-evidence",
+        default=None,
+        help="Path to parity evidence JSON (required for --parity-strict)",
+    )
     return parser
 
 
@@ -67,10 +72,17 @@ def main() -> int:
     parity_out = Path(args.parity_out)
     if not parity_out.is_absolute():
         parity_out = ROOT_DIR / parity_out
+    if args.parity_strict and not args.parity_evidence:
+        print(
+            "[preflight] ERROR: --parity-strict requires --parity-evidence <path> so evidence can be wired into the parity scan"
+        )
+        return 1
+
     config = PreflightConfig(
         waton_root=args.waton_root,
         baileys_src=args.baileys_src,
         parity_out=str(parity_out),
+        parity_evidence=args.parity_evidence,
         include_live_check=args.with_live,
         include_lint=not args.skip_lint,
         include_typecheck=not args.skip_typecheck,

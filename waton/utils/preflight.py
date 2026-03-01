@@ -20,6 +20,7 @@ class PreflightConfig:
     waton_root: str = "waton"
     baileys_src: str = "../Baileys/src"
     parity_out: str = "docs/parity/baileys-parity-latest.json"
+    parity_evidence: str | None = None
     include_live_check: bool = False
     include_lint: bool = True
     include_typecheck: bool = True
@@ -39,20 +40,24 @@ def build_preflight_commands(config: PreflightConfig) -> list[PreflightCommand]:
     if config.include_typecheck:
         commands.append(PreflightCommand(name="pyright", args=["python", "-m", "pyright"]))
 
+    parity_args = [
+        "python",
+        "-m",
+        "tools.parity.scan_baileys_parity",
+        "--waton",
+        config.waton_root,
+        "--baileys",
+        config.baileys_src,
+        "--out",
+        config.parity_out,
+    ]
+    if config.parity_evidence:
+        parity_args.extend(["--evidence", config.parity_evidence])
+
     commands.append(
         PreflightCommand(
             name="parity-scan",
-            args=[
-                "python",
-                "-m",
-                "tools.parity.scan_baileys_parity",
-                "--waton",
-                config.waton_root,
-                "--baileys",
-                config.baileys_src,
-                "--out",
-                config.parity_out,
-            ],
+            args=parity_args,
         )
     )
     if config.include_live_check:

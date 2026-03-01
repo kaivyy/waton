@@ -14,6 +14,7 @@ def test_build_preflight_commands_default() -> None:
     parity_cmd = commands[-1].args
     assert "--baileys" in parity_cmd
     assert "C:/Baileys/src" in parity_cmd
+    assert "--evidence" not in parity_cmd
 
 
 def test_build_preflight_commands_with_live_and_skips() -> None:
@@ -27,6 +28,17 @@ def test_build_preflight_commands_with_live_and_skips() -> None:
     names = [cmd.name for cmd in commands]
     assert names == ["tests", "parity-scan", "live-check"]
     assert commands[-1].required is False
+
+
+def test_build_preflight_commands_adds_parity_evidence_arg() -> None:
+    config = PreflightConfig(
+        baileys_src="C:/Baileys/src",
+        parity_evidence="docs/parity/evidence.json",
+    )
+    commands = build_preflight_commands(config)
+    parity_cmd = next(cmd for cmd in commands if cmd.name == "parity-scan").args
+    assert "--evidence" in parity_cmd
+    assert "docs/parity/evidence.json" in parity_cmd
 
 
 def test_validate_parity_report_flags_non_done() -> None:
