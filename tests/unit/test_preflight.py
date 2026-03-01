@@ -59,3 +59,20 @@ def test_load_parity_report_and_validate_done(tmp_path: Path) -> None:
     report = load_parity_report(str(report_path))
     issues = validate_parity_report(report)
     assert issues == []
+
+
+def test_validate_parity_report_strict_passes_with_required_evidence() -> None:
+    report = {
+        "domains": {
+            "messages-recv": {
+                "status": "done",
+                "evidence": {
+                    "replay_pass_rate": 1.0,
+                    "unknown_event_count": 0,
+                    "drift_count": 0,
+                },
+            }
+        }
+    }
+    issues = validate_parity_report(report, strict=True)
+    assert issues == []

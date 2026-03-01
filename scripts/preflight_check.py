@@ -64,10 +64,13 @@ def _run_command(name: str, args: list[str]) -> int:
 
 def main() -> int:
     args = _build_parser().parse_args()
+    parity_out = Path(args.parity_out)
+    if not parity_out.is_absolute():
+        parity_out = ROOT_DIR / parity_out
     config = PreflightConfig(
         waton_root=args.waton_root,
         baileys_src=args.baileys_src,
-        parity_out=args.parity_out,
+        parity_out=str(parity_out),
         include_live_check=args.with_live,
         include_lint=not args.skip_lint,
         include_typecheck=not args.skip_typecheck,
