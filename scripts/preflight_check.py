@@ -41,6 +41,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Copy latest parity report to docs/parity/baileys-parity-baseline.json on success",
     )
+    parser.add_argument(
+        "--parity-strict",
+        action="store_true",
+        help="Fail if any done domains are missing required evidence fields",
+    )
     return parser
 
 
@@ -75,7 +80,7 @@ def main() -> int:
             return code
 
     report = load_parity_report(config.parity_out)
-    issues = validate_parity_report(report)
+    issues = validate_parity_report(report, strict=args.parity_strict)
     if issues:
         print("[preflight] parity validation failed:")
         for issue in issues:

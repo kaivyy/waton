@@ -70,11 +70,13 @@ def load_parity_report(path: str) -> dict[str, Any]:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def validate_parity_report(report: dict[str, Any]) -> list[str]:
+def validate_parity_report(report: dict[str, Any], *, strict: bool = False) -> list[str]:
     issues: list[str] = []
     domains = report.get("domains")
     if not isinstance(domains, dict):
         return ["parity report missing domains map"]
+
+    required_evidence_keys = ["replay_pass_rate", "unknown_event_count", "drift_count"]
 
     for domain, payload in domains.items():
         if not isinstance(payload, dict):
@@ -82,6 +84,14 @@ def validate_parity_report(report: dict[str, Any]) -> list[str]:
             continue
         status = payload.get("status")
         if status == "done":
+            if strict:
+                evidence = payload.get("evidence", {})
+                if not isinstance(evidence, dict):
+                    evidence = {}
+                missing = [k for k in required_evidence_keys if k not in evidence]
+                if missing:
+                    issues.append(f"{domain}: missing evidence {missing}")
+                    continue
             continue
         issues.append(f"{domain}: status={status}")
     return issues
