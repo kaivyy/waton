@@ -58,6 +58,7 @@ Waton Documentation
    :caption: Start Here
 
    content/getting-started
+   content/ai-agent-quickstart
    content/quickstart-app
    content/quickstart-low-level
    content/browser-dashboard

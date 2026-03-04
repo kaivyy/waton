@@ -88,6 +88,16 @@ python -m maturin sdist --manifest-path Cargo.toml --out .tmp-sdist
 
 Waton now provides a **simple callback API** for fastest onboarding, plus the existing high-level `App` and low-level `WAClient` interfaces.
 
+### AI Agent Fast Path
+
+If you want automation agents to run Waton with minimum prompt/context overhead:
+
+- Install latest stable: `pip install -U waton`
+- Or pin reproducible release: `pip install waton==0.1.2`
+- Start with simple API: `from waton import simple`
+- Keep one linked WA session active during tests to avoid conflict `440`
+- Use quick docs page: `docs/source/content/ai-agent-quickstart.rst`
+
 ### 0. Simple Callback API (Drop-in Easiest)
 
 If you want the shortest path from import to running bot:
