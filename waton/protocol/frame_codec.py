@@ -1,6 +1,6 @@
-import struct
+from waton.protocol.binary_codec import decode_binary_node, encode_binary_node
 from waton.protocol.binary_node import BinaryNode
-from waton.protocol.binary_codec import encode_binary_node, decode_binary_node
+
 
 def encode_frame(data: bytes) -> bytes:
     """Packs raw bytes with a 3-byte length prefix (WhatsApp transport format)."""

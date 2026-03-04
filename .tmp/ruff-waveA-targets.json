@@ -1,0 +1,1058 @@
+[
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 56,
+      "row": 24
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from __future__ import annotations\n\nimport os\nimport struct\nimport time\nfrom base64 import b64decode\nfrom collections.abc import Mapping\nfrom typing import TYPE_CHECKING, cast\n\nfrom waton.client.usync import USyncQuery\nfrom waton.core.jid import S_WHATSAPP_NET, jid_decode, jid_encode, jid_normalized_user\nfrom waton.protocol.binary_node import BinaryNode\nfrom waton.protocol.protobuf import wa_pb2\nfrom waton.protocol.protobuf.wire import (\n    ADVSignedDeviceIdentity,\n    encode_bool,\n    encode_len_delimited,\n    encode_string,\n    encode_varint,\n    encode_varint_field,\n)\nfrom waton.protocol.signal_repo import SignalRepository\nfrom waton.utils.crypto import aes_encrypt, hmac_sha256\nfrom waton.utils.message_utils import build_receipt_node, generate_message_id\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 26
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 1
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 1,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 36,
+      "row": 155
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"MediaInfo\"",
+          "end_location": {
+            "column": 36,
+            "row": 155
+          },
+          "location": {
+            "column": 27,
+            "row": 155
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 27,
+      "row": 155
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 155,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 36,
+      "row": 180
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"MediaInfo\"",
+          "end_location": {
+            "column": 36,
+            "row": 180
+          },
+          "location": {
+            "column": 27,
+            "row": 180
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 27,
+      "row": 180
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 180,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 36,
+      "row": 224
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"MediaInfo\"",
+          "end_location": {
+            "column": 36,
+            "row": 224
+          },
+          "location": {
+            "column": 27,
+            "row": 224
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 27,
+      "row": 224
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 224,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 36,
+      "row": 249
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"MediaInfo\"",
+          "end_location": {
+            "column": 36,
+            "row": 249
+          },
+          "location": {
+            "column": 27,
+            "row": 249
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 27,
+      "row": 249
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 249,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 36,
+      "row": 275
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"MediaInfo\"",
+          "end_location": {
+            "column": 36,
+            "row": 275
+          },
+          "location": {
+            "column": 27,
+            "row": 275
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 27,
+      "row": 275
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "UP012",
+    "end_location": {
+      "column": 75,
+      "row": 847
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "()",
+          "end_location": {
+            "column": 75,
+            "row": 847
+          },
+          "location": {
+            "column": 66,
+            "row": 847
+          }
+        }
+      ],
+      "message": "Remove unnecessary `encoding` argument"
+    },
+    "location": {
+      "column": 15,
+      "row": 847
+    },
+    "message": "Unnecessary UTF-8 `encoding` argument to `encode`",
+    "noqa_row": 847,
+    "url": "https://docs.astral.sh/ruff/rules/unnecessary-encode-utf8"
+  },
+  {
+    "cell": null,
+    "code": "UP012",
+    "end_location": {
+      "column": 80,
+      "row": 898
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "()",
+          "end_location": {
+            "column": 80,
+            "row": 898
+          },
+          "location": {
+            "column": 71,
+            "row": 898
+          }
+        }
+      ],
+      "message": "Remove unnecessary `encoding` argument"
+    },
+    "location": {
+      "column": 15,
+      "row": 898
+    },
+    "message": "Unnecessary UTF-8 `encoding` argument to `encode`",
+    "noqa_row": 898,
+    "url": "https://docs.astral.sh/ruff/rules/unnecessary-encode-utf8"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 48,
+      "row": 6
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import asyncio\r\nimport json\r\nfrom base64 import b64decode, b64encode\r\n\r\nimport aiosqlite\r\n\r\nfrom waton.utils.auth import AuthCreds, StoragePort\r\nfrom waton.utils.crypto import generate_keypair\r\n\r\n\r\n",
+          "end_location": {
+            "column": 1,
+            "row": 8
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 1
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 1,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "W291",
+    "end_location": {
+      "column": 67,
+      "row": 10
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 67,
+            "row": 10
+          },
+          "location": {
+            "column": 66,
+            "row": 10
+          }
+        }
+      ],
+      "message": "Remove trailing whitespace"
+    },
+    "location": {
+      "column": 66,
+      "row": 10
+    },
+    "message": "Trailing whitespace",
+    "noqa_row": 12,
+    "url": "https://docs.astral.sh/ruff/rules/trailing-whitespace"
+  },
+  {
+    "cell": null,
+    "code": "ANN204",
+    "end_location": {
+      "column": 17,
+      "row": 13
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": " -> None",
+          "end_location": {
+            "column": 50,
+            "row": 13
+          },
+          "location": {
+            "column": 50,
+            "row": 13
+          }
+        }
+      ],
+      "message": "Add return type annotation: `None`"
+    },
+    "location": {
+      "column": 9,
+      "row": 13
+    },
+    "message": "Missing return type annotation for special method `__init__`",
+    "noqa_row": 13,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-special-method"
+  },
+  {
+    "cell": null,
+    "code": "ANN201",
+    "end_location": {
+      "column": 22,
+      "row": 18
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": " -> None",
+          "end_location": {
+            "column": 28,
+            "row": 18
+          },
+          "location": {
+            "column": 28,
+            "row": 18
+          }
+        }
+      ],
+      "message": "Add return type annotation: `None`"
+    },
+    "location": {
+      "column": 15,
+      "row": 18
+    },
+    "message": "Missing return type annotation for public function `connect`",
+    "noqa_row": 18,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-undocumented-public-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN201",
+    "end_location": {
+      "column": 20,
+      "row": 23
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": " -> None",
+          "end_location": {
+            "column": 26,
+            "row": 23
+          },
+          "location": {
+            "column": 26,
+            "row": 23
+          }
+        }
+      ],
+      "message": "Add return type annotation: `None`"
+    },
+    "location": {
+      "column": 15,
+      "row": 23
+    },
+    "message": "Missing return type annotation for public function `close`",
+    "noqa_row": 23,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-undocumented-public-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 23,
+      "row": 28
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": " -> None",
+          "end_location": {
+            "column": 29,
+            "row": 28
+          },
+          "location": {
+            "column": 29,
+            "row": 28
+          }
+        }
+      ],
+      "message": "Add return type annotation: `None`"
+    },
+    "location": {
+      "column": 15,
+      "row": 28
+    },
+    "message": "Missing return type annotation for private function `_init_db`",
+    "noqa_row": 28,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "W293",
+    "end_location": {
+      "column": 9,
+      "row": 64
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 9,
+            "row": 64
+          },
+          "location": {
+            "column": 1,
+            "row": 64
+          }
+        }
+      ],
+      "message": "Remove whitespace from blank line"
+    },
+    "location": {
+      "column": 1,
+      "row": 64
+    },
+    "message": "Blank line contains whitespace",
+    "noqa_row": 64,
+    "url": "https://docs.astral.sh/ruff/rules/blank-line-with-whitespace"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 66,
+      "row": 20
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[], dict[str, bytes]]\"",
+          "end_location": {
+            "column": 66,
+            "row": 20
+          },
+          "location": {
+            "column": 36,
+            "row": 20
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 36,
+      "row": 20
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 20,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 55,
+      "row": 21
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes], bytes]\"",
+          "end_location": {
+            "column": 55,
+            "row": 21
+          },
+          "location": {
+            "column": 24,
+            "row": 21
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 24,
+      "row": 21
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 21,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 49,
+      "row": 22
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes], bytes]\"",
+          "end_location": {
+            "column": 49,
+            "row": 22
+          },
+          "location": {
+            "column": 18,
+            "row": 22
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 18,
+      "row": 22
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 22,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 57,
+      "row": 23
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes, bytes], bool]\"",
+          "end_location": {
+            "column": 57,
+            "row": 23
+          },
+          "location": {
+            "column": 20,
+            "row": 23
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 20,
+      "row": 23
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 23,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 74,
+      "row": 24
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes, bytes, bytes], bytes]\"",
+          "end_location": {
+            "column": 74,
+            "row": 24
+          },
+          "location": {
+            "column": 29,
+            "row": 24
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 29,
+      "row": 24
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 24,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 74,
+      "row": 25
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes, bytes, bytes], bytes]\"",
+          "end_location": {
+            "column": 74,
+            "row": 25
+          },
+          "location": {
+            "column": 29,
+            "row": 25
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 29,
+      "row": 25
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 25,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 67,
+      "row": 26
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes, bytes], bytes]\"",
+          "end_location": {
+            "column": 67,
+            "row": 26
+          },
+          "location": {
+            "column": 29,
+            "row": 26
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 29,
+      "row": 26
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 26,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 67,
+      "row": 27
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes, bytes], bytes]\"",
+          "end_location": {
+            "column": 67,
+            "row": 27
+          },
+          "location": {
+            "column": 29,
+            "row": 27
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 29,
+      "row": 27
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 27,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 61,
+      "row": 28
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, int, bytes, bytes], bytes]\"",
+          "end_location": {
+            "column": 61,
+            "row": 28
+          },
+          "location": {
+            "column": 18,
+            "row": 28
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 18,
+      "row": 28
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 28,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 49,
+      "row": 29
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes], bytes]\"",
+          "end_location": {
+            "column": 49,
+            "row": 29
+          },
+          "location": {
+            "column": 18,
+            "row": 29
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 18,
+      "row": 29
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 29,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 44,
+      "row": 30
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes], bytes]\"",
+          "end_location": {
+            "column": 44,
+            "row": 30
+          },
+          "location": {
+            "column": 20,
+            "row": 30
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 20,
+      "row": 30
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 30,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 115,
+      "row": 32
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, int, str, int, int, bytes, int, bytes, bytes, bytes | None, int | None, bytes | None], bytes]\"",
+          "end_location": {
+            "column": 115,
+            "row": 32
+          },
+          "location": {
+            "column": 5,
+            "row": 32
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 5,
+      "row": 32
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 32,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 78,
+      "row": 36
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes, int, str, int, bytes], Mapping[str, bytes | str]]\"",
+          "end_location": {
+            "column": 78,
+            "row": 36
+          },
+          "location": {
+            "column": 5,
+            "row": 36
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 5,
+      "row": 36
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 36,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 116,
+      "row": 40
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes, int, str, int, int | None, bytes | None, int, bytes, bytes], Mapping[str, bytes | str]]\"",
+          "end_location": {
+            "column": 116,
+            "row": 40
+          },
+          "location": {
+            "column": 5,
+            "row": 40
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 5,
+      "row": 40
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 40,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 78,
+      "row": 44
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes, int, str, int, bytes], Mapping[str, bytes | str]]\"",
+          "end_location": {
+            "column": 78,
+            "row": 44
+          },
+          "location": {
+            "column": 5,
+            "row": 44
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 5,
+      "row": 44
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 44,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 72,
+      "row": 47
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes], Mapping[str, bytes]]\"",
+          "end_location": {
+            "column": 72,
+            "row": 47
+          },
+          "location": {
+            "column": 27,
+            "row": 47
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 27,
+      "row": 47
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 47,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  },
+  {
+    "cell": null,
+    "code": "TC006",
+    "end_location": {
+      "column": 72,
+      "row": 48
+    },
+    "filename": "C:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"Callable[[bytes, bytes], Mapping[str, bytes]]\"",
+          "end_location": {
+            "column": 72,
+            "row": 48
+          },
+          "location": {
+            "column": 27,
+            "row": 48
+          }
+        }
+      ],
+      "message": "Add quotes"
+    },
+    "location": {
+      "column": 27,
+      "row": 48
+    },
+    "message": "Add quotes to type expression in `typing.cast()`",
+    "noqa_row": 48,
+    "url": "https://docs.astral.sh/ruff/rules/runtime-cast-value"
+  }
+]

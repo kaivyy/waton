@@ -1,7 +1,6 @@
-from waton.protocol.binary_node import BinaryNode
-from waton.client.client import WAClient
-from typing import Optional
 
+from waton.client.client import WAClient
+from waton.protocol.binary_node import BinaryNode
 
 _CHAT_MODIFY_ACTIONS: dict[str, tuple[str, dict[str, str]]] = {
     "archive": ("archive", {"value": "true"}),
@@ -34,7 +33,7 @@ class ChatsAPI:
         node = BinaryNode(tag="presence", attrs={"to": jid, "type": "subscribe"})
         await self.client.send_node(node)
 
-    async def get_profile_picture(self, jid: str) -> Optional[str]:
+    async def get_profile_picture(self, jid: str) -> str | None:
         """Requests the profile picture URL for a JID."""
         query_node = BinaryNode(
             tag="iq",
@@ -142,7 +141,7 @@ class ChatsAPI:
     def _children(node: BinaryNode | None) -> list[BinaryNode]:
         if node is None or not isinstance(node.content, list):
             return []
-        return [child for child in node.content if isinstance(child, BinaryNode)]
+        return list(node.content)
 
     @classmethod
     def _find_child(cls, node: BinaryNode | None, tag: str) -> BinaryNode | None:

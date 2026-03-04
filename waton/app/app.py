@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import uuid
 from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING
 
 from waton.app import filters as filters_module
 from waton.app.context import Context
-from waton.app.middleware import MiddlewarePipeline
-from waton.app.router import Router
+from waton.app.middleware import MiddlewareFn, MiddlewarePipeline
+from waton.app.router import DecoratorFn, Router
 from waton.client.chats import ChatsAPI
 from waton.client.client import WAClient
 from waton.client.communities import CommunitiesAPI
@@ -20,9 +22,12 @@ from waton.client.newsletter import NewsletterAPI
 from waton.client.presence import PresenceAPI
 from waton.core.entities import Message
 from waton.infra.storage_sqlite import SQLiteStorage
-from waton.protocol.binary_node import BinaryNode
 from waton.utils.process_message import process_incoming_message
 
+if TYPE_CHECKING:
+    from waton.app.filters import Filter
+    from waton.core.events import ConnectionEvent
+    from waton.protocol.binary_node import BinaryNode
 
 ReadyCallback = Callable[["App"], Awaitable[None] | None]
 logger = logging.getLogger(__name__)
@@ -50,10 +55,12 @@ class App:
         self._connected_event = asyncio.Event()
 
         self.client.on_message = self._dispatch_message
-        self._original_on_connection = self.client.on_connection_update
+        self._original_on_connection: Callable[[ConnectionEvent], Awaitable[None]] | None = (
+            self.client.on_connection_update
+        )
         self.client.on_connection_update = self._handle_connection_update
 
-    async def _handle_connection_update(self, event) -> None:
+    async def _handle_connection_update(self, event: ConnectionEvent) -> None:
         if event.qr:
             print("\n=== SCAN THIS QR CODE ===")
             try:
@@ -66,10 +73,10 @@ class App:
                 print(event.qr)
                 print("(Install 'qrcode' package to see a graphical QR in terminal)")
             print("==========================\n")
-        
+
         if event.status == "open":
             self._connected_event.set()
-            
+
         if self._original_on_connection:
             await self._original_on_connection(event)
 
@@ -77,19 +84,35 @@ class App:
         self._on_ready_cb = func
         return func
 
-    def use(self, middleware) -> None:
+    def use(self, middleware: MiddlewareFn) -> None:
         self.middleware.add(middleware)
 
-    def message(self, custom_filter=None):
+    def message(self, custom_filter: Filter | None = None) -> DecoratorFn:
         return self.router.message(custom_filter)
 
-    def command(self, prefix: str):
+    def command(self, prefix: str) -> DecoratorFn:
         return self.message(custom_filter=filters_module.command(prefix))
 
     async def _dispatch_message(self, node: BinaryNode) -> None:
         if node.tag != "message":
             return
 
+        trace_id = uuid.uuid4().hex
+        ingress_message_id = node.attrs.get("id", "") if isinstance(node.attrs.get("id"), str) else ""
+        ingress_from = node.attrs.get("from", "") if isinstance(node.attrs.get("from"), str) else ""
+        logger.debug(
+            "dispatch stage",
+            extra={
+                "stage": "dispatch_ingress",
+                "trace_id": trace_id,
+                "message_id": ingress_message_id,
+                "from_jid": ingress_from,
+                "node_tag": node.tag,
+            },
+        )
+
+        canonical_message_id = ingress_message_id
+        dispatch_status = "ok"
         try:
             parsed = await process_incoming_message(node, self.client)
             message = Message(
@@ -117,18 +140,64 @@ class App:
                 raw_node=node,
                 message_type=parsed.message_type,
             )
+            if not canonical_message_id:
+                canonical_message_id = message.id
+            logger.debug(
+                "dispatch stage",
+                extra={
+                    "stage": "dispatch_parse_success",
+                    "trace_id": trace_id,
+                    "message_id": canonical_message_id,
+                    "from_jid": message.from_jid,
+                    "node_tag": node.tag,
+                },
+            )
         except Exception as exc:  # pragma: no cover - defensive fallback
-            logger.warning("failed to parse incoming message %s: %s", node.attrs.get("id"), exc)
+            participant = node.attrs.get("participant") if isinstance(node.attrs.get("participant"), str) else None
+            fallback_from = node.attrs.get("from", "") if isinstance(node.attrs.get("from"), str) else ""
+            fallback_message_id = node.attrs.get("id", "") if isinstance(node.attrs.get("id"), str) else ""
+            if not canonical_message_id:
+                canonical_message_id = fallback_message_id
+            logger.warning(
+                "failed to parse incoming message %s: %s",
+                fallback_message_id,
+                exc,
+                extra={
+                    "stage": "dispatch_parse_fallback",
+                    "trace_id": trace_id,
+                    "message_id": canonical_message_id,
+                    "from_jid": fallback_from,
+                    "node_tag": node.tag,
+                },
+            )
             message = Message(
-                id=node.attrs.get("id", ""),
-                from_jid=node.attrs.get("from", ""),
-                participant=node.attrs.get("participant"),
+                id=fallback_message_id,
+                from_jid=fallback_from,
+                participant=participant,
                 raw_node=node,
                 message_type=node.attrs.get("type", "unknown"),
             )
-        ctx = Context(message=message, app=self)
+        ctx = Context(message=message, app=self, trace_id=trace_id, trace_message_id=canonical_message_id)
 
-        await self.middleware.run(ctx, self.router.dispatch)
+        try:
+            await self.middleware.run(ctx, self.router.dispatch)
+        except Exception:
+            dispatch_status = "error"
+            raise
+        finally:
+            if not canonical_message_id:
+                canonical_message_id = message.id
+            logger.debug(
+                "dispatch stage",
+                extra={
+                    "stage": "dispatch_complete",
+                    "dispatch_status": dispatch_status,
+                    "trace_id": trace_id,
+                    "message_id": canonical_message_id,
+                    "from_jid": message.from_jid,
+                    "node_tag": node.tag,
+                },
+            )
 
     def run(self) -> None:
         loop = asyncio.get_event_loop()

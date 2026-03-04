@@ -1,0 +1,5 @@
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\client.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\client.py:411:25 - error: Unnecessary "cast" call; type is already "list[dict[str, Any]]" (reportUnnecessaryCast)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\client.py:428:21 - error: Unnecessary isinstance call; "dict[str, Any]" is always an instance of "dict[Unknown, Unknown]" (reportUnnecessaryIsInstance)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\client.py:1121:19 - error: Unnecessary "cast" call; type is already "Any" (reportUnnecessaryCast)
+3 errors, 0 warnings, 0 informations

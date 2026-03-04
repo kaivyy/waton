@@ -1,0 +1,158 @@
+{
+    "version": "1.1.408",
+    "time": "1772454594044",
+    "generalDiagnostics": [
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+            "severity": "error",
+            "message": "Type of parameter \"message_obj\" is unknown",
+            "range": {
+                "start": {
+                    "line": 75,
+                    "character": 22
+                },
+                "end": {
+                    "line": 75,
+                    "character": 33
+                }
+            },
+            "rule": "reportUnknownParameterType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+            "severity": "error",
+            "message": "Variable not allowed in type expression",
+            "range": {
+                "start": {
+                    "line": 75,
+                    "character": 35
+                },
+                "end": {
+                    "line": 75,
+                    "character": 41
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+            "severity": "error",
+            "message": "Type of \"Message\" is unknown",
+            "range": {
+                "start": {
+                    "line": 75,
+                    "character": 35
+                },
+                "end": {
+                    "line": 75,
+                    "character": 49
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+            "severity": "error",
+            "message": "Type of \"conversation\" is unknown",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 11
+                },
+                "end": {
+                    "line": 76,
+                    "character": 35
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+            "severity": "error",
+            "message": "Return type, \"Unknown | None\", is partially unknown",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 11
+                },
+                "end": {
+                    "line": 76,
+                    "character": 119
+                }
+            },
+            "rule": "reportUnknownVariableType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+            "severity": "error",
+            "message": "Type of \"extendedTextMessage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 39
+                },
+                "end": {
+                    "line": 76,
+                    "character": 70
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+            "severity": "error",
+            "message": "Type of \"text\" is unknown",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 39
+                },
+                "end": {
+                    "line": 76,
+                    "character": 75
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+            "severity": "error",
+            "message": "Type of \"imageMessage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 79
+                },
+                "end": {
+                    "line": 76,
+                    "character": 103
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+            "severity": "error",
+            "message": "Type of \"caption\" is unknown",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 79
+                },
+                "end": {
+                    "line": 76,
+                    "character": 111
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 1,
+        "errorCount": 9,
+        "warningCount": 0,
+        "informationCount": 0,
+        "timeInSec": 1.001
+    }
+}
+

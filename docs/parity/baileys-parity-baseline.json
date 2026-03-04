@@ -2,63 +2,113 @@
   "domains": {
     "messages-recv": {
       "status": "done",
-      "ratio": 0.8429,
-      "waton_lines": 1406,
-      "baileys_lines": 1668
+      "ratio": 0.8417,
+      "waton_lines": 1404,
+      "baileys_lines": 1668,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     },
     "app-state-sync": {
       "status": "done",
-      "ratio": 1.3171,
-      "waton_lines": 108,
-      "baileys_lines": 82
+      "ratio": 1.5122,
+      "waton_lines": 124,
+      "baileys_lines": 82,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     },
     "retry-manager": {
       "status": "done",
       "ratio": 0.9153,
       "waton_lines": 270,
-      "baileys_lines": 295
+      "baileys_lines": 295,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     },
     "group-signal": {
       "status": "done",
       "ratio": 1.0256,
       "waton_lines": 120,
-      "baileys_lines": 117
+      "baileys_lines": 117,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     },
     "messages-send": {
       "status": "done",
-      "ratio": 0.8009,
-      "waton_lines": 1038,
-      "baileys_lines": 1296
+      "ratio": 0.814,
+      "waton_lines": 1055,
+      "baileys_lines": 1296,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     },
     "process-message": {
       "status": "done",
-      "ratio": 1.1343,
-      "waton_lines": 760,
-      "baileys_lines": 670
+      "ratio": 1.1716,
+      "waton_lines": 785,
+      "baileys_lines": 670,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     },
     "groups-api": {
       "status": "done",
       "ratio": 0.9418,
       "waton_lines": 340,
-      "baileys_lines": 361
+      "baileys_lines": 361,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     },
     "communities-api": {
       "status": "done",
       "ratio": 0.8679,
       "waton_lines": 414,
-      "baileys_lines": 477
+      "baileys_lines": 477,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     },
     "newsletter-api": {
       "status": "done",
       "ratio": 0.9869,
       "waton_lines": 226,
-      "baileys_lines": 229
+      "baileys_lines": 229,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     },
     "connection-core": {
       "status": "done",
-      "ratio": 0.9641,
-      "waton_lines": 1100,
-      "baileys_lines": 1141
+      "ratio": 0.9816,
+      "waton_lines": 1120,
+      "baileys_lines": 1141,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0
+      }
     }
   }
 }

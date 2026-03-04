@@ -6,7 +6,6 @@ import pytest
 from waton.client.client import WAClient
 from waton.infra.storage_sqlite import SQLiteStorage
 
-
 pytestmark = pytest.mark.skipif(
     os.getenv("WATON_RUN_WHATSAPP_INTEGRATION") != "1",
     reason="Set WATON_RUN_WHATSAPP_INTEGRATION=1 to run live WhatsApp connection test.",

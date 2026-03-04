@@ -1,0 +1,286 @@
+{
+    "version": "1.1.408",
+    "time": "1772453919124",
+    "generalDiagnostics": [
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Class \"_MessageKeyLike\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 28,
+                    "character": 6
+                },
+                "end": {
+                    "line": 28,
+                    "character": 21
+                }
+            },
+            "rule": "reportUnusedClass"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Unnecessary isinstance call; \"str\" is always an instance of \"str\"",
+            "range": {
+                "start": {
+                    "line": 63,
+                    "character": 28
+                },
+                "end": {
+                    "line": 63,
+                    "character": 55
+                }
+            },
+            "rule": "reportUnnecessaryIsInstance"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Unnecessary isinstance call; \"BinaryNode\" is always an instance of \"BinaryNode\"",
+            "range": {
+                "start": {
+                    "line": 139,
+                    "character": 45
+                },
+                "end": {
+                    "line": 139,
+                    "character": 70
+                }
+            },
+            "rule": "reportUnnecessaryIsInstance"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "\"_unpad_random_max16\" is private and used outside of the module in which it is declared",
+            "range": {
+                "start": {
+                    "line": 149,
+                    "character": 54
+                },
+                "end": {
+                    "line": 149,
+                    "character": 73
+                }
+            },
+            "rule": "reportPrivateUsage"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "\"participant\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 191,
+                    "character": 78
+                },
+                "end": {
+                    "line": 191,
+                    "character": 89
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "\"participant\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 193,
+                    "character": 80
+                },
+                "end": {
+                    "line": 193,
+                    "character": 91
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Unnecessary isinstance call; \"dict[str, object]\" is always an instance of \"dict[Unknown, Unknown]\"",
+            "range": {
+                "start": {
+                    "line": 209,
+                    "character": 11
+                },
+                "end": {
+                    "line": 209,
+                    "character": 40
+                }
+            },
+            "rule": "reportUnnecessaryIsInstance"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Unnecessary isinstance call; \"_AppStateSyncKey\" is always an instance of \"dict[Unknown, Unknown]\"",
+            "range": {
+                "start": {
+                    "line": 263,
+                    "character": 27
+                },
+                "end": {
+                    "line": 263,
+                    "character": 53
+                }
+            },
+            "rule": "reportUnnecessaryIsInstance"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Unnecessary \"cast\" call; type is already \"_AppStateSyncKey\"",
+            "range": {
+                "start": {
+                    "line": 265,
+                    "character": 37
+                },
+                "end": {
+                    "line": 265,
+                    "character": 69
+                }
+            },
+            "rule": "reportUnnecessaryCast"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Type of \"enc_payload_b64\" is partially unknown\n  Type of \"enc_payload_b64\" is \"Unknown | None\"",
+            "range": {
+                "start": {
+                    "line": 288,
+                    "character": 12
+                },
+                "end": {
+                    "line": 288,
+                    "character": 27
+                }
+            },
+            "rule": "reportUnknownVariableType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Type of \"get\" is partially unknown\n  Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+            "range": {
+                "start": {
+                    "line": 288,
+                    "character": 30
+                },
+                "end": {
+                    "line": 288,
+                    "character": 43
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Type of \"enc_iv_b64\" is partially unknown\n  Type of \"enc_iv_b64\" is \"Unknown | None\"",
+            "range": {
+                "start": {
+                    "line": 289,
+                    "character": 12
+                },
+                "end": {
+                    "line": 289,
+                    "character": 22
+                }
+            },
+            "rule": "reportUnknownVariableType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Type of \"get\" is partially unknown\n  Type of \"get\" is \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\"",
+            "range": {
+                "start": {
+                    "line": 289,
+                    "character": 25
+                },
+                "end": {
+                    "line": 289,
+                    "character": 38
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Argument of type \"object | None\" cannot be assigned to parameter \"message_key\" of type \"dict[str, object] | None\" in function \"_resolve_key_jid\"\n  Type \"object | None\" is not assignable to type \"dict[str, object] | None\"\n    Type \"object\" is not assignable to type \"dict[str, object] | None\"\n      \"object\" is not assignable to \"dict[str, object]\"\n      \"object\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 297,
+                    "character": 24
+                },
+                "end": {
+                    "line": 297,
+                    "character": 103
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Unnecessary isinstance call; \"dict[str, object]\" is always an instance of \"dict[Unknown, Unknown]\"",
+            "range": {
+                "start": {
+                    "line": 297,
+                    "character": 64
+                },
+                "end": {
+                    "line": 297,
+                    "character": 93
+                }
+            },
+            "rule": "reportUnnecessaryIsInstance"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Argument of type \"object | None\" cannot be assigned to parameter \"message_key\" of type \"dict[str, object] | None\" in function \"_resolve_key_jid\"\n  Type \"object | None\" is not assignable to type \"dict[str, object] | None\"\n    Type \"object\" is not assignable to type \"dict[str, object] | None\"\n      \"object\" is not assignable to \"dict[str, object]\"\n      \"object\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 325,
+                    "character": 24
+                },
+                "end": {
+                    "line": 325,
+                    "character": 110
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\process_message.py",
+            "severity": "error",
+            "message": "Unnecessary isinstance call; \"dict[str, object]\" is always an instance of \"dict[Unknown, Unknown]\"",
+            "range": {
+                "start": {
+                    "line": 325,
+                    "character": 68
+                },
+                "end": {
+                    "line": 325,
+                    "character": 100
+                }
+            },
+            "rule": "reportUnnecessaryIsInstance"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 1,
+        "errorCount": 17,
+        "warningCount": 0,
+        "informationCount": 0,
+        "timeInSec": 0.917
+    }
+}
+

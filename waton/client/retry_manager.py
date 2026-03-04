@@ -10,7 +10,10 @@ import threading
 import time
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 MESSAGE_KEY_SEPARATOR = "\x00"
 RECREATE_SESSION_TIMEOUT_MS = 60 * 60 * 1000
@@ -168,7 +171,7 @@ class RetryManager:
             self._statistics["sessionRecreations"] += 1
             return {"reason": "missing_session", "recreate": True}
 
-        if self.is_mac_error(error_code):
+        if error_code is not None and self.is_mac_error(error_code):
             self._session_recreate_history[jid] = now
             self._statistics["sessionRecreations"] += 1
             return {"reason": f"mac_error_{int(error_code)}", "recreate": True}

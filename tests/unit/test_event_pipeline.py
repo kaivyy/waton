@@ -1,5 +1,7 @@
 import pytest
+
 from waton.client.event_pipeline import EventPipeline
+
 
 @pytest.mark.asyncio
 async def test_persist_happens_before_emit() -> None:

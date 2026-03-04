@@ -1,32 +1,37 @@
 import asyncio
-import aiosqlite
 import json
-from base64 import b64encode, b64decode
-from typing import Any
+from base64 import b64decode, b64encode
+
+import aiosqlite
+
 from waton.utils.auth import AuthCreds, StoragePort
 from waton.utils.crypto import generate_keypair
 
+
 class SQLiteStorage(StoragePort):
     """
-    Async SQLite implementation of the StoragePort for persisting 
+    Async SQLite implementation of the StoragePort for persisting
     auth credentials, signal sessions, and pre-keys.
     """
-    def __init__(self, db_path: str = "waton.db"):
+
+    def __init__(self, db_path: str = "waton.db") -> None:  # noqa: ANN204
         self.db_path = db_path
         self._db: aiosqlite.Connection | None = None
         self._lock = asyncio.Lock()
 
-    async def connect(self):
+    async def connect(self) -> None:  # noqa: ANN201
         if not self._db:
             self._db = await aiosqlite.connect(self.db_path)
             await self._init_db()
 
-    async def close(self):
+    async def close(self) -> None:  # noqa: ANN201
         if self._db:
             await self._db.close()
             self._db = None
 
-    async def _init_db(self):
+    async def _init_db(self) -> None:  # noqa: ANN202
+        if self._db is None:
+            return
         await self._db.execute('''
             CREATE TABLE IF NOT EXISTS creds (
                 id TEXT PRIMARY KEY,
@@ -60,7 +65,7 @@ class SQLiteStorage(StoragePort):
 
     def _b64_decode(self, data: str) -> bytes:
         return b64decode(data)
-        
+
     def _creds_to_json(self, creds: AuthCreds) -> str:
         d = {
             "noise_key": {
@@ -158,7 +163,10 @@ class SQLiteStorage(StoragePort):
 
     async def get_creds(self) -> AuthCreds | None:
         await self.connect()
-        async with self._db.execute('SELECT data FROM creds WHERE id=?', ("default",)) as cursor:
+        db = self._db
+        if db is None:
+            return None
+        async with db.execute('SELECT data FROM creds WHERE id=?', ("default",)) as cursor:
             row = await cursor.fetchone()
             if row:
                 return self._json_to_creds(row[0])
@@ -166,17 +174,23 @@ class SQLiteStorage(StoragePort):
 
     async def save_creds(self, creds: AuthCreds) -> None:
         await self.connect()
+        db = self._db
+        if db is None:
+            return
         async with self._lock:
             data = self._creds_to_json(creds)
-            await self._db.execute(
+            await db.execute(
                 'INSERT OR REPLACE INTO creds (id, data) VALUES (?, ?)',
                 ("default", data)
             )
-            await self._db.commit()
+            await db.commit()
 
     async def get_session(self, jid: str) -> bytes | None:
         await self.connect()
-        async with self._db.execute('SELECT data FROM sessions WHERE jid=?', (jid,)) as cursor:
+        db = self._db
+        if db is None:
+            return None
+        async with db.execute('SELECT data FROM sessions WHERE jid=?', (jid,)) as cursor:
             row = await cursor.fetchone()
             if row:
                 return self._b64_decode(row[0])
@@ -184,17 +198,23 @@ class SQLiteStorage(StoragePort):
 
     async def save_session(self, jid: str, data: bytes) -> None:
         await self.connect()
+        db = self._db
+        if db is None:
+            return
         async with self._lock:
             encoded = self._b64_encode(data)
-            await self._db.execute(
+            await db.execute(
                 'INSERT OR REPLACE INTO sessions (jid, data) VALUES (?, ?)',
                 (jid, encoded)
             )
-            await self._db.commit()
+            await db.commit()
 
     async def get_prekey(self, key_id: int) -> bytes | None:
         await self.connect()
-        async with self._db.execute('SELECT data FROM prekeys WHERE key_id=?', (key_id,)) as cursor:
+        db = self._db
+        if db is None:
+            return None
+        async with db.execute('SELECT data FROM prekeys WHERE key_id=?', (key_id,)) as cursor:
             row = await cursor.fetchone()
             if row:
                 return self._b64_decode(row[0])
@@ -202,18 +222,24 @@ class SQLiteStorage(StoragePort):
 
     async def save_prekey(self, key_id: int, data: bytes) -> None:
         await self.connect()
+        db = self._db
+        if db is None:
+            return
         async with self._lock:
             encoded = self._b64_encode(data)
-            await self._db.execute(
+            await db.execute(
                 'INSERT OR REPLACE INTO prekeys (key_id, data) VALUES (?, ?)',
                 (key_id, encoded)
             )
-            await self._db.commit()
+            await db.commit()
 
     async def get_sender_key(self, group_jid: str, sender_jid: str) -> bytes | None:
         await self.connect()
-        async with self._db.execute(
-            'SELECT data FROM sender_keys WHERE group_jid=? AND sender_jid=?', 
+        db = self._db
+        if db is None:
+            return None
+        async with db.execute(
+            'SELECT data FROM sender_keys WHERE group_jid=? AND sender_jid=?',
             (group_jid, sender_jid)
         ) as cursor:
             row = await cursor.fetchone()
@@ -223,10 +249,13 @@ class SQLiteStorage(StoragePort):
 
     async def save_sender_key(self, group_jid: str, sender_jid: str, data: bytes) -> None:
         await self.connect()
+        db = self._db
+        if db is None:
+            return
         async with self._lock:
             encoded = self._b64_encode(data)
-            await self._db.execute(
+            await db.execute(
                 'INSERT OR REPLACE INTO sender_keys (group_jid, sender_jid, data) VALUES (?, ?, ?)',
                 (group_jid, sender_jid, encoded)
             )
-            await self._db.commit()
+            await db.commit()

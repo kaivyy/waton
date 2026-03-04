@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
 @dataclass
@@ -40,20 +43,30 @@ class LiveProbe:
         attrs = getattr(node, "attrs", None)
         if tag != "ack" or not isinstance(attrs, dict):
             return
-        if attrs.get("class") != "message":
+
+        attrs_map = cast("Mapping[str, object]", attrs)
+        if attrs_map.get("class") != "message":
             return
 
-        message_id = str(attrs.get("id", ""))
+        raw_message_id = attrs_map.get("id")
+        message_id = raw_message_id if isinstance(raw_message_id, str) else ""
         if not message_id:
             return
 
-        error = attrs.get("error")
+        error = attrs_map.get("error")
+        remote_from = attrs_map.get("from")
+        remote_to = attrs_map.get("to")
+        remote_jid = (
+            remote_from
+            if isinstance(remote_from, str)
+            else (remote_to if isinstance(remote_to, str) else None)
+        )
         observation = AckObservation(
             message_id=message_id,
-            remote_jid=attrs.get("from") or attrs.get("to"),
+            remote_jid=remote_jid,
             status="error" if error else "ok",
             error=str(error) if error is not None else None,
-            attrs=dict(attrs),
+            attrs=dict(attrs_map),
         )
         await self._record_ack(observation)
 
@@ -64,17 +77,19 @@ class LiveProbe:
         if not isinstance(bad_ack, dict):
             return
 
-        message_id = bad_ack.get("message_id")
+        bad_ack_map = cast("Mapping[str, object]", bad_ack)
+        message_id = bad_ack_map.get("message_id")
         if not isinstance(message_id, str) or not message_id:
             return
 
-        error_raw = bad_ack.get("error")
+        error_raw = bad_ack_map.get("error")
+        remote_jid_raw = bad_ack_map.get("remote_jid")
         observation = AckObservation(
             message_id=message_id,
-            remote_jid=bad_ack.get("remote_jid"),
+            remote_jid=remote_jid_raw if isinstance(remote_jid_raw, str) else None,
             status="error",
             error=str(error_raw) if error_raw is not None else "unknown",
-            attrs=dict(bad_ack),
+            attrs=dict(bad_ack_map),
         )
         await self._record_ack(observation)
 

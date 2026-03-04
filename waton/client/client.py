@@ -8,7 +8,7 @@ import copy
 import hashlib
 import logging
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from waton.client.messages_recv import (
     build_call_reject_node,
@@ -230,7 +230,14 @@ class WAClient:
             if isinstance(frame, bytes):
                 await self._raw_frame_queue.put(frame)
             else:
-                if buffer_enabled and classify_incoming_node(frame) in {"message", "receipt", "notification", "call", "ack", "ib"}:
+                if buffer_enabled and classify_incoming_node(frame) in {
+                    "message",
+                    "receipt",
+                    "notification",
+                    "call",
+                    "ack",
+                    "ib",
+                }:
                     buffered_nodes.append(frame)
                 else:
                     await self._handle_binary_node(frame)
@@ -297,7 +304,9 @@ class WAClient:
         await self.on_message(node)
 
     async def _handle_incoming_node(self, node: BinaryNode, incoming_kind: str) -> None:
-        if incoming_kind in {"message", "receipt", "notification", "call"} and self.config.get("auto_ack_incoming", True):
+        if incoming_kind in {"message", "receipt", "notification", "call"} and self.config.get(
+            "auto_ack_incoming", True
+        ):
             await self._maybe_send_ack(node)
 
         signal_repo: SignalRepository | None = None
@@ -328,13 +337,15 @@ class WAClient:
         call = event.get("call")
         if not isinstance(call, dict):
             return
+        call_data = cast("dict[str, Any]", call)
 
-        status = str(call.get("status") or "").lower()
+        status_value = call_data.get("status")
+        status = status_value.lower() if isinstance(status_value, str) else ""
         if status not in {"offer", "offer_video", "offer_audio"}:
             return
 
-        call_id = call.get("id")
-        call_from = call.get("from")
+        call_id = call_data.get("id")
+        call_from = call_data.get("from")
         if not isinstance(call_id, str) or not call_id:
             return
         if not isinstance(call_from, str) or not call_from:
@@ -358,9 +369,10 @@ class WAClient:
         ack = event.get("ack")
         if not isinstance(ack, dict):
             return
-        if ack.get("class") != "receipt":
+        ack_data = cast("dict[str, Any]", ack)
+        if ack_data.get("class") != "receipt":
             return
-        message_id = ack.get("id")
+        message_id = ack_data.get("id")
         if isinstance(message_id, str) and message_id:
             self.retry_manager.mark_retry_acked(message_id)
 
@@ -372,50 +384,57 @@ class WAClient:
         protocol = event.get("protocol")
         if not isinstance(protocol, dict):
             return
+        protocol_data = cast("dict[str, Any]", protocol)
 
         creds_changed = False
         additional_data = dict(self.creds.additional_data or {})
 
         if event_type == "messages.app_state_sync_key_share":
-            share = protocol.get("app_state_sync_key_share")
-            keys_payload = share.get("keys") if isinstance(share, dict) else None
+            share = protocol_data.get("app_state_sync_key_share")
+            share_data = cast("dict[str, Any]", share) if isinstance(share, dict) else {}
+            keys_payload = share_data.get("keys")
             stored_keys = dict(additional_data.get("app_state_sync_keys") or {})
             if isinstance(keys_payload, list):
-                for key_item in keys_payload:
-                    if not isinstance(key_item, dict):
+                keys_payload_list = cast("list[Any]", keys_payload)
+                for key_item_any in keys_payload_list:
+                    if not isinstance(key_item_any, dict):
                         continue
-                    key_id = key_item.get("key_id_b64")
+                    key_item_data = cast("dict[str, Any]", key_item_any)
+                    key_id = key_item_data.get("key_id_b64")
                     if not isinstance(key_id, str) or not key_id:
                         continue
+                    key_data_size = key_item_data.get("key_data_size", 0)
                     normalized = {
                         "key_id_b64": key_id,
-                        "key_data_size": int(key_item.get("key_data_size", 0)),
+                        "key_data_size": int(key_data_size),
                     }
                     if stored_keys.get(key_id) != normalized:
                         stored_keys[key_id] = normalized
                         creds_changed = True
             if stored_keys:
                 additional_data["app_state_sync_keys"] = stored_keys
-                event["app_state_sync_keys_saved"] = len(stored_keys)
+                if creds_changed:
+                    event["app_state_sync_keys_saved"] = len(stored_keys)
 
         if event_type == "messages.history_sync":
             processed = list(self.creds.processed_history_messages or [])
             message = event.get("message")
-            history = protocol.get("history_sync")
-            message_id = message.get("id") if isinstance(message, dict) else None
-            sync_type = history.get("sync_type") if isinstance(history, dict) else None
-            chunk_order = history.get("chunk_order") if isinstance(history, dict) else None
+            message_data = cast("dict[str, Any]", message) if isinstance(message, dict) else {}
+            history = protocol_data.get("history_sync")
+            history_data = cast("dict[str, Any]", history) if isinstance(history, dict) else {}
+            message_id = message_data.get("id")
+            sync_type = history_data.get("sync_type")
+            chunk_order = history_data.get("chunk_order")
 
             if isinstance(message_id, str) and message_id:
                 record = {
                     "id": message_id,
                     "sync_type": sync_type,
                     "chunk_order": chunk_order,
-                    "timestamp": message.get("timestamp") if isinstance(message, dict) else None,
+                    "timestamp": message_data.get("timestamp"),
                 }
                 already_recorded = any(
-                    isinstance(entry, dict)
-                    and entry.get("id") == message_id
+                    entry.get("id") == message_id
                     and entry.get("sync_type") == sync_type
                     and entry.get("chunk_order") == chunk_order
                     for entry in processed
@@ -437,13 +456,14 @@ class WAClient:
         message = event.get("message")
         if not isinstance(message, dict):
             return
+        message_data = cast("dict[str, Any]", message)
 
-        content_type = message.get("content_type")
+        content_type = message_data.get("content_type")
         if content_type not in {"poll_creation", "event"}:
             return
 
-        message_id = message.get("id")
-        message_secret_b64 = message.get("message_secret_b64")
+        message_id = message_data.get("id")
+        message_secret_b64 = message_data.get("message_secret_b64")
         if not isinstance(message_id, str) or not message_id:
             return
         if not isinstance(message_secret_b64, str) or not message_secret_b64:
@@ -525,15 +545,18 @@ class WAClient:
         receipt = event.get("receipt")
         if not isinstance(receipt, dict):
             return
+        receipt_data = cast("dict[str, Any]", receipt)
 
-        from_jid = receipt.get("participant") or receipt.get("from") or ""
-        message_ids = receipt.get("message_ids")
+        from_jid_value = receipt_data.get("participant") or receipt_data.get("from")
+        from_jid = from_jid_value if isinstance(from_jid_value, str) else ""
+        message_ids = receipt_data.get("message_ids")
         if not isinstance(message_ids, list):
             message_ids = []
+        message_ids_list = cast("list[Any]", message_ids)
 
         retry_decisions: dict[str, bool] = {}
         retry_attempts: dict[str, int] = {}
-        for message_id in message_ids:
+        for message_id in message_ids_list:
             if not isinstance(message_id, str) or not message_id:
                 continue
             key = f"{from_jid}:{message_id}"
@@ -549,17 +572,22 @@ class WAClient:
         receipt = event.get("receipt")
         if not isinstance(receipt, dict):
             return
+        receipt_data = cast("dict[str, Any]", receipt)
 
-        message_ids = receipt.get("message_ids")
+        message_ids = receipt_data.get("message_ids")
         if not isinstance(message_ids, list):
             message_ids = []
+        message_ids_list = cast("list[Any]", message_ids)
 
         retry_decisions = event.get("retry_decisions")
         if not isinstance(retry_decisions, dict):
             retry_decisions = {}
+        retry_decisions_data = cast("dict[str, Any]", retry_decisions)
 
-        from_jid = receipt.get("from") if isinstance(receipt.get("from"), str) else ""
-        participant = receipt.get("participant") if isinstance(receipt.get("participant"), str) else None
+        from_value = receipt_data.get("from")
+        from_jid = from_value if isinstance(from_value, str) else ""
+        participant_value = receipt_data.get("participant")
+        participant = participant_value if isinstance(participant_value, str) else None
         placeholder_on_retry = bool(
             self.config.get("placeholder_resend_on_retry", self.config.get("enable_placeholder_resend", True))
         )
@@ -574,10 +602,10 @@ class WAClient:
             "placeholder_sent_ids": [],
             "placeholder_failed_ids": [],
         }
-        for raw_message_id in message_ids:
+        for raw_message_id in message_ids_list:
             if not isinstance(raw_message_id, str) or not raw_message_id:
                 continue
-            if not bool(retry_decisions.get(raw_message_id)):
+            if not bool(retry_decisions_data.get(raw_message_id)):
                 outcome["skipped_ids"].append(raw_message_id)
                 continue
 
@@ -985,6 +1013,9 @@ class WAClient:
         self._epoch += 1
         return tag
 
+    def generate_message_tag(self) -> str:
+        return self._generate_message_tag()
+
     async def _handle_ws_disconnect(self, exc: Exception) -> None:
         reason = self._pending_disconnect_reason or exc
         self._pending_disconnect_reason = None
@@ -1093,8 +1124,9 @@ class WAClient:
     async def _default_connection_handler(self, event: ConnectionEvent) -> None:
         logger.info("connection update: %s", event)
 
-    async def send_message(self, jid: str, message: dict) -> str:
-        msg_id = message.get("id", "generated-id")
-        if hasattr(self, "pipeline"):
-            await self.pipeline.process({"type": "message.send", "id": msg_id, "jid": jid})
+    async def send_message(self, jid: str, message: dict[str, Any]) -> Any:
+        msg_id: Any = message.get("id", "generated-id")
+        pipeline = getattr(self, "pipeline", None)
+        if pipeline is not None and hasattr(pipeline, "process"):
+            await pipeline.process({"type": "message.send", "id": msg_id, "jid": jid})
         return msg_id

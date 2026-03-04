@@ -1,5 +1,6 @@
-from typing import Any
 from dataclasses import dataclass
+from typing import Any
+
 
 @dataclass
 class ConnectionEvent:
@@ -14,4 +15,4 @@ class MessagesUpsertEvent:
 
 @dataclass
 class MessageUpdateEvent:
-    updates: list[dict]
+    updates: list[dict[str, Any]]

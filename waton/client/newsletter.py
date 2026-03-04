@@ -192,7 +192,7 @@ class NewsletterAPI:
     def _children(node: BinaryNode | None) -> list[BinaryNode]:
         if node is None or not isinstance(node.content, list):
             return []
-        return [child for child in node.content if isinstance(child, BinaryNode)]
+        return list(node.content)
 
     @classmethod
     def _find_child(cls, node: BinaryNode | None, tag: str) -> BinaryNode | None:

@@ -7,7 +7,10 @@ connection/auth flow. High-level message payloads still use ``wa_pb2.Message``.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def _encode_varint(value: int) -> bytes:
@@ -107,6 +110,34 @@ def _iter_fields(data: bytes) -> Iterable[tuple[int, int, bytes | int]]:
         raise ValueError(f"unsupported wire type: {wire_type}")
 
 
+def encode_varint(value: int) -> bytes:
+    return _encode_varint(value)
+
+
+def encode_len_delimited(field_number: int, payload: bytes) -> bytes:
+    return _encode_len_delimited(field_number, payload)
+
+
+def encode_string(field_number: int, value: str | None) -> bytes:
+    return _encode_string(field_number, value)
+
+
+def encode_varint_field(field_number: int, value: int | None) -> bytes:
+    return _encode_varint_field(field_number, value)
+
+
+def encode_bool(field_number: int, value: bool | None) -> bytes:
+    return _encode_bool(field_number, value)
+
+
+def iter_fields(data: bytes) -> Iterable[tuple[int, int, bytes | int]]:
+    return _iter_fields(data)
+
+
+def iter_wire_fields(data: bytes) -> Iterable[tuple[int, int, bytes | int]]:
+    return iter_fields(data)
+
+
 @dataclass
 class HandshakeClientHello:
     ephemeral: bytes | None = None
@@ -127,7 +158,7 @@ class HandshakeClientHello:
         )
 
     @classmethod
-    def ParseFromString(cls, payload: bytes) -> "HandshakeClientHello":
+    def ParseFromString(cls, payload: bytes) -> HandshakeClientHello:
         out = cls()
         for field, wire, value in _iter_fields(payload):
             if wire == 2 and field == 1:
@@ -161,7 +192,7 @@ class HandshakeServerHello:
         )
 
     @classmethod
-    def ParseFromString(cls, payload: bytes) -> "HandshakeServerHello":
+    def ParseFromString(cls, payload: bytes) -> HandshakeServerHello:
         out = cls()
         for field, wire, value in _iter_fields(payload):
             if wire == 2 and field == 1:
@@ -191,7 +222,7 @@ class HandshakeClientFinish:
         )
 
     @classmethod
-    def ParseFromString(cls, payload: bytes) -> "HandshakeClientFinish":
+    def ParseFromString(cls, payload: bytes) -> HandshakeClientFinish:
         out = cls()
         for field, wire, value in _iter_fields(payload):
             if wire == 2 and field == 1:
@@ -225,7 +256,7 @@ class HandshakeMessage:
         )
 
     @classmethod
-    def ParseFromString(cls, payload: bytes) -> "HandshakeMessage":
+    def ParseFromString(cls, payload: bytes) -> HandshakeMessage:
         out = cls()
         for field, wire, value in _iter_fields(payload):
             if wire != 2:
@@ -469,7 +500,7 @@ class ADVSignedDeviceIdentityHMAC:
         HOSTED = 1
 
     @classmethod
-    def ParseFromString(cls, payload: bytes) -> "ADVSignedDeviceIdentityHMAC":
+    def ParseFromString(cls, payload: bytes) -> ADVSignedDeviceIdentityHMAC:
         out = cls()
         for field, wire, value in _iter_fields(payload):
             if wire == 2 and field == 1:
@@ -489,7 +520,7 @@ class ADVSignedDeviceIdentity:
     device_signature: bytes | None = None
 
     @classmethod
-    def ParseFromString(cls, payload: bytes) -> "ADVSignedDeviceIdentity":
+    def ParseFromString(cls, payload: bytes) -> ADVSignedDeviceIdentity:
         out = cls()
         for field, wire, value in _iter_fields(payload):
             if wire == 2 and field == 1:
@@ -526,7 +557,7 @@ class ADVDeviceIdentity:
         HOSTED = 1
 
     @classmethod
-    def ParseFromString(cls, payload: bytes) -> "ADVDeviceIdentity":
+    def ParseFromString(cls, payload: bytes) -> ADVDeviceIdentity:
         out = cls()
         for field, wire, value in _iter_fields(payload):
             if wire == 0 and field == 1:

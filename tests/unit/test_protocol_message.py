@@ -43,7 +43,7 @@ def test_decrypt_poll_vote_roundtrip() -> None:
         actor_jid=voter_jid,
         message_secret=secret,
     )
-    aad = f"{poll_message_id}\x00{voter_jid}".encode("utf-8")
+    aad = f"{poll_message_id}\x00{voter_jid}".encode()
     ciphertext = aes_encrypt(plaintext, key, iv, aad)
 
     out = decrypt_poll_vote(
@@ -81,7 +81,7 @@ def test_decrypt_event_response_roundtrip() -> None:
         actor_jid=responder_jid,
         message_secret=secret,
     )
-    aad = f"{event_message_id}\x00{responder_jid}".encode("utf-8")
+    aad = f"{event_message_id}\x00{responder_jid}".encode()
     ciphertext = aes_encrypt(plaintext, key, iv, aad)
 
     out = decrypt_event_response(

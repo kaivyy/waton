@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import struct
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from waton.defaults.config import NOISE_MODE, WA_NOISE_HEADER
 from waton.protocol.binary_codec import decode_binary_node
-from waton.protocol.binary_node import BinaryNode
+
+if TYPE_CHECKING:
+    from waton.protocol.binary_node import BinaryNode
 from waton.utils.crypto import aes_decrypt, aes_encrypt, generate_keypair, hkdf, sha256, shared_key
 
 EMPTY_AAD = b""
@@ -46,7 +48,7 @@ class NoiseHandler:
         keypair: dict[str, bytes] | None = None,
         noise_header: bytes = WA_NOISE_HEADER,
         routing_info: bytes | None = None,
-    ):
+    ) -> None:
         self.local_keypair = keypair or generate_keypair()
         self.noise_header = noise_header
 

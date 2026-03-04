@@ -15,11 +15,12 @@ def derive_media_keys(media_key: bytes, media_type: str) -> dict[str, bytes]:
         "ref_key": expanded[80:112],
     }
 
-def _upload_once(data: bytes) -> str:
+def upload_once(data: bytes) -> str:
     digest = sha256(data).hex()
     return f"https://media.local/{digest}"
 
-def _verify_remote_checksum(url: str, data: bytes) -> bool:
+
+def verify_remote_checksum(url: str, data: bytes) -> bool:
     expected = sha256(data).hex()
     remote = url.rstrip("/").split("/")[-1]
     return remote == expected

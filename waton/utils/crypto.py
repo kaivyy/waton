@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Callable, Mapping
+from typing import Any, cast  # noqa: TC006
 
 try:
     import waton._crypto as _rust_crypto
@@ -12,24 +14,38 @@ except Exception as exc:  # pragma: no cover - exercised only when extension is 
         "If you are building from source, install Rust + maturin and run `maturin develop`."
     ) from exc
 
+_rust_crypto_mod: Any = _rust_crypto
 
-curve25519_generate_keypair = _rust_crypto.curve25519_generate_keypair
-rust_shared_key = _rust_crypto.curve25519_shared_key
-rust_sign = _rust_crypto.curve25519_sign
-rust_verify = _rust_crypto.curve25519_verify
-rust_aes_gcm_encrypt = _rust_crypto.aes_gcm_encrypt
-rust_aes_gcm_decrypt = _rust_crypto.aes_gcm_decrypt
-rust_aes_cbc_encrypt = _rust_crypto.aes_cbc_encrypt
-rust_aes_cbc_decrypt = _rust_crypto.aes_cbc_decrypt
-rust_hkdf = _rust_crypto.hkdf_sha256
-rust_hmac = _rust_crypto.hmac_sha256
-rust_sha256 = _rust_crypto.sha256_hash
-rust_signal_process_prekey_bundle = _rust_crypto.signal_process_prekey_bundle
-rust_signal_session_encrypt = _rust_crypto.signal_session_encrypt
-rust_signal_session_decrypt_prekey = _rust_crypto.signal_session_decrypt_prekey
-rust_signal_session_decrypt_whisper = _rust_crypto.signal_session_decrypt_whisper
-rust_group_encrypt = _rust_crypto.group_encrypt
-rust_group_decrypt = _rust_crypto.group_decrypt
+
+curve25519_generate_keypair = cast(Callable[[], dict[str, bytes]], _rust_crypto_mod.curve25519_generate_keypair)
+rust_shared_key = cast(Callable[[bytes, bytes], bytes], _rust_crypto_mod.curve25519_shared_key)
+rust_sign = cast(Callable[[bytes, bytes], bytes], _rust_crypto_mod.curve25519_sign)
+rust_verify = cast(Callable[[bytes, bytes, bytes], bool], _rust_crypto_mod.curve25519_verify)
+rust_aes_gcm_encrypt = cast(Callable[[bytes, bytes, bytes, bytes], bytes], _rust_crypto_mod.aes_gcm_encrypt)
+rust_aes_gcm_decrypt = cast(Callable[[bytes, bytes, bytes, bytes], bytes], _rust_crypto_mod.aes_gcm_decrypt)
+rust_aes_cbc_encrypt = cast(Callable[[bytes, bytes, bytes], bytes], _rust_crypto_mod.aes_cbc_encrypt)
+rust_aes_cbc_decrypt = cast(Callable[[bytes, bytes, bytes], bytes], _rust_crypto_mod.aes_cbc_decrypt)
+rust_hkdf = cast(Callable[[bytes, int, bytes, bytes], bytes], _rust_crypto_mod.hkdf_sha256)
+rust_hmac = cast(Callable[[bytes, bytes], bytes], _rust_crypto_mod.hmac_sha256)
+rust_sha256 = cast(Callable[[bytes], bytes], _rust_crypto_mod.sha256_hash)
+rust_signal_process_prekey_bundle = cast(
+    Callable[[bytes, int, str, int, int, bytes, int, bytes, bytes, bytes | None, int | None, bytes | None], bytes],
+    _rust_crypto_mod.signal_process_prekey_bundle,
+)
+rust_signal_session_encrypt = cast(
+    Callable[[bytes, bytes, int, str, int, bytes], Mapping[str, bytes | str]],
+    _rust_crypto_mod.signal_session_encrypt,
+)
+rust_signal_session_decrypt_prekey = cast(
+    Callable[[bytes, bytes, int, str, int, int | None, bytes | None, int, bytes, bytes], Mapping[str, bytes | str]],
+    _rust_crypto_mod.signal_session_decrypt_prekey,
+)
+rust_signal_session_decrypt_whisper = cast(
+    Callable[[bytes, bytes, int, str, int, bytes], Mapping[str, bytes | str]],
+    _rust_crypto_mod.signal_session_decrypt_whisper,
+)
+rust_group_encrypt = cast(Callable[[bytes, bytes], Mapping[str, bytes]], _rust_crypto_mod.group_encrypt)
+rust_group_decrypt = cast(Callable[[bytes, bytes], Mapping[str, bytes]], _rust_crypto_mod.group_decrypt)
 def generate_keypair() -> dict[str, bytes]:
     """Generates a Curve25519 keypair."""
     return curve25519_generate_keypair()
@@ -102,6 +118,18 @@ def signal_process_prekey_bundle(
         prekey_public,
     )
 
+def _to_bytes(value: object) -> bytes:
+    if isinstance(value, bytes):
+        return value
+    if isinstance(value, str):
+        return value.encode("utf-8")
+    if isinstance(value, bytearray):
+        return bytes(value)
+    if isinstance(value, memoryview):
+        return value.tobytes()
+    raise TypeError(f"expected bytes-like value, got {type(value).__name__}")
+
+
 def signal_session_encrypt(
     session: bytes,
     identity_private: bytes,
@@ -119,7 +147,7 @@ def signal_session_encrypt(
         remote_device,
         plaintext,
     )
-    return str(result["type"]), bytes(result["ciphertext"]), bytes(result["session"])
+    return str(result["type"]), _to_bytes(result["ciphertext"]), _to_bytes(result["session"])
 
 def signal_session_decrypt_prekey(
     session: bytes,
@@ -146,7 +174,11 @@ def signal_session_decrypt_prekey(
         signed_prekey_private,
         ciphertext,
     )
-    return {"type": str(result["type"]), "ciphertext": bytes(result["ciphertext"]), "session": bytes(result["session"])}
+    return {
+        "type": str(result["type"]),
+        "ciphertext": _to_bytes(result["ciphertext"]),
+        "session": _to_bytes(result["session"]),
+    }
 
 def signal_session_decrypt_whisper(
     session: bytes,
@@ -165,7 +197,11 @@ def signal_session_decrypt_whisper(
         remote_device,
         ciphertext,
     )
-    return {"type": str(result["type"]), "ciphertext": bytes(result["ciphertext"]), "session": bytes(result["session"])}
+    return {
+        "type": str(result["type"]),
+        "ciphertext": _to_bytes(result["ciphertext"]),
+        "session": _to_bytes(result["session"]),
+    }
 
 def generate_random_bytes(length: int = 32) -> bytes:
     """Generates random bytes."""

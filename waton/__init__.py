@@ -1,6 +1,11 @@
 """Python WhatsApp Web Multi-Device library."""
 
+from typing import TYPE_CHECKING
+
+from .core.errors import ConnectionError as ConnectionError  # noqa: A004
+
 __version__ = "0.1.0"
+
 
 __all__ = [
     "App",
@@ -20,6 +25,14 @@ __all__ = [
     "SimpleClient",
     "SimpleIncomingMessage",
 ]
+
+if TYPE_CHECKING:
+    from .app import filters
+    from .app.app import App, Context
+    from .core.entities import Chat, Contact, GroupMetadata, Message
+    from .core.errors import DisconnectReason, WatonError
+    from .core.jid import Jid, jid_decode, jid_encode
+    from .simple_api import SimpleClient, SimpleIncomingMessage, simple
 
 
 def __getattr__(name: str) -> object:
@@ -45,13 +58,15 @@ def __getattr__(name: str) -> object:
         }[name]
 
     if name in {"WatonError", "ConnectionError", "DisconnectReason"}:
-        from .core.errors import ConnectionError, DisconnectReason, WatonError
+        from .core.errors import ConnectionError as _ConnectionError
+        from .core.errors import DisconnectReason, WatonError
 
-        return {
+        mapping = {
             "WatonError": WatonError,
-            "ConnectionError": ConnectionError,
+            "ConnectionError": _ConnectionError,
             "DisconnectReason": DisconnectReason,
-        }[name]
+        }
+        return mapping[name]
 
     if name in {"Jid", "jid_decode", "jid_encode"}:
         from .core.jid import Jid, jid_decode, jid_encode

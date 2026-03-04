@@ -7,13 +7,12 @@ import contextlib
 import logging
 import threading
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import qrcode
 
 from waton.client.client import WAClient
 from waton.client.messages import MessagesAPI
-from waton.core.events import ConnectionEvent
 from waton.core.jid import S_WHATSAPP_NET, jid_decode, jid_encode, jid_normalized_user
 from waton.infra.storage_sqlite import SQLiteStorage
 from waton.protocol.binary_node import BinaryNode
@@ -21,6 +20,9 @@ from waton.protocol.signal_repo import SignalRepository
 from waton.utils.process_message import process_incoming_message
 
 from .state import DashboardEvent, DashboardState
+
+if TYPE_CHECKING:
+    from waton.core.events import ConnectionEvent
 
 logger = logging.getLogger(__name__)
 
@@ -496,7 +498,9 @@ class DashboardRuntime:
                         and not msg.text
                         and msg.message_type in {"unknown", "text"}
                     )
-                    display_text = msg.text or ("[undecrypted message]" if inferred_undecrypted else "[non-text message]")
+                    display_text = msg.text or (
+                        "[undecrypted message]" if inferred_undecrypted else "[non-text message]"
+                    )
                     display_status = "undecrypted" if inferred_undecrypted else ("received" if not from_me else "sent")
 
                     payload["message"] = {
@@ -582,7 +586,13 @@ class DashboardRuntime:
     async def _resolve_chat_jid(self, raw_jid: str) -> str:
         normalized = normalize_jid_for_chat(raw_jid)
         parsed = jid_decode(normalized)
-        if not parsed or parsed.server != "lid" or self._client is None or self._storage is None or self._client.creds is None:
+        if (
+            not parsed
+            or parsed.server != "lid"
+            or self._client is None
+            or self._storage is None
+            or self._client.creds is None
+        ):
             return normalized
         try:
             repo = SignalRepository(self._client.creds, self._storage)

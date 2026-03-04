@@ -3,15 +3,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from waton.core.entities import Message
 from waton.protocol.binary_node import BinaryNode
+
+if TYPE_CHECKING:
+    from waton.app.app import App
+    from waton.core.entities import Message
 
 
 @dataclass
 class Context:
     message: Message
-    app: "App"
+    app: App
+    trace_id: str = ""
+    trace_message_id: str = ""
 
     @property
     def text(self) -> str | None:

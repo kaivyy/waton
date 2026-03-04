@@ -6,13 +6,17 @@ import asyncio
 import contextlib
 import os
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from waton.client.client import WAClient
 from waton.client.messages import MessagesAPI
 from waton.infra.storage_sqlite import SQLiteStorage
-from waton.protocol.binary_node import BinaryNode
 from waton.utils.live_probe import AckObservation, LiveProbe
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from waton.protocol.binary_node import BinaryNode
 
 
 @dataclass

@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import base64
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict, cast
 
 from waton.core.entities import Message
-from waton.protocol.binary_node import BinaryNode
 from waton.protocol.signal_repo import SignalRepository
 from waton.utils.message_content import parse_message_payload
 from waton.utils.protocol_message import (
@@ -22,18 +21,50 @@ from waton.utils.protocol_message import (
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from waton.client.client import WAClient
+    from waton.protocol.binary_node import BinaryNode
+
+
+class _AppStateSyncKey(TypedDict, total=False):
+    key_id_b64: str
+
+
+class _AppStateSyncKeyShare(TypedDict, total=False):
+    keys: list[_AppStateSyncKey]
+
+
+class _EditedMessage(TypedDict, total=False):
+    text: str
+
+
+class _HistorySync(TypedDict, total=False):
+    sync_type: int
+
+
+class _ContentSummary(TypedDict):
+    text: str | None
+    media_url: str | None
+    reaction: str | None
+    reaction_target_id: str | None
+    destination_jid: str | None
+    message_kind: str
+    content_type: str
+    content: dict[str, object]
+    message_secret_b64: str | None
 
 
 def _get_message_secret(client: WAClient, message_id: str) -> bytes | None:
     creds = client.creds
-    if creds is None or not isinstance(message_id, str) or not message_id:
+    if creds is None or not message_id:
         return None
     additional_data = creds.additional_data or {}
     secrets_map = additional_data.get("message_secrets")
     if not isinstance(secrets_map, dict):
         return None
-    raw = secrets_map.get(message_id)
+    secrets_map_typed = cast("Mapping[str, object]", secrets_map)
+    raw = secrets_map_typed.get(message_id)
     if isinstance(raw, bytes):
         return raw
     if isinstance(raw, str):
@@ -44,8 +75,8 @@ def _get_message_secret(client: WAClient, message_id: str) -> bytes | None:
     return None
 
 
-def _resolve_key_jid(message_key: dict[str, object] | None, fallback: str) -> str:
-    if isinstance(message_key, dict):
+def _resolve_key_jid(message_key: Mapping[str, object | None] | None, fallback: str) -> str:
+    if message_key is not None:
         for candidate_key in ("participant", "remote_jid"):
             candidate = message_key.get(candidate_key)
             if isinstance(candidate, str) and candidate:
@@ -84,7 +115,7 @@ def _extract_sender_alt(node: BinaryNode, sender: str) -> str | None:
 def extract_text_from_payload(
     payload: bytes,
 ) -> tuple[str | None, str | None, str | None, str | None, str | None, str]:
-    summary = parse_message_payload(payload)
+    summary = cast("_ContentSummary", parse_message_payload(payload))
     return (
         summary["text"],
         summary["media_url"],
@@ -97,12 +128,13 @@ def extract_text_from_payload(
 
 async def process_incoming_message(node: BinaryNode, client: WAClient) -> Message:
     raw = b""
+    participant: str | None = None
     if node.content and isinstance(node.content, bytes):
         raw = node.content
     else:
         # Check for <enc v="2" type="msg|pkmsg"> child
         enc_node = (
-            next((c for c in node.content if isinstance(c, BinaryNode) and c.tag == "enc"), None)
+            next((c for c in node.content if c.tag == "enc"), None)
             if isinstance(node.content, list)
             else None
         )
@@ -112,13 +144,18 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
             if (v is None or v == "2") and client.creds:
                 repo = SignalRepository(client.creds, client.storage)
                 try:
-                    from waton.client.messages import _unpad_random_max16
+                    from waton.client.messages import unpad_random_max16
 
-                    participant = node.attrs.get("participant") or node.attrs.get("from")
-                    sender = participant if isinstance(participant, str) else None
+                    participant_raw = node.attrs.get("participant") or node.attrs.get("from")
+                    if isinstance(participant_raw, str):
+                        participant = participant_raw
+                    sender = participant
                     if sender:
                         sender_alt = _extract_sender_alt(node, sender)
-                        if sender_alt and ((_is_pn_user(sender) and _is_lid_user(sender_alt)) or (_is_lid_user(sender) and _is_pn_user(sender_alt))):
+                        if sender_alt and (
+                            (_is_pn_user(sender) and _is_lid_user(sender_alt))
+                            or (_is_lid_user(sender) and _is_pn_user(sender_alt))
+                        ):
                             pn_jid = sender if _is_pn_user(sender) else sender_alt
                             lid_jid = sender if _is_lid_user(sender) else sender_alt
                             await repo.store_lid_pn_mapping(lid_jid, pn_jid)
@@ -143,7 +180,7 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
                             tried.add(candidate)
                             try:
                                 decrypted = await repo.decrypt_message(candidate, enc_type, enc_node.content)
-                                raw = _unpad_random_max16(decrypted)
+                                raw = unpad_random_max16(decrypted)
                                 last_error = None
                                 break
                             except Exception as decrypt_error:
@@ -163,7 +200,7 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
     content: dict[str, object] = {}
     message_secret_b64: str | None = None
     if raw:
-        content_summary = parse_message_payload(raw)
+        content_summary = cast("_ContentSummary", parse_message_payload(raw))
         text = content_summary["text"]
         media_url = content_summary["media_url"]
         reaction = content_summary["reaction"]
@@ -172,8 +209,7 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
         kind = content_summary["message_kind"]
         content_type = content_summary["content_type"]
         raw_content = content_summary["content"]
-        if isinstance(raw_content, dict):
-            content = raw_content
+        content = raw_content
         raw_secret = content_summary["message_secret_b64"]
         if isinstance(raw_secret, str):
             message_secret_b64 = raw_secret
@@ -208,24 +244,25 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
 
         edited_message = protocol.get("edited_message")
         if isinstance(edited_message, dict):
-            raw_edited_text = edited_message.get("text")
+            edited_message_typed = cast("_EditedMessage", edited_message)
+            raw_edited_text = edited_message_typed.get("text")
             if isinstance(raw_edited_text, str):
                 edited_text = raw_edited_text
 
         history_sync = protocol.get("history_sync")
         if isinstance(history_sync, dict):
-            raw_history_sync_type = history_sync.get("sync_type")
+            history_sync_typed = cast("_HistorySync", history_sync)
+            raw_history_sync_type = history_sync_typed.get("sync_type")
             if isinstance(raw_history_sync_type, int):
                 history_sync_type = raw_history_sync_type
 
         app_state_sync_key_share = protocol.get("app_state_sync_key_share")
         if isinstance(app_state_sync_key_share, dict):
-            keys = app_state_sync_key_share.get("keys")
+            app_state_sync_key_share_typed = cast("_AppStateSyncKeyShare", app_state_sync_key_share)
+            keys = app_state_sync_key_share_typed.get("keys")
             if isinstance(keys, list):
-                for key_item in keys:
-                    if not isinstance(key_item, dict):
-                        continue
-                    key_id = key_item.get("key_id_b64")
+                for key_item_typed in keys:
+                    key_id = key_item_typed.get("key_id_b64")
                     if isinstance(key_id, str):
                         app_state_key_ids.append(key_id)
 
@@ -247,8 +284,9 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
         poll_vote = poll_update.get("vote")
         if isinstance(poll_creation_message_id, str) and isinstance(poll_vote, dict):
             secret = _get_message_secret(client, poll_creation_message_id)
-            enc_payload_b64 = poll_vote.get("enc_payload_b64")
-            enc_iv_b64 = poll_vote.get("enc_iv_b64")
+            poll_vote_typed = cast("Mapping[str, object]", poll_vote)
+            enc_payload_b64 = poll_vote_typed.get("enc_payload_b64")
+            enc_iv_b64 = poll_vote_typed.get("enc_iv_b64")
             if (
                 secret is not None
                 and isinstance(enc_payload_b64, str)
@@ -256,7 +294,7 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
             ):
                 try:
                     key_jid = _resolve_key_jid(
-                        poll_update.get("poll_creation_key") if isinstance(poll_update, dict) else None,
+                        cast("Mapping[str, object | None] | None", poll_update.get("poll_creation_key")),
                         node.attrs.get("from", ""),
                     )
                     poll_update["decrypted_vote"] = decrypt_poll_vote(
@@ -284,7 +322,7 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
             if secret is not None:
                 try:
                     key_jid = _resolve_key_jid(
-                        event_response.get("event_creation_key") if isinstance(event_response, dict) else None,
+                        cast("Mapping[str, object | None] | None", event_response.get("event_creation_key")),
                         node.attrs.get("from", ""),
                     )
                     event_response["decrypted_response"] = decrypt_event_response(

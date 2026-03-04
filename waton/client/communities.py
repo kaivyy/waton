@@ -343,9 +343,11 @@ class CommunitiesAPI:
             "subject_time": subject_time,
             "owner": community_node.attrs.get("creator"),
             "size": size,
-            "linked_parent": cls._find_child(community_node, "linked_parent").attrs.get("jid")
-            if cls._find_child(community_node, "linked_parent")
-            else None,
+            "linked_parent": (
+                linked_parent.attrs.get("jid")
+                if (linked_parent := cls._find_child(community_node, "linked_parent"))
+                else None
+            ),
             "restrict": cls._find_child(community_node, "locked") is not None,
             "announce": cls._find_child(community_node, "announcement") is not None,
             "is_community": cls._find_child(community_node, "parent") is not None,
@@ -384,7 +386,7 @@ class CommunitiesAPI:
     def _children(node: BinaryNode | None) -> list[BinaryNode]:
         if node is None or not isinstance(node.content, list):
             return []
-        return [child for child in node.content if isinstance(child, BinaryNode)]
+        return list(node.content)
 
     @classmethod
     def _find_child(cls, node: BinaryNode | None, tag: str) -> BinaryNode | None:

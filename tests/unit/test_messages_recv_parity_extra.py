@@ -6,8 +6,8 @@ from waton.client.messages_recv import (
     OfflineNodeProcessor,
     build_call_reject_node,
     build_placeholder_resend_request,
-    drain_nodes_with_buffer,
     decode_notification_node,
+    drain_nodes_with_buffer,
 )
 from waton.protocol.binary_node import BinaryNode
 

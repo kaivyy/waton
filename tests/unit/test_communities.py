@@ -337,7 +337,10 @@ def test_community_participant_request_and_update_helpers() -> None:
                                     attrs={},
                                     content=[
                                         BinaryNode(tag="participant", attrs={"jid": "1@s.whatsapp.net"}),
-                                        BinaryNode(tag="participant", attrs={"jid": "2@s.whatsapp.net", "error": "404"}),
+                                        BinaryNode(
+                                            tag="participant",
+                                            attrs={"jid": "2@s.whatsapp.net", "error": "404"},
+                                        ),
                                     ],
                                 )
                             ],

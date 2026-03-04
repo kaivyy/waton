@@ -146,7 +146,13 @@ class GroupsAPI:
         result = await self._group_query(
             jid,
             "set",
-            [BinaryNode(tag=action, attrs={}, content=[BinaryNode(tag="participant", attrs={"jid": value}) for value in participants])],
+            [
+                BinaryNode(
+                    tag=action,
+                    attrs={},
+                    content=[BinaryNode(tag="participant", attrs={"jid": value}) for value in participants],
+                )
+            ],
         )
         action_node = self._find_child(result, action)
         return [
@@ -169,18 +175,19 @@ class GroupsAPI:
         return invite.attrs.get("code") if invite else None
 
     async def group_revoke_invite_v4(self, group_jid: str, invited_jid: str) -> bool:
-        result = await self._group_query(
-            group_jid,
-            "set",
-            [
-                BinaryNode(
-                    tag="revoke",
-                    attrs={},
-                    content=[BinaryNode(tag="participant", attrs={"jid": invited_jid})],
-                )
-            ],
+        return bool(
+            await self._group_query(
+                group_jid,
+                "set",
+                [
+                    BinaryNode(
+                        tag="revoke",
+                        attrs={},
+                        content=[BinaryNode(tag="participant", attrs={"jid": invited_jid})],
+                    )
+                ],
+            )
         )
-        return result is not None
 
     async def group_accept_invite(self, code: str) -> str | None:
         result = await self._group_query("@g.us", "set", [BinaryNode(tag="invite", attrs={"code": code})])
@@ -269,9 +276,11 @@ class GroupsAPI:
             "desc_id": description_node.attrs.get("id") if description_node else None,
             "desc_owner": description_node.attrs.get("participant") if description_node else None,
             "desc_time": desc_time if desc_time > 0 else None,
-            "linked_parent": cls._find_child(group_node, "linked_parent").attrs.get("jid")
-            if cls._find_child(group_node, "linked_parent")
-            else None,
+            "linked_parent": (
+                linked_parent.attrs.get("jid")
+                if (linked_parent := cls._find_child(group_node, "linked_parent"))
+                else None
+            ),
             "restrict": cls._find_child(group_node, "locked") is not None,
             "announce": cls._find_child(group_node, "announcement") is not None,
             "is_community": cls._find_child(group_node, "parent") is not None,
@@ -310,7 +319,7 @@ class GroupsAPI:
     def _children(node: BinaryNode | None) -> list[BinaryNode]:
         if node is None or not isinstance(node.content, list):
             return []
-        return [child for child in node.content if isinstance(child, BinaryNode)]
+        return list(node.content)
 
     @classmethod
     def _find_child(cls, node: BinaryNode | None, tag: str) -> BinaryNode | None:

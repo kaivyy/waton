@@ -55,19 +55,19 @@ def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = 
     app.config["DASHBOARD_RUNTIME"] = dashboard_runtime
 
     @app.get("/")
-    def index():
+    def index() -> Any:
         return render_template("index.html")
 
     @app.get("/api/health")
-    def health():
+    def health() -> Any:
         return jsonify({"status": "ok", "mode": "real", "connection": dashboard_runtime.connection_state()})
 
     @app.get("/api/connection")
-    def connection():
+    def connection() -> Any:
         return jsonify(dashboard_runtime.connection_state())
 
     @app.get("/api/qr")
-    def qr():
+    def qr() -> Any:
         state = dashboard_runtime.connection_state()
         return jsonify(
             {
@@ -78,11 +78,11 @@ def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = 
         )
 
     @app.get("/api/events")
-    def events():
+    def events() -> Any:
         return jsonify({"events": dashboard_runtime.list_events()})
 
     @app.get("/api/debug/summary")
-    def debug_summary():
+    def debug_summary() -> Any:
         events = dashboard_runtime.list_events()
         chats = dashboard_runtime.list_chats()
         return jsonify(
@@ -95,21 +95,21 @@ def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = 
         )
 
     @app.get("/api/chats")
-    def chats():
+    def chats() -> Any:
         return jsonify({"chats": dashboard_runtime.list_chats()})
 
     @app.get("/api/chats/<path:chat_jid>/messages")
-    def chat_messages(chat_jid: str):
+    def chat_messages(chat_jid: str) -> Any:
         messages = dashboard_runtime.list_messages(chat_jid)
         return jsonify({"chat_jid": chat_jid, "messages": messages})
 
     @app.post("/api/chats/<path:chat_jid>/read")
-    def mark_chat_read(chat_jid: str):
+    def mark_chat_read(chat_jid: str) -> Any:
         dashboard_runtime.mark_chat_read(chat_jid)
         return jsonify({"status": "ok", "chat_jid": chat_jid})
 
     @app.post("/api/connect")
-    def connect():
+    def connect() -> Any:
         try:
             state = dashboard_runtime.ensure_connected()
         except Exception as exc:
@@ -117,7 +117,7 @@ def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = 
         return jsonify(state)
 
     @app.post("/api/disconnect")
-    def disconnect():
+    def disconnect() -> Any:
         try:
             state = dashboard_runtime.disconnect()
         except Exception as exc:
@@ -125,7 +125,7 @@ def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = 
         return jsonify(state)
 
     @app.post("/api/send")
-    def send():
+    def send() -> Any:
         data = request.get_json(silent=True) or {}
         raw_to = (data.get("to") or "").strip()
         text = (data.get("text") or "").strip()

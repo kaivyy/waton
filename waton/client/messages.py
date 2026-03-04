@@ -1,26 +1,27 @@
 from __future__ import annotations
 
-from base64 import b64decode
-import struct
-from typing import TYPE_CHECKING
 import os
+import struct
 import time
+from base64 import b64decode
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, cast  # noqa: TC006
 
-from waton.core.jid import S_WHATSAPP_NET, jid_normalized_user, jid_decode, jid_encode
+from waton.client.usync import USyncQuery
+from waton.core.jid import S_WHATSAPP_NET, jid_decode, jid_encode, jid_normalized_user
 from waton.protocol.binary_node import BinaryNode
 from waton.protocol.protobuf import wa_pb2
 from waton.protocol.protobuf.wire import (
     ADVSignedDeviceIdentity,
-    _encode_bool,
-    _encode_len_delimited,
-    _encode_string,
-    _encode_varint,
-    _encode_varint_field,
+    encode_bool,
+    encode_len_delimited,
+    encode_string,
+    encode_varint,
+    encode_varint_field,
 )
 from waton.protocol.signal_repo import SignalRepository
-from waton.client.usync import USyncQuery
-from waton.utils.message_utils import build_receipt_node, generate_message_id
 from waton.utils.crypto import aes_encrypt, hmac_sha256
+from waton.utils.message_utils import build_receipt_node, generate_message_id
 
 if TYPE_CHECKING:
     from waton.client.client import WAClient
@@ -48,10 +49,14 @@ def _unpad_random_max16(msg: bytes) -> bytes:
     return msg[:-pad_len]
 
 
+# Public alias for call sites outside this module (e.g. inbound processing).
+unpad_random_max16 = _unpad_random_max16
+
+
 def _encode_fixed64_field(field_number: int, value: float | None) -> bytes:
     if value is None:
         return b""
-    key = _encode_varint((field_number << 3) | 1)
+    key = encode_varint((field_number << 3) | 1)
     return key + struct.pack("<d", float(value))
 
 
@@ -64,13 +69,13 @@ def _encode_message_key(
 ) -> bytes:
     encoded = b"".join(
         (
-            _encode_string(1, remote_jid),
-            _encode_varint_field(2, 1 if from_me else 0),
-            _encode_string(3, message_id),
+            encode_string(1, remote_jid),
+            encode_varint_field(2, 1 if from_me else 0),
+            encode_string(3, message_id),
         )
     )
     if participant:
-        encoded += _encode_string(4, participant)
+        encoded += encode_string(4, participant)
     return encoded
 
 
@@ -95,12 +100,28 @@ def _derive_message_addon_key(
     return hmac_sha256(sign, key0)
 
 
+MediaInfo = Mapping[str, object]
+
+
+def _bytes_or_default(value: object, default: bytes = b"") -> bytes:
+    return value if isinstance(value, bytes) else default
+
+
+def _int_or_default(value: object, default: int = 0) -> int:
+    return value if isinstance(value, int) else default
+
+
+def _session_key(repo: SignalRepository, jid: str) -> str:
+    signal_name, signal_device = repo.jid_to_signal_address(jid)
+    return f"{signal_name}.{signal_device}"
+
+
 def _encode_poll_vote_plaintext(selected_options: list[bytes]) -> bytes:
-    chunks = []
+    chunks: list[bytes] = []
     for option in selected_options:
         if not option:
             continue
-        chunks.append(_encode_len_delimited(1, option))
+        chunks.append(encode_len_delimited(1, option))
     return b"".join(chunks)
 
 
@@ -112,12 +133,12 @@ def _encode_event_response_plaintext(
 ) -> bytes:
     payload = b"".join(
         (
-            _encode_varint_field(1, max(0, response_type)),
-            _encode_varint_field(2, max(0, timestamp_ms)),
+            encode_varint_field(1, max(0, response_type)),
+            encode_varint_field(2, max(0, timestamp_ms)),
         )
     )
     if extra_guest_count is not None:
-        payload += _encode_varint_field(3, max(0, extra_guest_count))
+        payload += encode_varint_field(3, max(0, extra_guest_count))
     return payload
 
 
@@ -135,15 +156,15 @@ class MessagesAPI:
         """Uploads and sends an image message to all devices of recipient."""
         from waton.client.media import MediaManager
         media = MediaManager()
-        media_info = await media.encrypt_and_upload("image", image_bytes)
+        media_info = cast("MediaInfo", await media.encrypt_and_upload("image", image_bytes))
 
         msg = wa_pb2.Message()
-        msg.imageMessage.url = str(media_info["url"])
+        msg.imageMessage.url = str(media_info.get("url", ""))
         msg.imageMessage.mimetype = "image/jpeg"
         msg.imageMessage.caption = caption
-        msg.imageMessage.fileSha256 = bytes(media_info["fileSha256"])
-        msg.imageMessage.fileEncSha256 = bytes(media_info["fileEncSha256"])
-        msg.imageMessage.mediaKey = bytes(media_info["mediaKey"])
+        msg.imageMessage.fileSha256 = _bytes_or_default(media_info.get("fileSha256"))
+        msg.imageMessage.fileEncSha256 = _bytes_or_default(media_info.get("fileEncSha256"))
+        msg.imageMessage.mediaKey = _bytes_or_default(media_info.get("mediaKey"))
         msg.imageMessage.fileLength = len(image_bytes)
         return await self._send_payload(to_jid, msg.SerializeToString(), message_type="media")
 
@@ -160,7 +181,7 @@ class MessagesAPI:
         from waton.client.media import MediaManager
 
         media = MediaManager()
-        media_info = await media.encrypt_and_upload("document", document_bytes)
+        media_info = cast("MediaInfo", await media.encrypt_and_upload("document", document_bytes))
         payload = self._build_document_payload(
             media_info=media_info,
             file_name=file_name,
@@ -204,7 +225,7 @@ class MessagesAPI:
         from waton.client.media import MediaManager
 
         media = MediaManager()
-        media_info = await media.encrypt_and_upload("audio", audio_bytes)
+        media_info = cast("MediaInfo", await media.encrypt_and_upload("audio", audio_bytes))
         payload = self._build_audio_payload(
             media_info=media_info,
             mimetype=mimetype,
@@ -229,7 +250,7 @@ class MessagesAPI:
         from waton.client.media import MediaManager
 
         media = MediaManager()
-        media_info = await media.encrypt_and_upload("video", video_bytes)
+        media_info = cast("MediaInfo", await media.encrypt_and_upload("video", video_bytes))
         payload = self._build_video_payload(
             media_info=media_info,
             mimetype=mimetype,
@@ -255,7 +276,7 @@ class MessagesAPI:
         from waton.client.media import MediaManager
 
         media = MediaManager()
-        media_info = await media.encrypt_and_upload("sticker", sticker_bytes)
+        media_info = cast("MediaInfo", await media.encrypt_and_upload("sticker", sticker_bytes))
         payload = self._build_sticker_payload(
             media_info=media_info,
             mimetype=mimetype,
@@ -536,43 +557,43 @@ class MessagesAPI:
             all_device_jids.extend(device_jids)
 
         me_device_jid = self.client.creds.me["id"] if self.client.creds and self.client.creds.me else ""
-        me_session_key = signal_repo._session_key(me_device_jid)
-        return [jid for jid in all_device_jids if signal_repo._session_key(jid) != me_session_key]
+        me_session_key = _session_key(signal_repo, me_device_jid)
+        return [jid for jid in all_device_jids if _session_key(signal_repo, jid) != me_session_key]
 
     @staticmethod
     def _build_device_sent_payload(destination_jid: str, inner_payload: bytes) -> bytes:
-        device_sent_payload = _encode_string(1, destination_jid) + _encode_len_delimited(2, inner_payload)
-        return _encode_len_delimited(31, device_sent_payload)
+        device_sent_payload = encode_string(1, destination_jid) + encode_len_delimited(2, inner_payload)
+        return encode_len_delimited(31, device_sent_payload)
 
     @staticmethod
     def _build_document_payload(
         *,
-        media_info: dict[str, str | bytes | int],
+        media_info: MediaInfo,
         file_name: str,
         mimetype: str,
         caption: str,
     ) -> bytes:
         url = str(media_info.get("url", ""))
-        media_key = bytes(media_info.get("mediaKey", b""))
-        file_sha256 = bytes(media_info.get("fileSha256", b""))
-        file_enc_sha256 = bytes(media_info.get("fileEncSha256", b""))
+        media_key = _bytes_or_default(media_info.get("mediaKey"))
+        file_sha256 = _bytes_or_default(media_info.get("fileSha256"))
+        file_enc_sha256 = _bytes_or_default(media_info.get("fileEncSha256"))
         direct_path = str(media_info.get("directPath", ""))
-        file_length = int(media_info.get("fileLength", 0))
+        file_length = _int_or_default(media_info.get("fileLength"))
 
         document_payload = b"".join(
             (
-                _encode_string(1, url),
-                _encode_string(2, mimetype),
-                _encode_len_delimited(4, file_sha256),
-                _encode_varint_field(5, file_length),
-                _encode_len_delimited(7, media_key),
-                _encode_string(8, file_name),
-                _encode_len_delimited(9, file_enc_sha256),
-                _encode_string(10, direct_path),
-                _encode_string(20, caption),
+                encode_string(1, url),
+                encode_string(2, mimetype),
+                encode_len_delimited(4, file_sha256),
+                encode_varint_field(5, file_length),
+                encode_len_delimited(7, media_key),
+                encode_string(8, file_name),
+                encode_len_delimited(9, file_enc_sha256),
+                encode_string(10, direct_path),
+                encode_string(20, caption),
             )
         )
-        return _encode_len_delimited(7, document_payload)
+        return encode_len_delimited(7, document_payload)
 
     @staticmethod
     def _build_location_payload(
@@ -588,48 +609,48 @@ class MessagesAPI:
             (
                 _encode_fixed64_field(1, latitude),
                 _encode_fixed64_field(2, longitude),
-                _encode_string(3, name),
-                _encode_string(4, address),
-                _encode_string(5, url),
-                _encode_string(11, comment),
+                encode_string(3, name),
+                encode_string(4, address),
+                encode_string(5, url),
+                encode_string(11, comment),
             )
         )
-        return _encode_len_delimited(5, location_payload)
+        return encode_len_delimited(5, location_payload)
 
     @staticmethod
     def _build_audio_payload(
         *,
-        media_info: dict[str, str | bytes | int],
+        media_info: MediaInfo,
         mimetype: str,
         seconds: int,
         ptt: bool,
     ) -> bytes:
         url = str(media_info.get("url", ""))
-        media_key = bytes(media_info.get("mediaKey", b""))
-        file_sha256 = bytes(media_info.get("fileSha256", b""))
-        file_enc_sha256 = bytes(media_info.get("fileEncSha256", b""))
+        media_key = _bytes_or_default(media_info.get("mediaKey"))
+        file_sha256 = _bytes_or_default(media_info.get("fileSha256"))
+        file_enc_sha256 = _bytes_or_default(media_info.get("fileEncSha256"))
         direct_path = str(media_info.get("directPath", ""))
-        file_length = int(media_info.get("fileLength", 0))
+        file_length = _int_or_default(media_info.get("fileLength"))
 
         audio_payload = b"".join(
             (
-                _encode_string(1, url),
-                _encode_string(2, mimetype),
-                _encode_len_delimited(3, file_sha256),
-                _encode_varint_field(4, file_length),
-                _encode_varint_field(5, max(0, seconds)),
-                _encode_bool(6, ptt),
-                _encode_len_delimited(7, media_key),
-                _encode_len_delimited(8, file_enc_sha256),
-                _encode_string(9, direct_path),
+                encode_string(1, url),
+                encode_string(2, mimetype),
+                encode_len_delimited(3, file_sha256),
+                encode_varint_field(4, file_length),
+                encode_varint_field(5, max(0, seconds)),
+                encode_bool(6, ptt),
+                encode_len_delimited(7, media_key),
+                encode_len_delimited(8, file_enc_sha256),
+                encode_string(9, direct_path),
             )
         )
-        return _encode_len_delimited(8, audio_payload)
+        return encode_len_delimited(8, audio_payload)
 
     @staticmethod
     def _build_video_payload(
         *,
-        media_info: dict[str, str | bytes | int],
+        media_info: MediaInfo,
         mimetype: str,
         caption: str,
         seconds: int,
@@ -638,71 +659,71 @@ class MessagesAPI:
         gif_playback: bool,
     ) -> bytes:
         url = str(media_info.get("url", ""))
-        media_key = bytes(media_info.get("mediaKey", b""))
-        file_sha256 = bytes(media_info.get("fileSha256", b""))
-        file_enc_sha256 = bytes(media_info.get("fileEncSha256", b""))
+        media_key = _bytes_or_default(media_info.get("mediaKey"))
+        file_sha256 = _bytes_or_default(media_info.get("fileSha256"))
+        file_enc_sha256 = _bytes_or_default(media_info.get("fileEncSha256"))
         direct_path = str(media_info.get("directPath", ""))
-        file_length = int(media_info.get("fileLength", 0))
+        file_length = _int_or_default(media_info.get("fileLength"))
 
         video_payload = b"".join(
             (
-                _encode_string(1, url),
-                _encode_string(2, mimetype),
-                _encode_len_delimited(3, file_sha256),
-                _encode_varint_field(4, file_length),
-                _encode_varint_field(5, max(0, seconds)),
-                _encode_len_delimited(6, media_key),
-                _encode_string(7, caption),
-                _encode_bool(8, gif_playback),
-                _encode_varint_field(9, max(0, height)),
-                _encode_varint_field(10, max(0, width)),
-                _encode_len_delimited(11, file_enc_sha256),
-                _encode_string(13, direct_path),
+                encode_string(1, url),
+                encode_string(2, mimetype),
+                encode_len_delimited(3, file_sha256),
+                encode_varint_field(4, file_length),
+                encode_varint_field(5, max(0, seconds)),
+                encode_len_delimited(6, media_key),
+                encode_string(7, caption),
+                encode_bool(8, gif_playback),
+                encode_varint_field(9, max(0, height)),
+                encode_varint_field(10, max(0, width)),
+                encode_len_delimited(11, file_enc_sha256),
+                encode_string(13, direct_path),
             )
         )
-        return _encode_len_delimited(9, video_payload)
+        return encode_len_delimited(9, video_payload)
 
     @staticmethod
     def _build_sticker_payload(
         *,
-        media_info: dict[str, str | bytes | int],
+        media_info: MediaInfo,
         mimetype: str,
         height: int,
         width: int,
         is_animated: bool,
     ) -> bytes:
         url = str(media_info.get("url", ""))
-        media_key = bytes(media_info.get("mediaKey", b""))
-        file_sha256 = bytes(media_info.get("fileSha256", b""))
-        file_enc_sha256 = bytes(media_info.get("fileEncSha256", b""))
+        media_key = _bytes_or_default(media_info.get("mediaKey"))
+        file_sha256 = _bytes_or_default(media_info.get("fileSha256"))
+        file_enc_sha256 = _bytes_or_default(media_info.get("fileEncSha256"))
         direct_path = str(media_info.get("directPath", ""))
-        file_length = int(media_info.get("fileLength", 0))
+        file_length = _int_or_default(media_info.get("fileLength"))
 
         sticker_payload = b"".join(
             (
-                _encode_string(1, url),
-                _encode_len_delimited(2, file_sha256),
-                _encode_len_delimited(3, file_enc_sha256),
-                _encode_len_delimited(4, media_key),
-                _encode_string(5, mimetype),
-                _encode_varint_field(6, max(0, height)),
-                _encode_varint_field(7, max(0, width)),
-                _encode_string(8, direct_path),
-                _encode_varint_field(9, file_length),
-                _encode_bool(13, is_animated),
+                encode_string(1, url),
+                encode_len_delimited(2, file_sha256),
+                encode_len_delimited(3, file_enc_sha256),
+                encode_len_delimited(4, media_key),
+                encode_string(5, mimetype),
+                encode_varint_field(6, max(0, height)),
+                encode_varint_field(7, max(0, width)),
+                encode_string(8, direct_path),
+                encode_varint_field(9, file_length),
+                encode_bool(13, is_animated),
             )
         )
-        return _encode_len_delimited(26, sticker_payload)
+        return encode_len_delimited(26, sticker_payload)
 
     @staticmethod
     def _build_contact_payload(*, display_name: str, vcard: str) -> bytes:
         contact_payload = b"".join(
             (
-                _encode_string(1, display_name),
-                _encode_string(16, vcard),
+                encode_string(1, display_name),
+                encode_string(16, vcard),
             )
         )
-        return _encode_len_delimited(4, contact_payload)
+        return encode_len_delimited(4, contact_payload)
 
     @staticmethod
     def _build_poll_creation_payload(
@@ -713,18 +734,18 @@ class MessagesAPI:
         enc_key: bytes,
         message_secret: bytes,
     ) -> bytes:
-        option_payloads = b"".join(_encode_len_delimited(3, _encode_string(1, option)) for option in options)
-        context_info_payload = _encode_len_delimited(3, message_secret)
+        option_payloads = b"".join(encode_len_delimited(3, encode_string(1, option)) for option in options)
+        context_info_payload = encode_len_delimited(3, message_secret)
         poll_payload = b"".join(
             (
-                _encode_len_delimited(1, enc_key),
-                _encode_string(2, name),
+                encode_len_delimited(1, enc_key),
+                encode_string(2, name),
                 option_payloads,
-                _encode_varint_field(4, max(0, selectable_options_count)),
-                _encode_len_delimited(5, context_info_payload),
+                encode_varint_field(4, max(0, selectable_options_count)),
+                encode_len_delimited(5, context_info_payload),
             )
         )
-        return _encode_len_delimited(49, poll_payload)
+        return encode_len_delimited(49, poll_payload)
 
     @staticmethod
     def _resolve_timestamp_ms(value: int | None) -> int:
@@ -748,11 +769,11 @@ class MessagesAPI:
         )
         protocol_payload = b"".join(
             (
-                _encode_len_delimited(1, key_payload),
-                _encode_varint_field(2, 0),
+                encode_len_delimited(1, key_payload),
+                encode_varint_field(2, 0),
             )
         )
-        return _encode_len_delimited(12, protocol_payload)
+        return encode_len_delimited(12, protocol_payload)
 
     @classmethod
     def _build_protocol_edit_payload(
@@ -775,13 +796,13 @@ class MessagesAPI:
         edited_message.conversation = text
         protocol_payload = b"".join(
             (
-                _encode_len_delimited(1, key_payload),
-                _encode_varint_field(2, 14),
-                _encode_len_delimited(14, edited_message.SerializeToString()),
-                _encode_varint_field(15, cls._resolve_timestamp_ms(edited_at_ms)),
+                encode_len_delimited(1, key_payload),
+                encode_varint_field(2, 14),
+                encode_len_delimited(14, edited_message.SerializeToString()),
+                encode_varint_field(15, cls._resolve_timestamp_ms(edited_at_ms)),
             )
         )
-        return _encode_len_delimited(12, protocol_payload)
+        return encode_len_delimited(12, protocol_payload)
 
     @classmethod
     def _build_protocol_ephemeral_setting_payload(
@@ -798,13 +819,13 @@ class MessagesAPI:
         )
         protocol_payload = b"".join(
             (
-                _encode_len_delimited(1, key_payload),
-                _encode_varint_field(2, 3),
-                _encode_varint_field(4, max(0, expiration_seconds)),
-                _encode_varint_field(5, cls._resolve_timestamp_ms(setting_timestamp)),
+                encode_len_delimited(1, key_payload),
+                encode_varint_field(2, 3),
+                encode_varint_field(4, max(0, expiration_seconds)),
+                encode_varint_field(5, cls._resolve_timestamp_ms(setting_timestamp)),
             )
         )
-        return _encode_len_delimited(12, protocol_payload)
+        return encode_len_delimited(12, protocol_payload)
 
     @classmethod
     def _build_poll_vote_update_payload(
@@ -827,7 +848,7 @@ class MessagesAPI:
             actor_jid=voter_jid,
             message_secret=message_secret,
         )
-        aad = f"{poll_creation_message_id}\x00{voter_jid}".encode("utf-8")
+        aad = f"{poll_creation_message_id}\x00{voter_jid}".encode()
         vote_cipher = aes_encrypt(vote_plain, vote_key, vote_iv, aad)
 
         key_payload = _encode_message_key(
@@ -838,18 +859,18 @@ class MessagesAPI:
         )
         enc_vote_payload = b"".join(
             (
-                _encode_len_delimited(1, vote_cipher),
-                _encode_len_delimited(2, vote_iv),
+                encode_len_delimited(1, vote_cipher),
+                encode_len_delimited(2, vote_iv),
             )
         )
         poll_update_payload = b"".join(
             (
-                _encode_len_delimited(1, key_payload),
-                _encode_len_delimited(2, enc_vote_payload),
-                _encode_varint_field(4, cls._resolve_timestamp_ms(sender_timestamp_ms)),
+                encode_len_delimited(1, key_payload),
+                encode_len_delimited(2, enc_vote_payload),
+                encode_varint_field(4, cls._resolve_timestamp_ms(sender_timestamp_ms)),
             )
         )
-        return _encode_len_delimited(50, poll_update_payload)
+        return encode_len_delimited(50, poll_update_payload)
 
     @classmethod
     def _build_event_response_update_payload(
@@ -878,7 +899,7 @@ class MessagesAPI:
             actor_jid=responder_jid,
             message_secret=message_secret,
         )
-        aad = f"{event_creation_message_id}\x00{responder_jid}".encode("utf-8")
+        aad = f"{event_creation_message_id}\x00{responder_jid}".encode()
         response_cipher = aes_encrypt(response_plain, response_key, response_iv, aad)
 
         key_payload = _encode_message_key(
@@ -889,12 +910,12 @@ class MessagesAPI:
         )
         event_payload = b"".join(
             (
-                _encode_len_delimited(1, key_payload),
-                _encode_len_delimited(2, response_cipher),
-                _encode_len_delimited(3, response_iv),
+                encode_len_delimited(1, key_payload),
+                encode_len_delimited(2, response_cipher),
+                encode_len_delimited(3, response_iv),
             )
         )
-        return _encode_len_delimited(76, event_payload)
+        return encode_len_delimited(76, event_payload)
 
     async def _assert_sessions(self, signal_repo: SignalRepository, jids: list[str]) -> None:
         missing: list[str] = []

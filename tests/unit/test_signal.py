@@ -115,12 +115,12 @@ def test_signal_decrypt_pkmsg(monkeypatch: pytest.MonkeyPatch) -> None:
         creds = init_auth_creds()
         # Mock the prekey response
         await storage.save_prekey(123, b"prekey_private")
-        
+
         # Build fake protobuf payload manually: version byte + preKeyId (tag 1) + signedPreKeyId (tag 2)
         # tag 1, type 0 = 0x08. value = 123 (0x7b)
         # tag 2, type 0 = 0x10. value = 456 (0xc8 0x03)
         payload = b"\x33\x08\x7b\x10\xc8\x03"
-        
+
         repo = SignalRepository(creds, storage)
         out = await repo.decrypt_message("user@s.whatsapp.net", "pkmsg", payload)
         assert out == b"decrypted_payload"
@@ -147,7 +147,7 @@ def test_signal_decrypt_msg(monkeypatch: pytest.MonkeyPatch) -> None:
         creds = init_auth_creds()
         repo = SignalRepository(creds, storage)
         await storage.save_session("user.0", b"s0")
-        
+
         out = await repo.decrypt_message("user@s.whatsapp.net", "msg", b"cipher")
         assert out == b"whisper_payload"
         assert await storage.get_session("user.0") == b"s1"

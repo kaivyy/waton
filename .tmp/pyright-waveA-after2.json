@@ -1,0 +1,46 @@
+{
+    "version": "1.1.408",
+    "time": "1772401244300",
+    "generalDiagnostics": [
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"object\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"object\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    \"object\" is incompatible with protocol \"Iterable[SupportsIndex]\"\n      \"__iter__\" is not present\n    \"object\" is incompatible with protocol \"SupportsIndex\"\n      \"__index__\" is not present\n    \"object\" is incompatible with protocol \"SupportsBytes\"\n      \"__bytes__\" is not present\n    \"object\" is incompatible with protocol \"Buffer\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 125,
+                    "character": 17
+                },
+                "end": {
+                    "line": 125,
+                    "character": 22
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"object\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"object\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    \"object\" is incompatible with protocol \"Iterable[SupportsIndex]\"\n      \"__iter__\" is not present\n    \"object\" is incompatible with protocol \"SupportsIndex\"\n      \"__index__\" is not present\n    \"object\" is incompatible with protocol \"SupportsBytes\"\n      \"__bytes__\" is not present\n    \"object\" is incompatible with protocol \"Buffer\"",
+            "range": {
+                "start": {
+                    "line": 125,
+                    "character": 17
+                },
+                "end": {
+                    "line": 125,
+                    "character": 22
+                }
+            },
+            "rule": "reportArgumentType"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 3,
+        "errorCount": 2,
+        "warningCount": 0,
+        "informationCount": 0,
+        "timeInSec": 1.242
+    }
+}
+

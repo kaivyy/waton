@@ -11,7 +11,7 @@ import hashlib
 import hmac
 from typing import Any
 
-from waton.protocol.protobuf.wire import _iter_fields
+from waton.protocol.protobuf.wire import iter_wire_fields
 
 LT_HASH_STATE_SIZE = 128
 LT_HASH_WORD_COUNT = LT_HASH_STATE_SIZE // 2
@@ -34,7 +34,7 @@ def decode_app_state_sync_key(key_data: bytes) -> bytes:
     - field 2: fingerprint
     - field 3: timestamp
     """
-    for field_no, wire_type, value in _iter_fields(key_data):
+    for field_no, wire_type, value in iter_wire_fields(key_data):
         if field_no == 1 and wire_type == 2:
             return bytes(value)
     return b""

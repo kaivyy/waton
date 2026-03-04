@@ -10,7 +10,7 @@ from waton.utils.crypto import (
     hmac_sha256,
     sha256,
 )
-from waton.utils.media_utils import _upload_once, _verify_remote_checksum
+from waton.utils.media_utils import upload_once, verify_remote_checksum
 
 
 class MediaManager:
@@ -19,7 +19,7 @@ class MediaManager:
     def __init__(self) -> None:
         self.http = httpx.AsyncClient()
 
-    async def encrypt_and_upload(self, media_type: str, raw_media: bytes) -> dict[str, str | bytes]:
+    async def encrypt_and_upload(self, media_type: str, raw_media: bytes) -> dict[str, str | bytes | int]:
         """
         Encrypt media payload, upload encrypted bytes, and return message metadata.
         """
@@ -67,7 +67,7 @@ class MediaManager:
 
 def upload_with_retry(data: bytes, max_attempts: int = 3) -> dict[str, str | int | bool]:
     for attempt in range(1, max_attempts + 1):
-        url = _upload_once(data)
-        if _verify_remote_checksum(url, data):
+        url = upload_once(data)
+        if verify_remote_checksum(url, data):
             return {"url": url, "attempts": attempt, "verified": True}
     raise RuntimeError("upload failed after retries")

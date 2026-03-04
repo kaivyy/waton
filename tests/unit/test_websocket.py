@@ -3,7 +3,7 @@ import asyncio
 import pytest
 from websockets.protocol import State
 
-from waton.core.errors import ConnectionError
+from waton.core.errors import ConnectionError as WatonConnectionError
 from waton.infra.websocket import WebSocketTransport
 
 
@@ -53,6 +53,41 @@ def test_send_raises_when_state_based_socket_closed() -> None:
     transport = WebSocketTransport()
     transport._ws = _StateWs(state=State.CLOSED)
 
-    with pytest.raises(ConnectionError):
+    with pytest.raises(WatonConnectionError):
         _run(transport.send(b"x"))
+
+
+class _DisconnectWs:
+    def __init__(self) -> None:
+        self.close_called = False
+        self.wait_closed_called = False
+
+    async def close(self) -> None:
+        self.close_called = True
+
+    async def wait_closed(self) -> None:
+        self.wait_closed_called = True
+
+
+def test_disconnect_emits_on_disconnect_callback() -> None:
+    async def _case() -> None:
+        transport = WebSocketTransport()
+        ws = _DisconnectWs()
+        transport._ws = ws
+        transport._recv_task = asyncio.create_task(asyncio.sleep(10))
+
+        seen: list[Exception] = []
+
+        async def _capture(exc: Exception) -> None:
+            seen.append(exc)
+
+        transport.on_disconnect = _capture
+        await transport.disconnect()
+
+        assert ws.close_called is True
+        assert ws.wait_closed_called is True
+        assert transport._ws is None
+        assert len(seen) == 1
+
+    _run(_case())
 

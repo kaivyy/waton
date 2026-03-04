@@ -1,0 +1,771 @@
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\chats.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\chats.py:145:52 - error: Unnecessary isinstance call; "BinaryNode" is always an instance of "BinaryNode" (reportUnnecessaryIsInstance)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\client.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\client.py:411:25 - error: Unnecessary "cast" call; type is already "list[dict[str, Any]]" (reportUnnecessaryCast)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\client.py:428:21 - error: Unnecessary isinstance call; "dict[str, Any]" is always an instance of "dict[Unknown, Unknown]" (reportUnnecessaryIsInstance)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\client.py:1121:19 - error: Unnecessary "cast" call; type is already "Any" (reportUnnecessaryCast)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\communities.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\communities.py:346:79 - error: "attrs" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\communities.py:387:52 - error: Unnecessary isinstance call; "BinaryNode" is always an instance of "BinaryNode" (reportUnnecessaryIsInstance)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\event_pipeline.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\event_pipeline.py:2:24 - error: Type of parameter "save_fn" is unknown (reportUnknownParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\event_pipeline.py:2:24 - error: Type annotation is missing for parameter "save_fn" (reportMissingParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\event_pipeline.py:2:33 - error: Type of parameter "emit_fn" is unknown (reportUnknownParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\event_pipeline.py:2:33 - error: Type annotation is missing for parameter "emit_fn" (reportMissingParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\event_pipeline.py:6:29 - error: Type of parameter "event" is partially unknown
+    Parameter type is "dict[Unknown, Unknown]" (reportUnknownParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\event_pipeline.py:6:36 - error: Expected type arguments for generic class "dict" (reportMissingTypeArgument)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\groups.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\groups.py:183:16 - error: Condition will always evaluate to True since the types "BinaryNode" and "None" have no overlap (reportUnnecessaryComparison)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\groups.py:272:75 - error: "attrs" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\groups.py:313:52 - error: Unnecessary isinstance call; "BinaryNode" is always an instance of "BinaryNode" (reportUnnecessaryIsInstance)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\identity_change_handler.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\identity_change_handler.py:1:5 - error: Return type, "dict[Unknown, Unknown]", is partially unknown (reportUnknownParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\identity_change_handler.py:1:28 - error: Type of parameter "state" is partially unknown
+    Parameter type is "dict[Unknown, Unknown]" (reportUnknownParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\identity_change_handler.py:1:35 - error: Expected type arguments for generic class "dict" (reportMissingTypeArgument)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\identity_change_handler.py:1:54 - error: Expected type arguments for generic class "dict" (reportMissingTypeArgument)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\identity_change_handler.py:2:5 - error: Type of "out" is partially unknown
+    Type of "out" is "dict[Unknown, Unknown]" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\identity_change_handler.py:2:16 - error: Argument type is partially unknown
+    Argument corresponds to parameter "map" in function "__init__"
+    Argument type is "dict[Unknown, Unknown]" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\identity_change_handler.py:5:12 - error: Return type, "dict[Unknown, Unknown]", is partially unknown (reportUnknownVariableType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\media.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\media.py:13:37 - error: "_upload_once" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\media.py:13:51 - error: "_verify_remote_checksum" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\media.py:43:16 - error: Type "dict[str, str | int | bool | bytes]" is not assignable to return type "dict[str, str | bytes]"
+    Type "str | int | bool" is not assignable to type "str | bytes"
+      Type "int" is not assignable to type "str | bytes"
+        "int" is not assignable to "str"
+        "int" is not assignable to "bytes"
+    Type "int" is not assignable to type "str | bytes"
+      "int" is not assignable to "str"
+      "int" is not assignable to "bytes" (reportReturnType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:14:5 - error: "_encode_bool" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:15:5 - error: "_encode_len_delimited" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:16:5 - error: "_encode_string" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:17:5 - error: "_encode_varint" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:18:5 - error: "_encode_varint_field" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:35:5 - error: Function "_unpad_random_max16" is not accessed (reportUnusedFunction)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:103:9 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:104:21 - error: Argument type is partially unknown
+    Argument corresponds to parameter "iterable_of_bytes" in function "join"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:144:45 - error: Argument of type "str | bytes" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:144:45 - error: Argument of type "str | bytes" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:145:48 - error: Argument of type "str | bytes" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:145:48 - error: Argument of type "str | bytes" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:146:43 - error: Argument of type "str | bytes" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:146:43 - error: Argument of type "str | bytes" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:165:24 - error: Argument of type "dict[str, str | bytes]" cannot be assigned to parameter "media_info" of type "dict[str, str | bytes | int]" in function "_build_document_payload"
+    "dict[str, str | bytes]" is not assignable to "dict[str, str | bytes | int]"
+      Type parameter "_VT@dict" is invariant, but "str | bytes" is not the same as "str | bytes | int"
+      Consider switching from "dict" to "Mapping" which is covariant in the value type (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:209:24 - error: Argument of type "dict[str, str | bytes]" cannot be assigned to parameter "media_info" of type "dict[str, str | bytes | int]" in function "_build_audio_payload"
+    "dict[str, str | bytes]" is not assignable to "dict[str, str | bytes | int]"
+      Type parameter "_VT@dict" is invariant, but "str | bytes" is not the same as "str | bytes | int"
+      Consider switching from "dict" to "Mapping" which is covariant in the value type (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:234:24 - error: Argument of type "dict[str, str | bytes]" cannot be assigned to parameter "media_info" of type "dict[str, str | bytes | int]" in function "_build_video_payload"
+    "dict[str, str | bytes]" is not assignable to "dict[str, str | bytes | int]"
+      Type parameter "_VT@dict" is invariant, but "str | bytes" is not the same as "str | bytes | int"
+      Consider switching from "dict" to "Mapping" which is covariant in the value type (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:260:24 - error: Argument of type "dict[str, str | bytes]" cannot be assigned to parameter "media_info" of type "dict[str, str | bytes | int]" in function "_build_sticker_payload"
+    "dict[str, str | bytes]" is not assignable to "dict[str, str | bytes | int]"
+      Type parameter "_VT@dict" is invariant, but "str | bytes" is not the same as "str | bytes | int"
+      Consider switching from "dict" to "Mapping" which is covariant in the value type (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:539:38 - error: "_session_key" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:540:63 - error: "_session_key" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:556:27 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:556:27 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:557:29 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:557:29 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:558:33 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:558:33 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:608:27 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:608:27 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:609:29 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:609:29 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:610:33 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:610:33 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:641:27 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:641:27 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:642:29 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:642:29 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:643:33 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:643:33 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:675:27 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:675:27 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:676:29 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:676:29 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:677:33 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages.py:677:33 - error: Argument of type "str | bytes | int" cannot be assigned to parameter "o" of type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer" in function "__new__"
+    Type "str | bytes | int" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+      Type "str" is not assignable to type "Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer"
+        "str" is not assignable to "Iterable[SupportsIndex]"
+          Type parameter "_T_co@Iterable" is covariant, but "str" is not a subtype of "SupportsIndex"
+            "str" is incompatible with protocol "SupportsIndex"
+        "str" is incompatible with protocol "SupportsIndex"
+          "__index__" is not present
+        "str" is incompatible with protocol "SupportsBytes" (reportArgumentType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages_recv.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\messages_recv.py:39:52 - error: Unnecessary isinstance call; "BinaryNode" is always an instance of "BinaryNode" (reportUnnecessaryIsInstance)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\newsletter.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\newsletter.py:195:52 - error: Unnecessary isinstance call; "BinaryNode" is always an instance of "BinaryNode" (reportUnnecessaryIsInstance)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\retry_manager.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\retry_manager.py:174:48 - error: Argument of type "RetryReason | None" cannot be assigned to parameter "x" of type "ConvertibleToInt" in function "__new__"
+    Type "RetryReason | None" is not assignable to type "ConvertibleToInt"
+      Type "None" is not assignable to type "ConvertibleToInt"
+        "None" is not assignable to "str"
+        "None" is incompatible with protocol "Buffer"
+          "__buffer__" is not present
+        "None" is incompatible with protocol "SupportsInt"
+          "__int__" is not present
+        "None" is incompatible with protocol "SupportsIndex"
+    ... (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\retry_manager.py:174:48 - error: Argument of type "RetryReason | None" cannot be assigned to parameter "x" of type "ConvertibleToInt" in function "__new__"
+    Type "RetryReason | None" is not assignable to type "ConvertibleToInt"
+      Type "None" is not assignable to type "ConvertibleToInt"
+        "None" is not assignable to "str"
+        "None" is incompatible with protocol "Buffer"
+          "__buffer__" is not present
+        "None" is incompatible with protocol "SupportsInt"
+          "__int__" is not present
+        "None" is incompatible with protocol "SupportsIndex" (reportArgumentType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\usync.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\usync.py:79:13 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\usync.py:99:44 - error: "_generate_message_tag" is protected and used outside of the class in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\client\usync.py:107:66 - error: Argument type is partially unknown
+    Argument corresponds to parameter "content" in function "__init__"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\core\entities.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\core\entities.py:23:5 - error: Type of "app_state_key_ids" is partially unknown
+    Type of "app_state_key_ids" is "list[Unknown]" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\core\entities.py:28:5 - error: Type of "content" is partially unknown
+    Type of "content" is "dict[Unknown, Unknown]" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\core\entities.py:53:42 - error: Type "None" is not assignable to declared type "list[dict[str, Any]]"
+    "None" is not assignable to "list[dict[str, Any]]" (reportAssignmentType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\core\events.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\core\events.py:17:19 - error: Expected type arguments for generic class "dict" (reportMissingTypeArgument)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:5:20 - error: Import "Any" is not accessed (reportUnusedImport)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:30:24 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:36:24 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:42:24 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:48:24 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:56:24 - error: "commit" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:161:29 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:171:28 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:175:28 - error: "commit" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:179:29 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:189:28 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:193:28 - error: "commit" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:197:29 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:207:28 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:211:28 - error: "commit" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:215:29 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:228:28 - error: "execute" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\storage_sqlite.py:232:28 - error: "commit" is not a known attribute of "None" (reportOptionalMemberAccess)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\websocket.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\websocket.py:13:26 - error: Expected type arguments for generic class "Task" (reportMissingTypeArgument)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\websocket.py:22:24 - error: Argument of type "Literal['https://web.whatsapp.com']" cannot be assigned to parameter "origin" of type "Origin | None" in function "__init__"
+    Type "Literal['https://web.whatsapp.com']" is not assignable to type "Origin | None"
+      "Literal['https://web.whatsapp.com']" is not assignable to "Origin"
+      "Literal['https://web.whatsapp.com']" is not assignable to "None" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\websocket.py:34:12 - error: Type of "_recv_task" is partially unknown
+    Type of "_recv_task" is "Task[Unknown] | None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\websocket.py:35:13 - error: Type of "_recv_task" is partially unknown
+    Type of "_recv_task" is "Task[Unknown]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\websocket.py:40:23 - error: "object" is not awaitable
+    "object" is incompatible with protocol "Awaitable[_T_co@Awaitable]"
+      "__await__" is not present (reportGeneralTypeIssues)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\websocket.py:47:24 - error: "send" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\websocket.py:68:42 - error: "recv" is not a known attribute of "None" (reportOptionalMemberAccess)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\infra\websocket.py:74:41 - error: Argument of type "Awaitable[None]" cannot be assigned to parameter "coro" of type "_CoroutineLike[_T@create_task]" in function "create_task"
+    Type "Awaitable[None]" is not assignable to type "_CoroutineLike[_T@create_task]"
+      "Awaitable[None]" is not assignable to "Coroutine[Any, Any, _T@create_task]"
+      "Awaitable[None]" is incompatible with protocol "Generator[Any, None, _T@create_task]"
+        "__next__" is not present
+        "send" is not present
+        "throw" is not present
+        "close" is not present
+        "__iter__" is not present (reportArgumentType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:3:5 - error: Return type, "dict[Unknown, Unknown]", is partially unknown (reportUnknownParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:3:17 - error: Type of parameter "state" is partially unknown
+    Parameter type is "dict[Unknown, Unknown]" (reportUnknownParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:3:24 - error: Expected type arguments for generic class "dict" (reportMissingTypeArgument)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:3:30 - error: Type of parameter "patch" is partially unknown
+    Parameter type is "dict[Unknown, Unknown]" (reportUnknownParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:3:37 - error: Expected type arguments for generic class "dict" (reportMissingTypeArgument)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:3:46 - error: Expected type arguments for generic class "dict" (reportMissingTypeArgument)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:4:5 - error: Type of "items" is partially unknown
+    Type of "items" is "dict[Unknown, Unknown]" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:4:18 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:4:18 - error: Argument type is unknown
+    Argument corresponds to parameter "map" in function "__init__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:7:19 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:7:19 - error: Argument type is unknown
+    Argument corresponds to parameter "x" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:8:57 - error: Type of "k" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:8:60 - error: Type of "v" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:8:72 - error: Argument type is partially unknown
+    Argument corresponds to parameter "iterable" in function "sorted"
+    Argument type is "dict_items[Unknown, Unknown]" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\app_state.py:9:12 - error: Return type, "dict[Unknown, Unknown]", is partially unknown (reportUnknownVariableType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:1:8 - error: Import "math" is not accessed (reportUnusedImport)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:6:30 - error: Type of "TOKEN_MAP" is partially unknown
+    Type of "TOKEN_MAP" is "dict[Unknown, Unknown]" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:20:54 - error: Condition will always evaluate to True since the types "str" and "None" have no overlap (reportUnnecessaryComparison)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:38:14 - error: Unnecessary isinstance call; "list[BinaryNode]" is always an instance of "list[Unknown]" (reportUnnecessaryIsInstance)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:76:12 - error: Unnecessary isinstance call; "str" is always an instance of "str" (reportUnnecessaryIsInstance)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:83:5 - error: Type of "token_info" is partially unknown
+    Type of "token_info" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:83:18 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:86:24 - error: Argument type is unknown
+    Argument corresponds to parameter "item" in function "append" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:88:24 - error: Argument type is unknown
+    Argument corresponds to parameter "item" in function "append" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:89:24 - error: Argument type is unknown
+    Argument corresponds to parameter "item" in function "append" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:171:17 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:179:38 - error: Argument type is partially unknown
+    Argument corresponds to parameter "attrs" in function "__init__"
+    Argument type is "dict[Unknown, Unknown]" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:179:53 - error: Argument type is partially unknown
+    Argument corresponds to parameter "content" in function "__init__"
+    Argument type is "bytes | str | list[Unknown] | None" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:324:12 - error: Condition will always evaluate to False since the types "str" and "None" have no overlap (reportUnnecessaryComparison)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_codec.py:347:26 - error: Condition will always evaluate to False since the types "str" and "None" have no overlap (reportUnnecessaryComparison)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_node.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_node.py:2:20 - error: Import "Any" is not accessed (reportUnusedImport)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\binary_node.py:11:12 - error: Condition will always evaluate to False since the types "dict[str, str]" and "None" have no overlap (reportUnnecessaryComparison)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\frame_codec.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\frame_codec.py:1:8 - error: Import "struct" is not accessed (reportUnusedImport)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:15:19 - error: "_encode_bool" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:15:33 - error: "_encode_len_delimited" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:15:56 - error: "_encode_string" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:15:72 - error: "_iter_fields" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:97:22 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:98:27 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:99:26 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:100:29 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:101:29 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:103:27 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:104:32 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:105:29 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\protobuf\WAProto_pb2.py:106:25 - error: Argument type is partially unknown
+    Argument corresponds to parameter "iterable_of_bytes" in function "join"
+    Argument type is "list[Unknown]" (reportUnknownArgumentType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:58:9 - error: Type of "pn_to_lid" is partially unknown
+    Type of "pn_to_lid" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:58:21 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:63:9 - error: Type of "lid_to_pn" is partially unknown
+    Type of "lid_to_pn" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:63:21 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:68:16 - error: Return type, "tuple[dict[Unknown, Unknown], dict[Unknown, Unknown]]", is partially unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:141:13 - error: Type of "append" is partially unknown
+    Type of "append" is "(object: Unknown, /) -> None" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:149:16 - error: Return type, "list[Unknown]", is partially unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:276:42 - error: Argument of type "str | bytes" cannot be assigned to parameter "session_data" of type "bytes" in function "save_session"
+    Type "str | bytes" is not assignable to type "bytes"
+      "str" is not assignable to "bytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:277:20 - error: Type "str | bytes" is not assignable to return type "bytes"
+    Type "str | bytes" is not assignable to type "bytes"
+      "str" is not assignable to "bytes" (reportReturnType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:292:42 - error: Argument of type "str | bytes" cannot be assigned to parameter "session_data" of type "bytes" in function "save_session"
+    Type "str | bytes" is not assignable to type "bytes"
+      "str" is not assignable to "bytes" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\protocol\signal_repo.py:293:20 - error: Type "str | bytes" is not assignable to return type "bytes"
+    Type "str | bytes" is not assignable to type "bytes"
+      "str" is not assignable to "bytes" (reportReturnType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\simple_api.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\simple_api.py:52:19 - error: Function "_dispatch" is not accessed (reportUnusedFunction)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\simple_api.py:62:19 - error: Function "_dispatch" is not accessed (reportUnusedFunction)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:16:1 - error: Type of "curve25519_generate_keypair" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:16:31 - error: Type of "curve25519_generate_keypair" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:17:1 - error: Type of "rust_shared_key" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:17:19 - error: Type of "curve25519_shared_key" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:18:1 - error: Type of "rust_sign" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:18:13 - error: Type of "curve25519_sign" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:19:1 - error: Type of "rust_verify" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:19:15 - error: Type of "curve25519_verify" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:20:1 - error: Type of "rust_aes_gcm_encrypt" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:20:24 - error: Type of "aes_gcm_encrypt" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:21:1 - error: Type of "rust_aes_gcm_decrypt" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:21:24 - error: Type of "aes_gcm_decrypt" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:22:1 - error: Type of "rust_aes_cbc_encrypt" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:22:24 - error: Type of "aes_cbc_encrypt" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:23:1 - error: Type of "rust_aes_cbc_decrypt" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:23:24 - error: Type of "aes_cbc_decrypt" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:24:1 - error: Type of "rust_hkdf" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:24:13 - error: Type of "hkdf_sha256" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:25:1 - error: Type of "rust_hmac" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:25:13 - error: Type of "hmac_sha256" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:26:1 - error: Type of "rust_sha256" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:26:15 - error: Type of "sha256_hash" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:27:1 - error: Type of "rust_signal_process_prekey_bundle" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:27:37 - error: Type of "signal_process_prekey_bundle" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:28:1 - error: Type of "rust_signal_session_encrypt" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:28:31 - error: Type of "signal_session_encrypt" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:29:1 - error: Type of "rust_signal_session_decrypt_prekey" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:29:38 - error: Type of "signal_session_decrypt_prekey" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:30:1 - error: Type of "rust_signal_session_decrypt_whisper" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:30:39 - error: Type of "signal_session_decrypt_whisper" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:31:1 - error: Type of "rust_group_encrypt" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:31:22 - error: Type of "group_encrypt" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:32:1 - error: Type of "rust_group_decrypt" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:32:22 - error: Type of "group_decrypt" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:35:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:39:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:43:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:47:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:51:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:55:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:58:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:61:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:65:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:69:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:73:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:90:12 - error: Return type is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:114:5 - error: Type of "result" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:122:16 - error: Argument type is unknown
+    Argument corresponds to parameter "object" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:122:39 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:122:68 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:137:5 - error: Type of "result" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:149:25 - error: Argument type is unknown
+    Argument corresponds to parameter "object" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:149:62 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:149:102 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:160:5 - error: Type of "result" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:168:25 - error: Argument type is unknown
+    Argument corresponds to parameter "object" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:168:62 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:168:102 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:175:5 - error: Type of "res" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:176:18 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:176:44 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:179:5 - error: Type of "res" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:180:18 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\crypto.py:180:43 - error: Argument type is unknown
+    Argument corresponds to parameter "o" in function "__new__" (reportUnknownArgumentType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:43:12 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:46:26 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:46:26 - error: Argument type is unknown
+    Argument corresponds to parameter "object" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:50:9 - error: Type of "error" is partially unknown
+    Type of "error" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:50:17 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:53:24 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:53:24 - error: Argument type is partially unknown
+    Argument corresponds to parameter "remote_jid" in function "__init__"
+    Argument type is "Unknown | None" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:53:45 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:55:23 - error: Argument type is unknown
+    Argument corresponds to parameter "object" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:56:24 - error: Argument type is partially unknown
+    Argument corresponds to parameter "map" in function "__init__"
+    Argument type is "dict[Unknown, Unknown]" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:67:9 - error: Type of "message_id" is partially unknown
+    Type of "message_id" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:67:22 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:71:9 - error: Type of "error_raw" is partially unknown
+    Type of "error_raw" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:71:21 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:74:24 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:74:24 - error: Argument type is partially unknown
+    Argument corresponds to parameter "remote_jid" in function "__init__"
+    Argument type is "Unknown | None" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:76:23 - error: Argument type is unknown
+    Argument corresponds to parameter "object" in function "__new__" (reportUnknownArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\live_probe.py:77:24 - error: Argument type is partially unknown
+    Argument corresponds to parameter "map" in function "__init__"
+    Argument type is "dict[Unknown, Unknown]" (reportUnknownArgumentType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\lt_hash.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\lt_hash.py:14:42 - error: "_iter_fields" is private and used outside of the module in which it is declared (reportPrivateUsage)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\media_utils.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\media_utils.py:18:5 - error: Function "_upload_once" is not accessed (reportUnusedFunction)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\media_utils.py:22:5 - error: Function "_verify_remote_checksum" is not accessed (reportUnusedFunction)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\message_content.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\message_content.py:15:42 - error: "_iter_fields" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\message_content.py:37:5 - error: Function "_field_strings" is not accessed (reportUnusedFunction)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\message_content.py:213:30 - error: Argument of type "bytes | None" cannot be assigned to parameter "s" of type "ReadableBuffer" in function "b64encode"
+    Type "bytes | None" is not assignable to type "ReadableBuffer"
+      "None" is incompatible with protocol "Buffer"
+        "__buffer__" is not present (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\message_content.py:237:9 - error: Argument of type "dict[str, Any]" cannot be assigned to parameter "value" of type "str | int | bool | None" in function "__setitem__"
+    Type "dict[str, Any]" is not assignable to type "str | int | bool | None"
+      "dict[str, Any]" is not assignable to "str"
+      "dict[str, Any]" is not assignable to "None"
+      "dict[str, Any]" is not assignable to "int"
+      "dict[str, Any]" is not assignable to "bool" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\message_content.py:411:13 - error: Type of "candidate" is partially unknown
+    Type of "candidate" is "Any | Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\message_content.py:411:25 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: str, default: None = None, /) -> (Any | None), (key: str, default: Any, /) -> Any, (key: str, default: _T@get, /) -> (Any | _T@get)] | Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)] | Overload[(key: Any, default: None = None, /) -> (Any | None), (key: Any, default: Any, /) -> Any, (key: Any, default: _T@get, /) -> (Any | _T@get)]" (reportUnknownMemberType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\preflight.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\preflight.py:86:9 - error: Type of "domain" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\preflight.py:86:17 - error: Type of "payload" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\preflight.py:90:9 - error: Type of "status" is partially unknown
+    Type of "status" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\preflight.py:90:18 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\preflight.py:93:17 - error: Type of "evidence" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\preflight.py:93:28 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:30:29 - error: Unnecessary isinstance call; "str" is always an instance of "str" (reportUnnecessaryIsInstance)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:36:5 - error: Type of "raw" is partially unknown
+    Type of "raw" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:36:11 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:112:46 - error: Unnecessary isinstance call; "BinaryNode" is always an instance of "BinaryNode" (reportUnnecessaryIsInstance)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:122:55 - error: "_unpad_random_max16" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:164:79 - error: "participant" is possibly unbound (reportPossiblyUnboundVariable)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:166:81 - error: "participant" is possibly unbound (reportPossiblyUnboundVariable)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:183:13 - error: Type of "content" is partially unknown
+    Type of "content" is "dict[Unknown, Unknown]" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:218:13 - error: Type of "raw_edited_text" is partially unknown
+    Type of "raw_edited_text" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:218:31 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:224:13 - error: Type of "raw_history_sync_type" is partially unknown
+    Type of "raw_history_sync_type" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:224:37 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:230:13 - error: Type of "keys" is partially unknown
+    Type of "keys" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:230:20 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:232:21 - error: Type of "key_item" is unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:235:21 - error: Type of "key_id" is partially unknown
+    Type of "key_id" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:235:30 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:257:13 - error: Type of "enc_payload_b64" is partially unknown
+    Type of "enc_payload_b64" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:257:31 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:258:13 - error: Type of "enc_iv_b64" is partially unknown
+    Type of "enc_iv_b64" is "Unknown | None" (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:258:26 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:266:25 - error: Argument of type "object | None" cannot be assigned to parameter "message_key" of type "dict[str, object] | None" in function "_resolve_key_jid"
+    Type "object | None" is not assignable to type "dict[str, object] | None"
+      Type "object" is not assignable to type "dict[str, object] | None"
+        "object" is not assignable to "dict[str, object]"
+        "object" is not assignable to "None" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:266:65 - error: Unnecessary isinstance call; "dict[str, object]" is always an instance of "dict[Unknown, Unknown]" (reportUnnecessaryIsInstance)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:294:25 - error: Argument of type "object | None" cannot be assigned to parameter "message_key" of type "dict[str, object] | None" in function "_resolve_key_jid"
+    Type "object | None" is not assignable to type "dict[str, object] | None"
+      Type "object" is not assignable to type "dict[str, object] | None"
+        "object" is not assignable to "dict[str, object]"
+        "object" is not assignable to "None" (reportArgumentType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\process_message.py:294:69 - error: Unnecessary isinstance call; "dict[str, object]" is always an instance of "dict[Unknown, Unknown]" (reportUnnecessaryIsInstance)
+c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:13:42 - error: "_iter_fields" is private and used outside of the module in which it is declared (reportPrivateUsage)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:75:23 - error: Type of parameter "message" is unknown (reportUnknownParameterType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:75:32 - error: Variable not allowed in type expression (reportInvalidTypeForm)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:75:32 - error: Type of "Message" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:76:12 - error: Type of "conversation" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:76:12 - error: Return type, "Unknown | None", is partially unknown (reportUnknownVariableType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:76:36 - error: Type of "extendedTextMessage" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:76:36 - error: Type of "text" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:76:72 - error: Type of "imageMessage" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:76:72 - error: Type of "caption" is unknown (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:169:36 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:190:43 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:213:44 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+  c:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton\utils\protocol_message.py:353:36 - error: Type of "get" is partially unknown
+    Type of "get" is "Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]" (reportUnknownMemberType)
+301 errors, 0 warnings, 0 informations

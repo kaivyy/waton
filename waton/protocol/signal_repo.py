@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from waton.core.jid import jid_decode, jid_encode
 from waton.utils.crypto import (
@@ -54,16 +54,17 @@ class SignalRepository:
         if not isinstance(mapping_state, dict):
             mapping_state = {}
             additional_data["lid_mapping"] = mapping_state
+        mapping_state_typed = cast("dict[str, dict[str, str]]", mapping_state)
 
-        pn_to_lid = mapping_state.get("pn_to_lid_user")
+        pn_to_lid = mapping_state_typed.get("pn_to_lid_user")
         if not isinstance(pn_to_lid, dict):
             pn_to_lid = {}
-            mapping_state["pn_to_lid_user"] = pn_to_lid
+            mapping_state_typed["pn_to_lid_user"] = pn_to_lid
 
-        lid_to_pn = mapping_state.get("lid_to_pn_user")
+        lid_to_pn = mapping_state_typed.get("lid_to_pn_user")
         if not isinstance(lid_to_pn, dict):
             lid_to_pn = {}
-            mapping_state["lid_to_pn_user"] = lid_to_pn
+            mapping_state_typed["lid_to_pn_user"] = lid_to_pn
 
         return pn_to_lid, lid_to_pn
 
@@ -132,7 +133,7 @@ class SignalRepository:
     async def generate_prekeys(self, count: int) -> list[dict[str, Any]]:
         """Generates new pre-keys for upload to server."""
         start_id = self.creds.next_pre_key_id
-        new_keys = []
+        new_keys: list[dict[str, Any]] = []
         for i in range(count):
             kp = generate_keypair()
             # A real implementation serializes the prekey to libsignal format
@@ -273,8 +274,10 @@ class SignalRepository:
             )
 
             # update session
-            await self.save_session(jid, res["session"])
-            return res["ciphertext"]
+            session_bytes = cast("bytes", res["session"])
+            plaintext_bytes = cast("bytes", res["ciphertext"])
+            await self.save_session(jid, session_bytes)
+            return plaintext_bytes
 
         elif type_str == "msg":
             if not session:
@@ -289,8 +292,10 @@ class SignalRepository:
                 ciphertext=ciphertext,
             )
 
-            await self.save_session(jid, res["session"])
-            return res["ciphertext"]
+            session_bytes = cast("bytes", res["session"])
+            plaintext_bytes = cast("bytes", res["ciphertext"])
+            await self.save_session(jid, session_bytes)
+            return plaintext_bytes
 
         else:
             raise ValueError(f"Unknown message type: {type_str}")

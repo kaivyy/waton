@@ -1,6 +1,6 @@
 import asyncio
 import base64
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -23,6 +23,16 @@ class _DummyStorage:
     async def save_creds(self, creds: Any) -> None:
         self.creds = creds
 
+
+class _CountingStorage(_DummyStorage):
+    def __init__(self) -> None:
+        super().__init__()
+        self.save_calls = 0
+
+    async def save_creds(self, creds: Any) -> None:
+        self.save_calls += 1
+        await super().save_creds(creds)
+
     async def get_session(self, jid: str) -> bytes | None:
         return None
 
@@ -44,6 +54,45 @@ class _DummyStorage:
 
 def _run(coro: Any) -> Any:
     return asyncio.run(coro)
+
+
+def test_send_message_uses_existing_string_id_without_coercion() -> None:
+    async def _case() -> None:
+        client = WAClient(_DummyStorage())
+        seen_payloads: list[dict[str, Any]] = []
+
+        class _Pipeline:
+            async def process(self, payload: dict[str, Any]) -> None:
+                seen_payloads.append(payload)
+
+        client.pipeline = _Pipeline()  # type: ignore[attr-defined]
+        provided = "m-123"
+        msg_id = await client.send_message("123@s.whatsapp.net", {"id": provided})
+
+        assert msg_id == provided
+        assert seen_payloads and seen_payloads[0]["id"] == provided
+
+    _run(_case())
+
+
+def test_send_message_preserves_non_string_id_without_str_coercion() -> None:
+    async def _case() -> None:
+        client = WAClient(_DummyStorage())
+        seen_payloads: list[dict[str, Any]] = []
+
+        class _Pipeline:
+            async def process(self, payload: dict[str, Any]) -> None:
+                seen_payloads.append(payload)
+
+        client.pipeline = _Pipeline()  # type: ignore[attr-defined]
+        provided = cast("Any", 12345)
+        msg_id = await client.send_message("123@s.whatsapp.net", {"id": provided})
+
+        assert msg_id == provided
+        assert not isinstance(msg_id, str)
+        assert seen_payloads and seen_payloads[0]["id"] == provided
+
+    _run(_case())
 
 
 def test_handle_raw_ws_message_queues_handshake_frame() -> None:
@@ -636,7 +685,9 @@ def test_decrypt_error_sends_placeholder_resend_when_enabled(monkeypatch: pytest
         )
 
         assert sent_nodes and sent_nodes[0].tag == "receipt"
-        placeholder_nodes = [node for node in sent_nodes if node.tag == "iq" and node.attrs.get("xmlns") == "placeholder"]
+        placeholder_nodes = [
+            node for node in sent_nodes if node.tag == "iq" and node.attrs.get("xmlns") == "placeholder"
+        ]
         assert placeholder_nodes
         assert events and events[0]["retry_request"]["placeholder_sent"] is True
 
@@ -679,7 +730,9 @@ def test_decrypt_error_placeholder_resend_can_be_disabled(monkeypatch: pytest.Mo
         )
 
         assert sent_nodes and sent_nodes[0].tag == "receipt"
-        placeholder_nodes = [node for node in sent_nodes if node.tag == "iq" and node.attrs.get("xmlns") == "placeholder"]
+        placeholder_nodes = [
+            node for node in sent_nodes if node.tag == "iq" and node.attrs.get("xmlns") == "placeholder"
+        ]
         assert placeholder_nodes == []
         assert events and events[0]["retry_request"]["sent"] is True
         assert events[0]["retry_request"]["placeholder_sent"] is False
@@ -758,7 +811,9 @@ def test_retry_receipt_requests_placeholder_for_retry_ids() -> None:
             )
         )
 
-        placeholder_nodes = [node for node in sent_nodes if node.tag == "iq" and node.attrs.get("xmlns") == "placeholder"]
+        placeholder_nodes = [
+            node for node in sent_nodes if node.tag == "iq" and node.attrs.get("xmlns") == "placeholder"
+        ]
         assert placeholder_nodes
         assert events and events[0]["retry_resend"]["placeholder_sent_ids"] == ["m-placeholder-retry"]
 
@@ -800,6 +855,51 @@ def test_protocol_app_state_key_share_saved_to_creds() -> None:
         assert key_id in stored
         assert stored[key_id]["key_data_size"] == 32
         assert events[0]["app_state_sync_keys_saved"] == 1
+
+    _run(_case())
+
+
+def test_protocol_app_state_key_share_does_not_emit_saved_marker_when_unchanged() -> None:
+    async def _case() -> None:
+        storage = _CountingStorage()
+        storage.creds = init_auth_creds()
+        key_id = base64.b64encode(b"key-1").decode("ascii")
+        storage.creds.additional_data = {
+            "app_state_sync_keys": {
+                key_id: {
+                    "key_id_b64": key_id,
+                    "key_data_size": 32,
+                }
+            }
+        }
+
+        client = WAClient(storage, auto_ack_incoming=False)
+        client.creds = storage.creds
+        events: list[dict[str, Any]] = []
+
+        async def _capture_event(event: dict[str, Any]) -> None:
+            events.append(event)
+
+        client.on_event = _capture_event
+
+        key_id_payload = _encode_len_delimited(1, b"key-1")
+        key_data_payload = _encode_len_delimited(1, b"\x11" * 32)
+        key_item_payload = _encode_len_delimited(1, key_id_payload) + _encode_len_delimited(2, key_data_payload)
+        share_payload = _encode_len_delimited(1, key_item_payload)
+        protocol_payload = _encode_varint_field(2, 6) + _encode_len_delimited(7, share_payload)
+        message_payload = _encode_len_delimited(12, protocol_payload)
+
+        await client._handle_binary_node(
+            BinaryNode(
+                tag="message",
+                attrs={"id": "m-app-state-noop", "from": "123@s.whatsapp.net"},
+                content=message_payload,
+            )
+        )
+
+        assert events and events[0]["type"] == "messages.app_state_sync_key_share"
+        assert "app_state_sync_keys_saved" not in events[0]
+        assert storage.save_calls == 0
 
     _run(_case())
 

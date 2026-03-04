@@ -2,63 +2,136 @@
   "domains": {
     "messages-recv": {
       "status": "done",
-      "ratio": 0.8058,
-      "waton_lines": 1344,
-      "baileys_lines": 1668
+      "ratio": 0.8387,
+      "waton_lines": 1399,
+      "baileys_lines": 1668,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/messages-recv.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/messages-recv.json"
+      }
     },
     "app-state-sync": {
       "status": "done",
-      "ratio": 1.3171,
-      "waton_lines": 108,
-      "baileys_lines": 82
+      "ratio": 1.5122,
+      "waton_lines": 124,
+      "baileys_lines": 82,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/app-state-sync.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/app-state-sync.json"
+      }
     },
     "retry-manager": {
       "status": "done",
-      "ratio": 0.9153,
-      "waton_lines": 270,
-      "baileys_lines": 295
+      "ratio": 0.9254,
+      "waton_lines": 273,
+      "baileys_lines": 295,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/retry-manager.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/retry-manager.json"
+      }
     },
     "group-signal": {
       "status": "done",
       "ratio": 1.0256,
       "waton_lines": 120,
-      "baileys_lines": 117
+      "baileys_lines": 117,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/group-signal.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/group-signal.json"
+      }
     },
     "messages-send": {
       "status": "done",
-      "ratio": 0.8009,
-      "waton_lines": 1038,
-      "baileys_lines": 1296
+      "ratio": 0.8171,
+      "waton_lines": 1059,
+      "baileys_lines": 1296,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/messages-send.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/messages-send.json"
+      }
     },
     "process-message": {
       "status": "done",
-      "ratio": 1.0373,
-      "waton_lines": 695,
-      "baileys_lines": 670
+      "ratio": 1.1761,
+      "waton_lines": 788,
+      "baileys_lines": 670,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/process-message.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/process-message.json"
+      }
     },
     "groups-api": {
       "status": "done",
-      "ratio": 0.9418,
-      "waton_lines": 340,
-      "baileys_lines": 361
+      "ratio": 0.9668,
+      "waton_lines": 349,
+      "baileys_lines": 361,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/groups-api.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/groups-api.json"
+      }
     },
     "communities-api": {
       "status": "done",
-      "ratio": 0.8679,
-      "waton_lines": 414,
-      "baileys_lines": 477
+      "ratio": 0.8721,
+      "waton_lines": 416,
+      "baileys_lines": 477,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/communities-api.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/communities-api.json"
+      }
     },
     "newsletter-api": {
       "status": "done",
       "ratio": 0.9869,
       "waton_lines": 226,
-      "baileys_lines": 229
+      "baileys_lines": 229,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/newsletter-api.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/newsletter-api.json"
+      }
     },
     "connection-core": {
       "status": "done",
-      "ratio": 0.8931,
-      "waton_lines": 1019,
-      "baileys_lines": 1141
+      "ratio": 0.9921,
+      "waton_lines": 1132,
+      "baileys_lines": 1141,
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/connection-core.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/connection-core.json"
+      }
     }
-  }
+  },
+  "run_id": "strict-sample-2026-03-01",
+  "commit_sha": "local-working-tree",
+  "timestamp": "2026-03-01T00:00:00+00:00"
 }

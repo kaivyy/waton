@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import asyncio
 from base64 import b64encode
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import pytest
+if TYPE_CHECKING:
+    import pytest
 
 from waton.client.messages import MessagesAPI, _unpad_random_max16
 from waton.protocol.binary_node import BinaryNode
@@ -63,6 +64,9 @@ class _FakeClient:
     def _generate_message_tag(self) -> str:
         self._tag_counter += 1
         return str(self._tag_counter)
+
+    def generate_message_tag(self) -> str:
+        return self._generate_message_tag()
 
     async def send_node(self, node: BinaryNode) -> None:
         self.sent.append(node)

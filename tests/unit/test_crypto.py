@@ -1,10 +1,16 @@
 from waton._crypto import (
-    aes_gcm_encrypt, aes_gcm_decrypt,
-    curve25519_generate_keypair, curve25519_shared_key,
-    curve25519_sign, curve25519_verify,
-    hkdf_sha256, hmac_sha256, sha256_hash,
-    aes_cbc_encrypt, aes_cbc_decrypt,
+    aes_cbc_decrypt,
+    aes_cbc_encrypt,
+    aes_gcm_decrypt,
+    aes_gcm_encrypt,
+    curve25519_generate_keypair,
+    curve25519_shared_key,
+    curve25519_sign,
+    curve25519_verify,
+    hkdf_sha256,
+    hmac_sha256,
 )
+
 
 def test_aes_gcm_roundtrip():
     key = bytes(32)

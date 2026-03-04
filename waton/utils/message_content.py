@@ -8,11 +8,12 @@ coverage while still exposing richer message metadata.
 from __future__ import annotations
 
 import base64
+import contextlib
 import struct
-from typing import Any
+from typing import Any, cast
 
 from waton.protocol.protobuf import wa_pb2
-from waton.protocol.protobuf.wire import _iter_fields
+from waton.protocol.protobuf.wire import iter_fields
 
 _FUTURE_PROOF_FIELDS = {
     37, 40, 53, 55, 58, 59, 62, 67, 74, 85, 87, 90, 91, 92, 93, 95, 96, 99, 100, 101, 103, 104, 106
@@ -28,22 +29,14 @@ def _decode_utf8(value: bytes | bytearray | memoryview | None) -> str | None:
 
 
 def _field_bytes(payload: bytes, field_number: int) -> bytes | None:
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == field_number and wire_type == 2:
             return bytes(value)
     return None
 
 
-def _field_strings(payload: bytes, field_number: int) -> list[str]:
-    out: list[str] = []
-    for field_no, wire_type, value in _iter_fields(payload):
-        if field_no == field_number and wire_type == 2:
-            out.append(bytes(value).decode("utf-8", errors="ignore"))
-    return out
-
-
 def _field_varint(payload: bytes, field_number: int) -> int | None:
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == field_number and wire_type == 0:
             return int(value)
     return None
@@ -57,7 +50,7 @@ def _field_bool(payload: bytes, field_number: int) -> bool | None:
 
 
 def _field_fixed64_double(payload: bytes, field_number: int) -> float | None:
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == field_number and wire_type == 1:
             return float(struct.unpack("<d", bytes(value))[0])
     return None
@@ -69,7 +62,7 @@ def _unwrap_future_proof_message(payload: bytes) -> tuple[bytes, list[int]]:
     for _ in range(8):
         wrapped_payload: bytes | None = None
         wrapped_field: int | None = None
-        for field_no, wire_type, value in _iter_fields(current):
+        for field_no, wire_type, value in iter_fields(current):
             if field_no in _FUTURE_PROOF_FIELDS and wire_type == 2:
                 future_payload = bytes(value)
                 nested = _field_bytes(future_payload, 1)
@@ -203,16 +196,14 @@ def _decode_template_message(payload: bytes) -> dict[str, Any]:
 
 def _decode_poll_creation(payload: bytes) -> tuple[dict[str, Any], str | None]:
     options: list[str] = []
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == 3 and wire_type == 2:
             option_name = _decode_utf8(_field_bytes(bytes(value), 1))
             if option_name:
                 options.append(option_name)
     content = {
         "enc_key_b64": (
-            base64.b64encode(_field_bytes(payload, 1)).decode("ascii")
-            if _field_bytes(payload, 1) is not None
-            else None
+            base64.b64encode(enc_key).decode("ascii") if (enc_key := _field_bytes(payload, 1)) is not None else None
         ),
         "name": _decode_utf8(_field_bytes(payload, 2)),
         "options": options,
@@ -223,7 +214,7 @@ def _decode_poll_creation(payload: bytes) -> tuple[dict[str, Any], str | None]:
 
 
 def _decode_event_message(payload: bytes) -> tuple[dict[str, Any], str | None]:
-    content = {
+    content: dict[str, Any] = {
         "name": _decode_utf8(_field_bytes(payload, 3)),
         "description": _decode_utf8(_field_bytes(payload, 4)),
         "join_link": _decode_utf8(_field_bytes(payload, 6)),
@@ -277,10 +268,8 @@ def parse_message_payload(payload: bytes, *, allow_device_sent: bool = True) -> 
     summary["wrappers"] = wrappers
 
     message = wa_pb2.Message()
-    try:
+    with contextlib.suppress(Exception):
         message.ParseFromString(normalized_payload)
-    except Exception:
-        pass
 
     text = message.conversation or message.extendedTextMessage.text or message.imageMessage.caption or None
     media_url = message.imageMessage.url or None
@@ -407,8 +396,9 @@ def parse_message_payload(payload: bytes, *, allow_device_sent: bool = True) -> 
 
     # Preserve text fallbacks for captions inside known media payloads.
     if summary["text"] is None and isinstance(summary["content"], dict):
+        content_map = cast("dict[str, object]", summary["content"])
         for key in ("caption", "title", "content_text", "name"):
-            candidate = summary["content"].get(key)
+            candidate = content_map.get(key)
             if isinstance(candidate, str) and candidate:
                 summary["text"] = candidate
                 if summary["message_kind"] == "unknown":

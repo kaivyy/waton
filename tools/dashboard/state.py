@@ -4,7 +4,7 @@ import re
 import threading
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 _WA_SUFFIX = "@s.whatsapp.net"
@@ -12,7 +12,7 @@ _WA_ID_RE = re.compile(r"^\d{6,20}$")
 
 
 def _utc_now_iso() -> str:
-    return datetime.now(tz=timezone.utc).isoformat()
+    return datetime.now(tz=UTC).isoformat()
 
 
 def normalize_wa_id(raw: str) -> str:

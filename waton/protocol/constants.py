@@ -1,5 +1,13 @@
 """Binary protocol constants parsed from Baileys."""
 
+from typing import TypedDict
+
+
+class TokenInfo(TypedDict):
+    dict: int
+    index: int
+
+
 class Tags:
     LIST_EMPTY = 0
     DICTIONARY_0 = 236
@@ -1293,13 +1301,13 @@ DOUBLE_BYTE_TOKENS = [
     ],
 ]
 
-TOKEN_MAP = {}
+TOKEN_MAP: dict[str, TokenInfo] = {}
 for i, token in enumerate(SINGLE_BYTE_TOKENS):
     if token:
-        TOKEN_MAP[token] = {'dict': 0, 'index': i}
+        TOKEN_MAP[token] = {"dict": 0, "index": i}
 
 for i, token_dict in enumerate(DOUBLE_BYTE_TOKENS):
     if token_dict:
         for j, token in enumerate(token_dict):
             if token:
-                TOKEN_MAP[token] = {'dict': i + 1, 'index': j}
+                TOKEN_MAP[token] = {"dict": i + 1, "index": j}

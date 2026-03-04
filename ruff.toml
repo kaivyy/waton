@@ -3,7 +3,12 @@ line-length = 120
 
 [lint]
 select = ["E", "F", "W", "I", "N", "UP", "ANN", "B", "A", "SIM", "TCH"]
-ignore = ["ANN101", "ANN102", "ANN401"]
+ignore = ["ANN401"]
+
+[lint.per-file-ignores]
+"tests/**/*.py" = ["ANN"]
+"waton/utils/crypto.py" = ["TC006"]
+"waton/protocol/protobuf/wire.py" = ["N802"]
 
 [lint.isort]
 known-first-party = ["waton"]

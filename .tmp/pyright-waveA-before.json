@@ -1,0 +1,1390 @@
+{
+    "version": "1.1.408",
+    "time": "1772400564747",
+    "generalDiagnostics": [
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Function \"_unpad_random_max16\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 34,
+                    "character": 4
+                },
+                "end": {
+                    "line": 34,
+                    "character": 23
+                }
+            },
+            "rule": "reportUnusedFunction"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Type of \"append\" is partially unknown\n  Type of \"append\" is \"(object: Unknown, /) -> None\"",
+            "range": {
+                "start": {
+                    "line": 102,
+                    "character": 8
+                },
+                "end": {
+                    "line": 102,
+                    "character": 21
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument type is partially unknown\n  Argument corresponds to parameter \"iterable_of_bytes\" in function \"join\"\n  Argument type is \"list[Unknown]\"",
+            "range": {
+                "start": {
+                    "line": 103,
+                    "character": 20
+                },
+                "end": {
+                    "line": 103,
+                    "character": 26
+                }
+            },
+            "rule": "reportUnknownArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 143,
+                    "character": 44
+                },
+                "end": {
+                    "line": 143,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 143,
+                    "character": 44
+                },
+                "end": {
+                    "line": 143,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 144,
+                    "character": 47
+                },
+                "end": {
+                    "line": 144,
+                    "character": 74
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 144,
+                    "character": 47
+                },
+                "end": {
+                    "line": 144,
+                    "character": 74
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 145,
+                    "character": 42
+                },
+                "end": {
+                    "line": 145,
+                    "character": 64
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 145,
+                    "character": 42
+                },
+                "end": {
+                    "line": 145,
+                    "character": 64
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"dict[str, str | bytes]\" cannot be assigned to parameter \"media_info\" of type \"dict[str, str | bytes | int]\" in function \"_build_document_payload\"\n  \"dict[str, str | bytes]\" is not assignable to \"dict[str, str | bytes | int]\"\n    Type parameter \"_VT@dict\" is invariant, but \"str | bytes\" is not the same as \"str | bytes | int\"\n    Consider switching from \"dict\" to \"Mapping\" which is covariant in the value type",
+            "range": {
+                "start": {
+                    "line": 164,
+                    "character": 23
+                },
+                "end": {
+                    "line": 164,
+                    "character": 33
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"dict[str, str | bytes]\" cannot be assigned to parameter \"media_info\" of type \"dict[str, str | bytes | int]\" in function \"_build_audio_payload\"\n  \"dict[str, str | bytes]\" is not assignable to \"dict[str, str | bytes | int]\"\n    Type parameter \"_VT@dict\" is invariant, but \"str | bytes\" is not the same as \"str | bytes | int\"\n    Consider switching from \"dict\" to \"Mapping\" which is covariant in the value type",
+            "range": {
+                "start": {
+                    "line": 208,
+                    "character": 23
+                },
+                "end": {
+                    "line": 208,
+                    "character": 33
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"dict[str, str | bytes]\" cannot be assigned to parameter \"media_info\" of type \"dict[str, str | bytes | int]\" in function \"_build_video_payload\"\n  \"dict[str, str | bytes]\" is not assignable to \"dict[str, str | bytes | int]\"\n    Type parameter \"_VT@dict\" is invariant, but \"str | bytes\" is not the same as \"str | bytes | int\"\n    Consider switching from \"dict\" to \"Mapping\" which is covariant in the value type",
+            "range": {
+                "start": {
+                    "line": 233,
+                    "character": 23
+                },
+                "end": {
+                    "line": 233,
+                    "character": 33
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"dict[str, str | bytes]\" cannot be assigned to parameter \"media_info\" of type \"dict[str, str | bytes | int]\" in function \"_build_sticker_payload\"\n  \"dict[str, str | bytes]\" is not assignable to \"dict[str, str | bytes | int]\"\n    Type parameter \"_VT@dict\" is invariant, but \"str | bytes\" is not the same as \"str | bytes | int\"\n    Consider switching from \"dict\" to \"Mapping\" which is covariant in the value type",
+            "range": {
+                "start": {
+                    "line": 259,
+                    "character": 23
+                },
+                "end": {
+                    "line": 259,
+                    "character": 33
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "\"_session_key\" is protected and used outside of the class in which it is declared",
+            "range": {
+                "start": {
+                    "line": 538,
+                    "character": 37
+                },
+                "end": {
+                    "line": 538,
+                    "character": 49
+                }
+            },
+            "rule": "reportPrivateUsage"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "\"_session_key\" is protected and used outside of the class in which it is declared",
+            "range": {
+                "start": {
+                    "line": 539,
+                    "character": 62
+                },
+                "end": {
+                    "line": 539,
+                    "character": 74
+                }
+            },
+            "rule": "reportPrivateUsage"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 555,
+                    "character": 26
+                },
+                "end": {
+                    "line": 555,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 555,
+                    "character": 26
+                },
+                "end": {
+                    "line": 555,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 556,
+                    "character": 28
+                },
+                "end": {
+                    "line": 556,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 556,
+                    "character": 28
+                },
+                "end": {
+                    "line": 556,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 557,
+                    "character": 32
+                },
+                "end": {
+                    "line": 557,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 557,
+                    "character": 32
+                },
+                "end": {
+                    "line": 557,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 607,
+                    "character": 26
+                },
+                "end": {
+                    "line": 607,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 607,
+                    "character": 26
+                },
+                "end": {
+                    "line": 607,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 608,
+                    "character": 28
+                },
+                "end": {
+                    "line": 608,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 608,
+                    "character": 28
+                },
+                "end": {
+                    "line": 608,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 609,
+                    "character": 32
+                },
+                "end": {
+                    "line": 609,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 609,
+                    "character": 32
+                },
+                "end": {
+                    "line": 609,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 640,
+                    "character": 26
+                },
+                "end": {
+                    "line": 640,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 640,
+                    "character": 26
+                },
+                "end": {
+                    "line": 640,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 641,
+                    "character": 28
+                },
+                "end": {
+                    "line": 641,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 641,
+                    "character": 28
+                },
+                "end": {
+                    "line": 641,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 642,
+                    "character": 32
+                },
+                "end": {
+                    "line": 642,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 642,
+                    "character": 32
+                },
+                "end": {
+                    "line": 642,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 674,
+                    "character": 26
+                },
+                "end": {
+                    "line": 674,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 674,
+                    "character": 26
+                },
+                "end": {
+                    "line": 674,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 675,
+                    "character": 28
+                },
+                "end": {
+                    "line": 675,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 675,
+                    "character": 28
+                },
+                "end": {
+                    "line": 675,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 676,
+                    "character": 32
+                },
+                "end": {
+                    "line": 676,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\messages.py",
+            "severity": "error",
+            "message": "Argument of type \"str | bytes | int\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"str | bytes | int\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 676,
+                    "character": 32
+                },
+                "end": {
+                    "line": 676,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "Import \"Any\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 4,
+                    "character": 19
+                },
+                "end": {
+                    "line": 4,
+                    "character": 22
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 29,
+                    "character": 23
+                },
+                "end": {
+                    "line": 29,
+                    "character": 30
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 35,
+                    "character": 23
+                },
+                "end": {
+                    "line": 35,
+                    "character": 30
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 41,
+                    "character": 23
+                },
+                "end": {
+                    "line": 41,
+                    "character": 30
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 47,
+                    "character": 23
+                },
+                "end": {
+                    "line": 47,
+                    "character": 30
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"commit\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 55,
+                    "character": 23
+                },
+                "end": {
+                    "line": 55,
+                    "character": 29
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 160,
+                    "character": 28
+                },
+                "end": {
+                    "line": 160,
+                    "character": 35
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 170,
+                    "character": 27
+                },
+                "end": {
+                    "line": 170,
+                    "character": 34
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"commit\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 174,
+                    "character": 27
+                },
+                "end": {
+                    "line": 174,
+                    "character": 33
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 178,
+                    "character": 28
+                },
+                "end": {
+                    "line": 178,
+                    "character": 35
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 188,
+                    "character": 27
+                },
+                "end": {
+                    "line": 188,
+                    "character": 34
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"commit\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 192,
+                    "character": 27
+                },
+                "end": {
+                    "line": 192,
+                    "character": 33
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 196,
+                    "character": 28
+                },
+                "end": {
+                    "line": 196,
+                    "character": 35
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 206,
+                    "character": 27
+                },
+                "end": {
+                    "line": 206,
+                    "character": 34
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"commit\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 210,
+                    "character": 27
+                },
+                "end": {
+                    "line": 210,
+                    "character": 33
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 214,
+                    "character": 28
+                },
+                "end": {
+                    "line": 214,
+                    "character": 35
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"execute\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 227,
+                    "character": 27
+                },
+                "end": {
+                    "line": 227,
+                    "character": 34
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\storage_sqlite.py",
+            "severity": "error",
+            "message": "\"commit\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 231,
+                    "character": 27
+                },
+                "end": {
+                    "line": 231,
+                    "character": 33
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"curve25519_generate_keypair\" is unknown",
+            "range": {
+                "start": {
+                    "line": 17,
+                    "character": 67
+                },
+                "end": {
+                    "line": 17,
+                    "character": 107
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"curve25519_shared_key\" is unknown",
+            "range": {
+                "start": {
+                    "line": 18,
+                    "character": 56
+                },
+                "end": {
+                    "line": 18,
+                    "character": 90
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"curve25519_sign\" is unknown",
+            "range": {
+                "start": {
+                    "line": 19,
+                    "character": 50
+                },
+                "end": {
+                    "line": 19,
+                    "character": 78
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"curve25519_verify\" is unknown",
+            "range": {
+                "start": {
+                    "line": 20,
+                    "character": 58
+                },
+                "end": {
+                    "line": 20,
+                    "character": 88
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"aes_gcm_encrypt\" is unknown",
+            "range": {
+                "start": {
+                    "line": 21,
+                    "character": 75
+                },
+                "end": {
+                    "line": 21,
+                    "character": 103
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"aes_gcm_decrypt\" is unknown",
+            "range": {
+                "start": {
+                    "line": 22,
+                    "character": 75
+                },
+                "end": {
+                    "line": 22,
+                    "character": 103
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"aes_cbc_encrypt\" is unknown",
+            "range": {
+                "start": {
+                    "line": 23,
+                    "character": 68
+                },
+                "end": {
+                    "line": 23,
+                    "character": 96
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"aes_cbc_decrypt\" is unknown",
+            "range": {
+                "start": {
+                    "line": 24,
+                    "character": 68
+                },
+                "end": {
+                    "line": 24,
+                    "character": 96
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"hkdf_sha256\" is unknown",
+            "range": {
+                "start": {
+                    "line": 25,
+                    "character": 62
+                },
+                "end": {
+                    "line": 25,
+                    "character": 86
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"hmac_sha256\" is unknown",
+            "range": {
+                "start": {
+                    "line": 26,
+                    "character": 50
+                },
+                "end": {
+                    "line": 26,
+                    "character": 74
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"sha256_hash\" is unknown",
+            "range": {
+                "start": {
+                    "line": 27,
+                    "character": 45
+                },
+                "end": {
+                    "line": 27,
+                    "character": 69
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"signal_process_prekey_bundle\" is unknown",
+            "range": {
+                "start": {
+                    "line": 30,
+                    "character": 4
+                },
+                "end": {
+                    "line": 30,
+                    "character": 45
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"signal_session_encrypt\" is unknown",
+            "range": {
+                "start": {
+                    "line": 34,
+                    "character": 4
+                },
+                "end": {
+                    "line": 34,
+                    "character": 39
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"signal_session_decrypt_prekey\" is unknown",
+            "range": {
+                "start": {
+                    "line": 38,
+                    "character": 4
+                },
+                "end": {
+                    "line": 38,
+                    "character": 46
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"signal_session_decrypt_whisper\" is unknown",
+            "range": {
+                "start": {
+                    "line": 42,
+                    "character": 4
+                },
+                "end": {
+                    "line": 42,
+                    "character": 47
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"group_encrypt\" is unknown",
+            "range": {
+                "start": {
+                    "line": 44,
+                    "character": 73
+                },
+                "end": {
+                    "line": 44,
+                    "character": 99
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Type of \"group_decrypt\" is unknown",
+            "range": {
+                "start": {
+                    "line": 45,
+                    "character": 73
+                },
+                "end": {
+                    "line": 45,
+                    "character": 99
+                }
+            },
+            "rule": "reportUnknownMemberType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 135,
+                    "character": 38
+                },
+                "end": {
+                    "line": 135,
+                    "character": 58
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 135,
+                    "character": 38
+                },
+                "end": {
+                    "line": 135,
+                    "character": 58
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 135,
+                    "character": 67
+                },
+                "end": {
+                    "line": 135,
+                    "character": 84
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 135,
+                    "character": 67
+                },
+                "end": {
+                    "line": 135,
+                    "character": 84
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 162,
+                    "character": 61
+                },
+                "end": {
+                    "line": 162,
+                    "character": 81
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 162,
+                    "character": 61
+                },
+                "end": {
+                    "line": 162,
+                    "character": 81
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 162,
+                    "character": 101
+                },
+                "end": {
+                    "line": 162,
+                    "character": 118
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 162,
+                    "character": 101
+                },
+                "end": {
+                    "line": 162,
+                    "character": 118
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 181,
+                    "character": 61
+                },
+                "end": {
+                    "line": 181,
+                    "character": 81
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 181,
+                    "character": 61
+                },
+                "end": {
+                    "line": 181,
+                    "character": 81
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 181,
+                    "character": 101
+                },
+                "end": {
+                    "line": 181,
+                    "character": 118
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\crypto.py",
+            "severity": "error",
+            "message": "Argument of type \"bytes | str\" cannot be assigned to parameter \"o\" of type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\" in function \"__new__\"\n  Type \"bytes | str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n    Type \"str\" is not assignable to type \"Iterable[SupportsIndex] | SupportsIndex | SupportsBytes | ReadableBuffer\"\n      \"str\" is not assignable to \"Iterable[SupportsIndex]\"\n        Type parameter \"_T_co@Iterable\" is covariant, but \"str\" is not a subtype of \"SupportsIndex\"\n          \"str\" is incompatible with protocol \"SupportsIndex\"\n      \"str\" is incompatible with protocol \"SupportsIndex\"\n        \"__index__\" is not present\n      \"str\" is incompatible with protocol \"SupportsBytes\"",
+            "range": {
+                "start": {
+                    "line": 181,
+                    "character": 101
+                },
+                "end": {
+                    "line": 181,
+                    "character": 118
+                }
+            },
+            "rule": "reportArgumentType"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 3,
+        "errorCount": 86,
+        "warningCount": 0,
+        "informationCount": 0,
+        "timeInSec": 1.322
+    }
+}
+

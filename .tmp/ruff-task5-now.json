@@ -1,0 +1,711 @@
+[
+  {
+    "cell": null,
+    "code": "UP037",
+    "end_location": {
+      "column": 53,
+      "row": 11
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\__init__.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "Flask",
+          "end_location": {
+            "column": 53,
+            "row": 11
+          },
+          "location": {
+            "column": 46,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove quotes"
+    },
+    "location": {
+      "column": 46,
+      "row": 11
+    },
+    "message": "Remove quotes from type annotation",
+    "noqa_row": 11,
+    "url": "https://docs.astral.sh/ruff/rules/quoted-annotation"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 14,
+      "row": 58
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 58
+    },
+    "message": "Missing return type annotation for private function `index`",
+    "noqa_row": 58,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 15,
+      "row": 62
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 62
+    },
+    "message": "Missing return type annotation for private function `health`",
+    "noqa_row": 62,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 19,
+      "row": 66
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 66
+    },
+    "message": "Missing return type annotation for private function `connection`",
+    "noqa_row": 66,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 11,
+      "row": 70
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 70
+    },
+    "message": "Missing return type annotation for private function `qr`",
+    "noqa_row": 70,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 15,
+      "row": 81
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 81
+    },
+    "message": "Missing return type annotation for private function `events`",
+    "noqa_row": 81,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 22,
+      "row": 85
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 85
+    },
+    "message": "Missing return type annotation for private function `debug_summary`",
+    "noqa_row": 85,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 14,
+      "row": 98
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 98
+    },
+    "message": "Missing return type annotation for private function `chats`",
+    "noqa_row": 98,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 22,
+      "row": 102
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 102
+    },
+    "message": "Missing return type annotation for private function `chat_messages`",
+    "noqa_row": 102,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 23,
+      "row": 107
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 107
+    },
+    "message": "Missing return type annotation for private function `mark_chat_read`",
+    "noqa_row": 107,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 16,
+      "row": 112
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 112
+    },
+    "message": "Missing return type annotation for private function `connect`",
+    "noqa_row": 112,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 19,
+      "row": 120
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 120
+    },
+    "message": "Missing return type annotation for private function `disconnect`",
+    "noqa_row": 120,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "ANN202",
+    "end_location": {
+      "column": 13,
+      "row": 128
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\tools\\dashboard\\server.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 128
+    },
+    "message": "Missing return type annotation for private function `send`",
+    "noqa_row": 128,
+    "url": "https://docs.astral.sh/ruff/rules/missing-return-type-private-function"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 69,
+      "row": 30
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\__init__.py",
+    "fix": null,
+    "location": {
+      "column": 49,
+      "row": 30
+    },
+    "message": "`.core.errors.ConnectionError` imported but unused; consider removing, adding to `__all__`, or using a redundant alias",
+    "noqa_row": 30,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "TC001",
+    "end_location": {
+      "column": 50,
+      "row": 24
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\app\\app.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 25
+          },
+          "location": {
+            "column": 1,
+            "row": 24
+          }
+        },
+        {
+          "content": "    from waton.protocol.binary_node import BinaryNode\r\n",
+          "end_location": {
+            "column": 1,
+            "row": 28
+          },
+          "location": {
+            "column": 1,
+            "row": 28
+          }
+        }
+      ],
+      "message": "Move into type-checking block"
+    },
+    "location": {
+      "column": 40,
+      "row": 24
+    },
+    "message": "Move application import `waton.protocol.binary_node.BinaryNode` into a type-checking block",
+    "noqa_row": 24,
+    "url": "https://docs.astral.sh/ruff/rules/typing-only-first-party-import"
+  },
+  {
+    "cell": null,
+    "code": "F821",
+    "end_location": {
+      "column": 17,
+      "row": 27
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\app\\app.py",
+    "fix": null,
+    "location": {
+      "column": 4,
+      "row": 27
+    },
+    "message": "Undefined name `TYPE_CHECKING`",
+    "noqa_row": 27,
+    "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 132,
+      "row": 233
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\client.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 233
+    },
+    "message": "Line too long (131 > 120)",
+    "noqa_row": 233,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 123,
+      "row": 300
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\client.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 300
+    },
+    "message": "Line too long (122 > 120)",
+    "noqa_row": 300,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 137,
+      "row": 149
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\groups.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 149
+    },
+    "message": "Line too long (136 > 120)",
+    "noqa_row": 149,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 274
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\groups.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 274
+    },
+    "message": "Line too long (123 > 120)",
+    "noqa_row": 274,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 23,
+      "row": 14
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\client\\retry_manager.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from __future__ import annotations\n\nimport threading\nimport time\nfrom dataclasses import dataclass\nfrom enum import IntEnum\nfrom typing import TYPE_CHECKING, Any\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 16
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 7
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 7,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "A001",
+    "end_location": {
+      "column": 16,
+      "row": 4
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\core\\__init__.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 4
+    },
+    "message": "Variable `ConnectionError` is shadowing a Python builtin",
+    "noqa_row": 4,
+    "url": "https://docs.astral.sh/ruff/rules/builtin-variable-shadowing"
+  },
+  {
+    "cell": null,
+    "code": "E402",
+    "end_location": {
+      "column": 2,
+      "row": 18
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\core\\__init__.py",
+    "fix": null,
+    "location": {
+      "column": 1,
+      "row": 5
+    },
+    "message": "Module level import not at top of file",
+    "noqa_row": 5,
+    "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+  },
+  {
+    "cell": null,
+    "code": "SIM108",
+    "end_location": {
+      "column": 42,
+      "row": 88
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\infra\\websocket.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "payload = message.encode() if isinstance(message, str) else message",
+          "end_location": {
+            "column": 42,
+            "row": 88
+          },
+          "location": {
+            "column": 21,
+            "row": 85
+          }
+        }
+      ],
+      "message": "Replace `if`-`else`-block with `payload = message.encode() if isinstance(message, str) else message`"
+    },
+    "location": {
+      "column": 21,
+      "row": 85
+    },
+    "message": "Use ternary operator `payload = message.encode() if isinstance(message, str) else message` instead of `if`-`else`-block",
+    "noqa_row": 85,
+    "url": "https://docs.astral.sh/ruff/rules/if-else-block-instead-of-if-exp"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 42,
+      "row": 11
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\simple_api.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "    from collections.abc import Awaitable, Callable\r\n\r\n    from waton.app.context import Context\r\n",
+          "end_location": {
+            "column": 1,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 10
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 5,
+      "row": 10
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 10,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 23,
+      "row": 9
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\event_buffer.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from __future__ import annotations\r\n\r\nfrom collections import deque\r\nfrom dataclasses import dataclass\r\nfrom time import time\r\nfrom typing import TYPE_CHECKING, Any\r\n\r\n",
+          "end_location": {
+            "column": 1,
+            "row": 11
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 3
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 3,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "TC001",
+    "end_location": {
+      "column": 50,
+      "row": 14
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\live_check.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "from typing import TYPE_CHECKING, Any",
+          "end_location": {
+            "column": 38,
+            "row": 9
+          },
+          "location": {
+            "column": 1,
+            "row": 9
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 15
+          },
+          "location": {
+            "column": 1,
+            "row": 14
+          }
+        },
+        {
+          "content": "    from waton.protocol.binary_node import BinaryNode\n",
+          "end_location": {
+            "column": 1,
+            "row": 18
+          },
+          "location": {
+            "column": 1,
+            "row": 18
+          }
+        }
+      ],
+      "message": "Move into type-checking block"
+    },
+    "location": {
+      "column": 40,
+      "row": 14
+    },
+    "message": "Move application import `waton.protocol.binary_node.BinaryNode` into a type-checking block",
+    "noqa_row": 14,
+    "url": "https://docs.astral.sh/ruff/rules/typing-only-first-party-import"
+  },
+  {
+    "cell": null,
+    "code": "I001",
+    "end_location": {
+      "column": 29,
+      "row": 8
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\live_probe.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from __future__ import annotations\n\nimport asyncio\nfrom dataclasses import dataclass\nfrom typing import TYPE_CHECKING, Any, cast\n\n",
+          "end_location": {
+            "column": 1,
+            "row": 10
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Organize imports"
+    },
+    "location": {
+      "column": 1,
+      "row": 3
+    },
+    "message": "Import block is un-sorted or un-formatted",
+    "noqa_row": 3,
+    "url": "https://docs.astral.sh/ruff/rules/unsorted-imports"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 122,
+      "row": 60
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\live_probe.py",
+    "fix": null,
+    "location": {
+      "column": 121,
+      "row": 60
+    },
+    "message": "Line too long (121 > 120)",
+    "noqa_row": 60,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "TC003",
+    "end_location": {
+      "column": 36,
+      "row": 10
+    },
+    "filename": "c:\\Users\\Arvy Kairi\\Desktop\\whatsapp\\waton\\waton\\utils\\protocol_message.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 11
+          },
+          "location": {
+            "column": 1,
+            "row": 10
+          }
+        },
+        {
+          "content": "from typing import Any, cast, TYPE_CHECKING",
+          "end_location": {
+            "column": 29,
+            "row": 11
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        },
+        {
+          "content": "\nif TYPE_CHECKING:\n    from collections.abc import Mapping\n",
+          "end_location": {
+            "column": 1,
+            "row": 16
+          },
+          "location": {
+            "column": 1,
+            "row": 16
+          }
+        }
+      ],
+      "message": "Move into type-checking block"
+    },
+    "location": {
+      "column": 29,
+      "row": 10
+    },
+    "message": "Move standard library import `collections.abc.Mapping` into a type-checking block",
+    "noqa_row": 10,
+    "url": "https://docs.astral.sh/ruff/rules/typing-only-standard-library-import"
+  }
+]

@@ -7,11 +7,14 @@ and high-level message processing share the same behavior.
 from __future__ import annotations
 
 import base64
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from waton.protocol.protobuf import wa_pb2
-from waton.protocol.protobuf.wire import _iter_fields
+from waton.protocol.protobuf.wire import iter_fields
 from waton.utils.crypto import aes_decrypt, hmac_sha256
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 PROTOCOL_TYPE_NAMES: dict[int, str] = {
     0: "REVOKE",
@@ -40,7 +43,7 @@ def protocol_event_type(type_code: int | None) -> str:
 
 
 def _field_bytes(payload: bytes, field_number: int) -> bytes | None:
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == field_number and wire_type == 2:
             return bytes(value)
     return None
@@ -48,7 +51,7 @@ def _field_bytes(payload: bytes, field_number: int) -> bytes | None:
 
 def _decode_message_key(payload: bytes) -> dict[str, Any]:
     key: dict[str, Any] = {}
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == 1 and wire_type == 2:
             key["remote_jid"] = bytes(value).decode("utf-8", errors="ignore")
         elif field_no == 2 and wire_type == 0:
@@ -62,7 +65,7 @@ def _decode_message_key(payload: bytes) -> dict[str, Any]:
 
 def _decode_poll_enc_value(payload: bytes) -> dict[str, Any]:
     out: dict[str, Any] = {}
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if wire_type != 2:
             continue
         if field_no == 1:
@@ -72,8 +75,19 @@ def _decode_poll_enc_value(payload: bytes) -> dict[str, Any]:
     return out
 
 
-def _decode_text_like(message: wa_pb2.Message) -> str | None:
-    return message.conversation or message.extendedTextMessage.text or message.imageMessage.caption or None
+def _decode_text_like(message_obj: object) -> str | None:
+    conversation = getattr(message_obj, "conversation", "")
+    if isinstance(conversation, str) and conversation:
+        return conversation
+
+    extended = getattr(message_obj, "extendedTextMessage", None)
+    extended_text = getattr(extended, "text", "") if extended is not None else ""
+    if isinstance(extended_text, str) and extended_text:
+        return extended_text
+
+    image = getattr(message_obj, "imageMessage", None)
+    caption = getattr(image, "caption", "") if image is not None else ""
+    return caption if isinstance(caption, str) and caption else None
 
 
 def _decode_edited_message(payload: bytes) -> dict[str, Any]:
@@ -86,7 +100,7 @@ def _decode_edited_message(payload: bytes) -> dict[str, Any]:
 
 def _decode_history_sync(payload: bytes) -> dict[str, Any]:
     out: dict[str, Any] = {}
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if wire_type == 0 and field_no == 6:
             out["sync_type"] = int(value)
         elif wire_type == 0 and field_no == 7:
@@ -102,21 +116,21 @@ def _decode_history_sync(payload: bytes) -> dict[str, Any]:
 
 def _decode_app_state_sync_key_share(payload: bytes) -> dict[str, Any]:
     keys: list[dict[str, Any]] = []
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no != 1 or wire_type != 2:
             continue
         key_payload = bytes(value)
         key_item: dict[str, Any] = {}
-        for nested_field_no, nested_wire_type, nested_value in _iter_fields(key_payload):
+        for nested_field_no, nested_wire_type, nested_value in iter_fields(key_payload):
             if nested_field_no == 1 and nested_wire_type == 2:
                 key_id_payload = bytes(nested_value)
-                for key_id_field_no, key_id_wire_type, key_id_value in _iter_fields(key_id_payload):
+                for key_id_field_no, key_id_wire_type, key_id_value in iter_fields(key_id_payload):
                     if key_id_field_no == 1 and key_id_wire_type == 2:
                         key_bytes = bytes(key_id_value)
                         key_item["key_id_b64"] = base64.b64encode(key_bytes).decode("ascii")
             elif nested_field_no == 2 and nested_wire_type == 2:
                 key_data_payload = bytes(nested_value)
-                for data_field_no, data_wire_type, data_value in _iter_fields(key_data_payload):
+                for data_field_no, data_wire_type, data_value in iter_fields(key_data_payload):
                     if data_field_no == 1 and data_wire_type == 2:
                         key_item["key_data_size"] = len(bytes(data_value))
         if key_item:
@@ -129,7 +143,7 @@ def _decode_app_state_sync_key_share(payload: bytes) -> dict[str, Any]:
 
 def _decode_peer_data_operation_response(payload: bytes) -> dict[str, Any]:
     out: dict[str, Any] = {"result_count": 0}
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == 2 and wire_type == 2:
             out["stanza_id"] = bytes(value).decode("utf-8", errors="ignore")
         elif field_no == 3 and wire_type == 2:
@@ -139,7 +153,7 @@ def _decode_peer_data_operation_response(payload: bytes) -> dict[str, Any]:
 
 def _decode_member_label(payload: bytes) -> dict[str, Any]:
     out: dict[str, Any] = {}
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == 1 and wire_type == 2:
             out["label"] = bytes(value).decode("utf-8", errors="ignore")
         elif field_no == 2 and wire_type == 0:
@@ -154,7 +168,7 @@ def extract_enc_reaction_message(payload: bytes) -> dict[str, Any] | None:
         return None
 
     out: dict[str, Any] = {}
-    for field_no, wire_type, value in _iter_fields(reaction_payload):
+    for field_no, wire_type, value in iter_fields(reaction_payload):
         if wire_type != 2:
             continue
         if field_no == 1:
@@ -166,7 +180,8 @@ def extract_enc_reaction_message(payload: bytes) -> dict[str, Any] | None:
 
     key = out.get("target_key")
     if isinstance(key, dict):
-        out["target_message_id"] = key.get("id")
+        key_typed = cast("Mapping[str, object]", key)
+        out["target_message_id"] = key_typed.get("id")
     return out if out else None
 
 
@@ -177,7 +192,7 @@ def extract_poll_update_message(payload: bytes) -> dict[str, Any] | None:
         return None
 
     out: dict[str, Any] = {}
-    for field_no, wire_type, value in _iter_fields(poll_update_payload):
+    for field_no, wire_type, value in iter_fields(poll_update_payload):
         if field_no == 1 and wire_type == 2:
             out["poll_creation_key"] = _decode_message_key(bytes(value))
         elif field_no == 2 and wire_type == 2:
@@ -187,7 +202,8 @@ def extract_poll_update_message(payload: bytes) -> dict[str, Any] | None:
 
     poll_creation_key = out.get("poll_creation_key")
     if isinstance(poll_creation_key, dict):
-        out["poll_creation_message_id"] = poll_creation_key.get("id")
+        poll_creation_key_typed = cast("Mapping[str, object]", poll_creation_key)
+        out["poll_creation_message_id"] = poll_creation_key_typed.get("id")
     return out if out else None
 
 
@@ -198,7 +214,7 @@ def extract_enc_event_response_message(payload: bytes) -> dict[str, Any] | None:
         return None
 
     out: dict[str, Any] = {}
-    for field_no, wire_type, value in _iter_fields(response_payload):
+    for field_no, wire_type, value in iter_fields(response_payload):
         if wire_type != 2:
             continue
         if field_no == 1:
@@ -210,7 +226,8 @@ def extract_enc_event_response_message(payload: bytes) -> dict[str, Any] | None:
 
     event_creation_key = out.get("event_creation_key")
     if isinstance(event_creation_key, dict):
-        out["event_creation_message_id"] = event_creation_key.get("id")
+        event_creation_key_typed = cast("Mapping[str, object]", event_creation_key)
+        out["event_creation_message_id"] = event_creation_key_typed.get("id")
     return out if out else None
 
 
@@ -237,7 +254,7 @@ def _derive_message_addon_key(
 
 def _decode_poll_vote_message(payload: bytes) -> dict[str, Any]:
     selected_options: list[bytes] = []
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == 1 and wire_type == 2:
             selected_options.append(bytes(value))
     return {
@@ -263,7 +280,7 @@ def decrypt_poll_vote(
         actor_jid=voter_jid,
         message_secret=poll_enc_key,
     )
-    aad = f"{poll_message_id}\x00{voter_jid}".encode("utf-8")
+    aad = f"{poll_message_id}\x00{voter_jid}".encode()
     plaintext = aes_decrypt(enc_payload, dec_key, enc_iv, aad)
     out = _decode_poll_vote_message(plaintext)
     out["sender_jid"] = voter_jid
@@ -272,7 +289,7 @@ def decrypt_poll_vote(
 
 def _decode_event_response_message(payload: bytes) -> dict[str, Any]:
     out: dict[str, Any] = {}
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if wire_type != 0:
             continue
         if field_no == 1:
@@ -302,7 +319,7 @@ def decrypt_event_response(
         actor_jid=responder_jid,
         message_secret=event_enc_key,
     )
-    aad = f"{event_message_id}\x00{responder_jid}".encode("utf-8")
+    aad = f"{event_message_id}\x00{responder_jid}".encode()
     plaintext = aes_decrypt(enc_payload, dec_key, enc_iv, aad)
     out = _decode_event_response_message(plaintext)
     out["sender_jid"] = responder_jid
@@ -311,7 +328,7 @@ def decrypt_event_response(
 
 def extract_protocol_message(payload: bytes) -> dict[str, Any] | None:
     protocol_payload: bytes | None = None
-    for field_no, wire_type, value in _iter_fields(payload):
+    for field_no, wire_type, value in iter_fields(payload):
         if field_no == 12 and wire_type == 2:
             protocol_payload = bytes(value)
             break
@@ -324,7 +341,7 @@ def extract_protocol_message(payload: bytes) -> dict[str, Any] | None:
         "type_name": "UNKNOWN",
     }
 
-    for field_no, wire_type, value in _iter_fields(protocol_payload):
+    for field_no, wire_type, value in iter_fields(protocol_payload):
         if field_no == 1 and wire_type == 2:
             out["key"] = _decode_message_key(bytes(value))
         elif field_no == 2 and wire_type == 0:
@@ -350,6 +367,7 @@ def extract_protocol_message(payload: bytes) -> dict[str, Any] | None:
 
     key = out.get("key")
     if isinstance(key, dict):
-        out["target_message_id"] = key.get("id")
+        key_typed = cast("Mapping[str, object]", key)
+        out["target_message_id"] = key_typed.get("id")
 
     return out

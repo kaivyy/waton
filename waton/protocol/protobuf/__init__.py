@@ -1,3 +1,5 @@
+# ruff: noqa: N802, N815
+
 """Protobuf access layer.
 
 Uses generated WAProto bindings when available and falls back to a minimal shim
@@ -7,8 +9,8 @@ to keep high-level imports usable in dev environments.
 from __future__ import annotations
 
 import json
-from importlib import import_module
 from dataclasses import dataclass, field
+from importlib import import_module
 from types import SimpleNamespace
 
 try:

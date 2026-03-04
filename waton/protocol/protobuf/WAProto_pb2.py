@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .wire import _encode_bool, _encode_len_delimited, _encode_string, _iter_fields
+from .wire import encode_bool, encode_len_delimited, encode_string, iter_fields
 
 
 @dataclass
@@ -25,15 +25,15 @@ class MessageKey:
     def SerializeToString(self) -> bytes:
         return b"".join(
             (
-                _encode_string(1, self.remoteJid),
-                _encode_bool(2, self.fromMe if self.fromMe else None),
-                _encode_string(3, self.id),
-                _encode_string(4, self.participant),
+                encode_string(1, self.remoteJid),
+                encode_bool(2, self.fromMe if self.fromMe else None),
+                encode_string(3, self.id),
+                encode_string(4, self.participant),
             )
         )
 
     def ParseFromString(self, data: bytes) -> None:
-        for field_no, wire_type, value in _iter_fields(data):
+        for field_no, wire_type, value in iter_fields(data):
             if wire_type == 2 and field_no == 1:
                 self.remoteJid = bytes(value).decode("utf-8", errors="ignore")
             elif wire_type == 0 and field_no == 2:
@@ -53,13 +53,13 @@ class ReactionMessage:
         key_payload = self.key.SerializeToString()
         return b"".join(
             (
-                _encode_len_delimited(1, key_payload) if key_payload else b"",
-                _encode_string(2, self.text),
+                encode_len_delimited(1, key_payload) if key_payload else b"",
+                encode_string(2, self.text),
             )
         )
 
     def ParseFromString(self, data: bytes) -> None:
-        for field_no, wire_type, value in _iter_fields(data):
+        for field_no, wire_type, value in iter_fields(data):
             if wire_type == 2 and field_no == 1:
                 self.key.ParseFromString(bytes(value))
             elif wire_type == 2 and field_no == 2:
@@ -71,10 +71,10 @@ class ExtendedTextMessage:
     text: str = ""
 
     def SerializeToString(self) -> bytes:
-        return _encode_string(1, self.text)
+        return encode_string(1, self.text)
 
     def ParseFromString(self, data: bytes) -> None:
-        for field_no, wire_type, value in _iter_fields(data):
+        for field_no, wire_type, value in iter_fields(data):
             if wire_type == 2 and field_no == 1:
                 self.text = bytes(value).decode("utf-8", errors="ignore")
 
@@ -93,23 +93,33 @@ class ImageMessage:
     directPath: str = ""
 
     def SerializeToString(self) -> bytes:
-        parts = []
-        if self.url: parts.append(_encode_string(1, self.url))
-        if self.mimetype: parts.append(_encode_string(2, self.mimetype))
-        if self.caption: parts.append(_encode_string(3, self.caption))
-        if self.fileSha256: parts.append(_encode_len_delimited(4, self.fileSha256))
-        if self.fileLength: parts.append(_encode_string(5, str(self.fileLength))) # actually uint64 varint, but string mock might work or we need _encode_varint? 
-        # For simplicity, just skip fileLength or implement simple bytes if needed.
-        if self.mediaKey: parts.append(_encode_len_delimited(8, self.mediaKey))
-        if self.fileEncSha256: parts.append(_encode_len_delimited(9, self.fileEncSha256))
-        if self.directPath: parts.append(_encode_string(10, self.directPath))
+        parts: list[bytes] = []
+        if self.url:
+            parts.append(encode_string(1, self.url))
+        if self.mimetype:
+            parts.append(encode_string(2, self.mimetype))
+        if self.caption:
+            parts.append(encode_string(3, self.caption))
+        if self.fileSha256:
+            parts.append(encode_len_delimited(4, self.fileSha256))
+        if self.fileLength:
+            parts.append(encode_string(5, str(self.fileLength)))
+        if self.mediaKey:
+            parts.append(encode_len_delimited(8, self.mediaKey))
+        if self.fileEncSha256:
+            parts.append(encode_len_delimited(9, self.fileEncSha256))
+        if self.directPath:
+            parts.append(encode_string(10, self.directPath))
         return b"".join(parts)
 
     def ParseFromString(self, data: bytes) -> None:
-        for field_no, wire_type, value in _iter_fields(data):
-            if wire_type == 2 and field_no == 1: self.url = bytes(value).decode("utf-8", "ignore")
-            elif wire_type == 2 and field_no == 2: self.mimetype = bytes(value).decode("utf-8", "ignore")
-            elif wire_type == 2 and field_no == 3: self.caption = bytes(value).decode("utf-8", "ignore")
+        for field_no, wire_type, value in iter_fields(data):
+            if wire_type == 2 and field_no == 1:
+                self.url = bytes(value).decode("utf-8", "ignore")
+            elif wire_type == 2 and field_no == 2:
+                self.mimetype = bytes(value).decode("utf-8", "ignore")
+            elif wire_type == 2 and field_no == 3:
+                self.caption = bytes(value).decode("utf-8", "ignore")
 
 class Message:
     class _NoDeviceSentMessage:
@@ -132,13 +142,13 @@ class Message:
             nested = self.message.SerializeToString()
             return b"".join(
                 (
-                    _encode_string(1, self.destinationJid),
-                    _encode_len_delimited(2, nested) if nested else b"",
+                    encode_string(1, self.destinationJid),
+                    encode_len_delimited(2, nested) if nested else b"",
                 )
             )
 
         def ParseFromString(self, data: bytes) -> None:
-            for field_no, wire_type, value in _iter_fields(data):
+            for field_no, wire_type, value in iter_fields(data):
                 if wire_type == 2 and field_no == 1:
                     self.destinationJid = bytes(value).decode("utf-8", errors="ignore")
                 elif wire_type == 2 and field_no == 2:
@@ -160,17 +170,17 @@ class Message:
         device_sent = self.deviceSentMessage.SerializeToString()
         return b"".join(
             (
-                _encode_string(1, self.conversation),
-                _encode_len_delimited(4, img) if img else b"",
-                _encode_len_delimited(6, ext) if ext else b"",
-                _encode_len_delimited(31, device_sent) if device_sent else b"",
-                _encode_len_delimited(46, react) if react else b"",
+                encode_string(1, self.conversation),
+                encode_len_delimited(4, img) if img else b"",
+                encode_len_delimited(6, ext) if ext else b"",
+                encode_len_delimited(31, device_sent) if device_sent else b"",
+                encode_len_delimited(46, react) if react else b"",
             )
         )
 
     def ParseFromString(self, data: bytes) -> None:
         try:
-            for field_no, wire_type, value in _iter_fields(data):
+            for field_no, wire_type, value in iter_fields(data):
                 if wire_type != 2:
                     continue
                 payload = bytes(value)

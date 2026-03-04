@@ -1,12 +1,5 @@
-from waton.core.jid import (
-    Jid,
-    jid_decode,
-    jid_encode,
-    jid_normalized_user,
-    is_jid_group,
-    is_jid_user,
-    S_WHATSAPP_NET
-)
+from waton.core.jid import S_WHATSAPP_NET, is_jid_group, is_jid_user, jid_decode, jid_encode, jid_normalized_user
+
 
 def test_jid_decode_simple():
     jid = jid_decode("12345678@s.whatsapp.net")

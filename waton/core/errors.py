@@ -1,5 +1,7 @@
+# ruff: noqa: A001
+
 from enum import IntEnum
-from typing import Optional
+
 
 class WatonError(Exception):
     """Base exception for waton."""
@@ -8,7 +10,8 @@ class WatonError(Exception):
 
 class ConnectionError(WatonError):
     """Raised when there is a connection issue."""
-    def __init__(self, message: str, status_code: Optional[int] = None):
+
+    def __init__(self, message: str, status_code: int | None = None) -> None:
         super().__init__(message)
         self.status_code = status_code
 

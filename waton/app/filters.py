@@ -1,28 +1,30 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Callable
 from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 if TYPE_CHECKING:
     from waton.app.context import Context
 
 
 class Filter:
-    def __init__(self, fn: Callable[["Context"], bool]) -> None:
+    def __init__(self, fn: Callable[[Context], bool]) -> None:
         self.fn = fn
 
-    def __call__(self, ctx: "Context") -> bool:
+    def __call__(self, ctx: Context) -> bool:
         return self.fn(ctx)
 
-    def __and__(self, other: "Filter") -> "Filter":
+    def __and__(self, other: Filter) -> Filter:
         return Filter(lambda ctx: self(ctx) and other(ctx))
 
-    def __or__(self, other: "Filter") -> "Filter":
+    def __or__(self, other: Filter) -> Filter:
         return Filter(lambda ctx: self(ctx) or other(ctx))
 
 
-def _make(fn: Callable[["Context"], bool]) -> Filter:
+def _make(fn: Callable[[Context], bool]) -> Filter:
     return Filter(fn)
 
 

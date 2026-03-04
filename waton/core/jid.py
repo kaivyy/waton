@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 S_WHATSAPP_NET = "s.whatsapp.net"
 S_WHATSAPP_NET_LID = "lid"
@@ -11,13 +10,13 @@ S_WHATSAPP_NET_BROADCAST = "broadcast"
 class Jid:
     user: str
     server: str
-    device: Optional[int] = None
+    device: int | None = None
 
     def __str__(self) -> str:
         return jid_encode(self.user, self.server, self.device)
 
 
-def jid_decode(jid_str: str | None) -> Optional[Jid]:
+def jid_decode(jid_str: str | None) -> Jid | None:
     """Decodes a JID string into its parts."""
     if not jid_str:
         return None
@@ -29,11 +28,11 @@ def jid_decode(jid_str: str | None) -> Optional[Jid]:
     user_device = parts[0].split(":", 1)
     user = user_device[0]
     device = int(user_device[1]) if len(user_device) > 1 and user_device[1].isdigit() else None
-    
+
     return Jid(user=user, server=parts[1], device=device)
 
 
-def jid_encode(user: str, server: str, device: Optional[int] = None) -> str:
+def jid_encode(user: str, server: str, device: int | None = None) -> str:
     """Encodes a JID from its parts."""
     base = f"{user}@{server}" if user else server
     if device is not None:

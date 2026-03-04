@@ -1,6 +1,5 @@
 import pytest
 
-from tools.dashboard.server import create_app
 from tools.dashboard.runtime import (
     choose_lid_chat_fallback,
     compute_route_keys,
@@ -8,6 +7,7 @@ from tools.dashboard.runtime import (
     extract_peer_jid_from_attrs,
     normalize_jid_for_chat,
 )
+from tools.dashboard.server import create_app
 from tools.dashboard.state import DashboardEvent, DashboardState, normalize_wa_id
 
 

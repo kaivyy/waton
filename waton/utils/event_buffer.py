@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from collections import deque
-from collections.abc import Iterator
 from dataclasses import dataclass
 from time import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 @dataclass

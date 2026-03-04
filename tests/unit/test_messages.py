@@ -1,19 +1,18 @@
 import asyncio
-from base64 import b64encode
 import logging
+from base64 import b64encode
 from typing import Any
 
 import pytest
 
-from waton.client.messages import MessagesAPI
+from waton.client.messages import MessagesAPI, _unpad_random_max16, _write_random_pad_max16
 from waton.protocol.binary_node import BinaryNode
 from waton.protocol.protobuf import wa_pb2
 from waton.protocol.protobuf.wire import _encode_len_delimited, _encode_string, _encode_varint_field, _iter_fields
+from waton.utils.auth import init_auth_creds
+from waton.utils.crypto import aes_encrypt, hmac_sha256
 from waton.utils.media_utils import derive_media_keys
 from waton.utils.process_message import process_incoming_message
-from waton.utils.auth import init_auth_creds
-from waton.client.messages import _write_random_pad_max16, _unpad_random_max16
-from waton.utils.crypto import aes_encrypt, hmac_sha256
 
 
 def test_padding_unpadding():
@@ -48,6 +47,9 @@ class _FakeClient:
         self._tag_counter += 1
         return str(self._tag_counter)
 
+    def generate_message_tag(self) -> str:
+        return self._generate_message_tag()
+
     async def send_node(self, node: BinaryNode) -> None:
         self.sent.append(node)
 
@@ -74,8 +76,6 @@ class _FakeClient:
         if list_node and isinstance(list_node.content, list):
             for user_node in list_node.content:
                 jid = user_node.attrs.get("jid", "")
-                user = jid.split("@")[0] if "@" in jid else jid
-                server = jid.split("@")[1] if "@" in jid else "s.whatsapp.net"
                 user_results.append(
                     BinaryNode(
                         tag="user",
@@ -996,7 +996,7 @@ def test_process_incoming_message_decrypts_poll_update_when_secret_exists() -> N
             actor_jid=voter_jid,
             message_secret=secret,
         )
-        vote_cipher = aes_encrypt(vote_plain, vote_key, iv, f"{poll_message_id}\x00{voter_jid}".encode("utf-8"))
+        vote_cipher = aes_encrypt(vote_plain, vote_key, iv, f"{poll_message_id}\x00{voter_jid}".encode())
 
         key_payload = _encode_string(1, creator_jid) + _encode_string(3, poll_message_id)
         vote_payload = _encode_len_delimited(1, vote_cipher) + _encode_len_delimited(2, iv)
@@ -1039,7 +1039,7 @@ def test_process_incoming_message_decrypts_event_response_when_secret_exists() -
             response_plain,
             response_key,
             iv,
-            f"{event_message_id}\x00{responder_jid}".encode("utf-8"),
+            f"{event_message_id}\x00{responder_jid}".encode(),
         )
 
         key_payload = _encode_string(1, creator_jid) + _encode_string(3, event_message_id)

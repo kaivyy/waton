@@ -3,7 +3,8 @@ from __future__ import annotations
 import asyncio
 import base64
 import time
-from typing import TYPE_CHECKING, Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING, Any
 
 from waton.core.jid import S_WHATSAPP_NET
 from waton.protocol.binary_node import BinaryNode
@@ -36,7 +37,7 @@ def _unpad_random_max16(plaintext: bytes) -> bytes:
 
 def _children(node: BinaryNode) -> list[BinaryNode]:
     if isinstance(node.content, list):
-        return [child for child in node.content if isinstance(child, BinaryNode)]
+        return list(node.content)
     return []
 
 
@@ -104,6 +105,8 @@ def _is_pn_user(jid: str | None) -> bool:
 
 def _extract_sender_alt(attrs: dict[str, Any], sender: str) -> str | None:
     addressing_mode = attrs.get("addressing_mode") or ("lid" if _is_lid_user(sender) else "pn")
+
+    candidate: Any
     if addressing_mode == "lid":
         candidate = (
             attrs.get("participant_pn")
@@ -934,7 +937,7 @@ class OfflineNodeProcessor:
 
     async def drain(
         self,
-        handler: "IncomingNodeHandler",
+        handler: IncomingNodeHandler,
         *,
         yield_every: int = 20,
         max_items: int | None = None,
@@ -956,7 +959,7 @@ class OfflineNodeProcessor:
 
 async def drain_nodes_with_buffer(
     nodes: list[BinaryNode],
-    handler: "IncomingNodeHandler",
+    handler: IncomingNodeHandler,
     *,
     max_queue_size: int = 1024,
     yield_every: int = 20,

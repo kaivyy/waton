@@ -1,9 +1,10 @@
-import math
 import io
 import struct
 import zlib
+
 from .binary_node import BinaryNode
-from .constants import Tags, TOKEN_MAP, SINGLE_BYTE_TOKENS, DOUBLE_BYTE_TOKENS
+from .constants import DOUBLE_BYTE_TOKENS, SINGLE_BYTE_TOKENS, TOKEN_MAP, Tags
+
 
 def encode_binary_node(node: BinaryNode) -> bytes:
     # Non-compressed WA binary payloads are prefixed with 0x00.
@@ -11,22 +12,19 @@ def encode_binary_node(node: BinaryNode) -> bytes:
     _encode_node(node, buf)
     return bytes(buf)
 
-def _encode_node(node: BinaryNode, buf: bytearray):
+def _encode_node(node: BinaryNode, buf: bytearray) -> None:
     tag = node.tag
-    attrs = node.attrs or {}
+    attrs = node.attrs
     content = node.content
 
-    # Count actual attributes, skip None
-    valid_attrs = {k: v for k, v in attrs.items() if v is not None}
-    
     # List size: tag + 2 * len(attrs) + (1 if content else 0)
     has_content = 1 if content is not None else 0
-    list_size = 1 + 2 * len(valid_attrs) + has_content
+    list_size = 1 + 2 * len(attrs) + has_content
 
     _write_list_start(list_size, buf)
     _write_string(tag, buf)
 
-    for k, v in valid_attrs.items():
+    for k, v in attrs.items():
         _write_string(k, buf)
         _write_string(v, buf)
 
@@ -35,14 +33,14 @@ def _encode_node(node: BinaryNode, buf: bytearray):
             _write_string(content, buf)
         elif isinstance(content, (bytes, bytearray)):
             _write_bytes(content, buf)
-        elif isinstance(content, list):
+        elif isinstance(content, list):  # pyright: ignore[reportUnnecessaryIsInstance]
             _write_list_start(len(content), buf)
             for child in content:
                 _encode_node(child, buf)
         else:
             raise ValueError(f"Invalid content type: {type(content)}")
 
-def _write_list_start(size: int, buf: bytearray):
+def _write_list_start(size: int, buf: bytearray) -> None:
     if size == 0:
         buf.append(Tags.LIST_EMPTY)
     elif size < 256:
@@ -54,7 +52,7 @@ def _write_list_start(size: int, buf: bytearray):
     else:
         raise ValueError(f"List too large: {size}")
 
-def _write_bytes(data: bytes | bytearray, buf: bytearray):
+def _write_bytes(data: bytes | bytearray, buf: bytearray) -> None:
     length = len(data)
     if length >= 4294967296:
         raise ValueError("Byte string too long")
@@ -69,29 +67,27 @@ def _write_bytes(data: bytes | bytearray, buf: bytearray):
     else:
         buf.append(Tags.BINARY_32)
         buf.extend(struct.pack(">I", length))
-    
+
     buf.extend(data)
 
-def _write_string(s: str, buf: bytearray):
-    if not isinstance(s, str):
-        s = str(s)
-    
+def _write_string(s: str, buf: bytearray) -> None:
+
     if s == "c.us":
         s = "s.whatsapp.net"
-    
+
     # Try token
     token_info = TOKEN_MAP.get(s)
     if token_info:
-        if token_info['dict'] == 0:
-            buf.append(token_info['index'])
+        if token_info["dict"] == 0:
+            buf.append(token_info["index"])
         else:
-            buf.append(Tags.DICTIONARY_0 + token_info['dict'] - 1)
-            buf.append(token_info['index'])
+            buf.append(Tags.DICTIONARY_0 + token_info["dict"] - 1)
+            buf.append(token_info["index"])
         return
 
     # Try JID
     jid_idx = s.find("@")
-    if jid_idx != -1:
+    if jid_idx >= 0:  # pyright: ignore[reportUnnecessaryComparison]
         user_part = s[:jid_idx]
         server = s[jid_idx+1:]
         # Check for device JID: "user:device@server"
@@ -114,7 +110,7 @@ _DOMAIN_TYPE_MAP = {
     "hosted.lid": 3,
 }
 
-def _write_ad_jid(user: str, device: int, server: str, buf: bytearray):
+def _write_ad_jid(user: str, device: int, server: str, buf: bytearray) -> None:
     """Write a device-specific JID using AD_JID format (tag 247)."""
     buf.append(Tags.AD_JID)
     domain_type = _DOMAIN_TYPE_MAP.get(server, 0)
@@ -122,7 +118,7 @@ def _write_ad_jid(user: str, device: int, server: str, buf: bytearray):
     buf.append(device)
     _write_string(user, buf)
 
-def _write_jid(user: str, server: str, buf: bytearray):
+def _write_jid(user: str, server: str, buf: bytearray) -> None:
     buf.append(Tags.JID_PAIR)
     if not user:
         buf.append(Tags.LIST_EMPTY)
@@ -136,10 +132,7 @@ def _write_jid(user: str, server: str, buf: bytearray):
 def decode_binary_node(data: bytes) -> BinaryNode:
     if not data:
         raise ValueError("Empty binary payload")
-    if data[0] & 0x02:
-        payload = zlib.decompress(data[1:])
-    else:
-        payload = data[1:]
+    payload = zlib.decompress(data[1:]) if data[0] & 0x02 else data[1:]
     return _decode_node(io.BytesIO(payload))
 
 def _decode_node(stream: io.BytesIO) -> BinaryNode:
@@ -162,13 +155,14 @@ def _decode_node(stream: io.BytesIO) -> BinaryNode:
         if not val:
             raise EOFError("EOF reading content")
         tag_val = val[0]
-        
+
         if tag_val in (Tags.LIST_EMPTY, Tags.LIST_8, Tags.LIST_16):
             stream.seek(-1, io.SEEK_CUR)
             content_size = _read_list_size(stream)
-            content = []
+            content_nodes: list[BinaryNode] = []
             for _ in range(content_size):
-                content.append(_decode_node(stream))
+                content_nodes.append(_decode_node(stream))
+            content = content_nodes
         elif tag_val in (Tags.BINARY_8, Tags.BINARY_20, Tags.BINARY_32):
             stream.seek(-1, io.SEEK_CUR)
             content = _read_bytes(stream)
@@ -176,7 +170,7 @@ def _decode_node(stream: io.BytesIO) -> BinaryNode:
             stream.seek(-1, io.SEEK_CUR)
             content = _read_string(stream)
 
-    return BinaryNode(tag=tag, attrs=attrs, content=content)
+    return BinaryNode(tag=tag, attrs=attrs, content=content)  # pyright: ignore[reportUnknownArgumentType]
 
 def _read_list_size(stream: io.BytesIO) -> int:
     value = stream.read(1)
@@ -321,9 +315,9 @@ def _read_string_from_tag(stream: io.BytesIO, b: int) -> str:
         idx = idx_raw[0]
         dict_idx = b - Tags.DICTIONARY_0
         token = DOUBLE_BYTE_TOKENS[dict_idx][idx]
-        if token is None:
-            raise ValueError(f"Empty double byte token: {dict_idx},{idx}")
-        return token
+        if token:
+            return token
+        raise ValueError(f"Empty double byte token: {dict_idx},{idx}")
     if b == Tags.LIST_EMPTY:
         return ""
     if b == Tags.BINARY_8:
@@ -344,8 +338,11 @@ def _read_string_from_tag(stream: io.BytesIO, b: int) -> str:
         if not server_tag:
             raise EOFError("EOF reading JID_PAIR server tag")
         server = _read_string_from_tag(stream, server_tag[0])
-        if user == "" or user is None:
+        if user == "":
             return server
+        if user:
+            return f"{user}@{server}"
+        return server
         return f"{user}@{server}"
     if b == Tags.AD_JID:
         return _read_ad_jid(stream)

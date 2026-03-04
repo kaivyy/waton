@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING
 
 from waton.app.app import App
-from waton.app.context import Context
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
+    from waton.app.context import Context
 
 
 class SimpleIncomingMessage:
@@ -48,20 +52,20 @@ class SimpleClient:
         self,
         handler: Callable[[SimpleIncomingMessage], Awaitable[None]],
     ) -> Callable[[SimpleIncomingMessage], Awaitable[None]]:
-        @self.app.message()
         async def _dispatch(ctx: Context) -> None:
             await handler(SimpleIncomingMessage(ctx))
 
+        self.app.message()(_dispatch)
         return handler
 
     def on_ready(
         self,
-        handler: Callable[["SimpleClient"], Awaitable[None]],
-    ) -> Callable[["SimpleClient"], Awaitable[None]]:
-        @self.app.on_ready
+        handler: Callable[[SimpleClient], Awaitable[None]],
+    ) -> Callable[[SimpleClient], Awaitable[None]]:
         async def _dispatch(_: App) -> None:
             await handler(self)
 
+        self.app.on_ready(_dispatch)
         return handler
 
     async def send_text(self, to_jid: str, text: str) -> str:
