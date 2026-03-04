@@ -1,8 +1,13 @@
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
+
+import pytest
 
 from tools.parity.scan_baileys_parity import scan_parity
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _write_file(path: Path, content: str) -> None:
@@ -10,7 +15,7 @@ def _write_file(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def test_scan_parity_accepts_evidence_overlay(tmp_path: Path) -> None:
+def _create_minimal_parity_tree(tmp_path: Path) -> tuple[Path, Path]:
     waton_root = tmp_path / "waton"
     baileys_src = tmp_path / "baileys" / "src"
 
@@ -40,10 +45,85 @@ def test_scan_parity_accepts_evidence_overlay(tmp_path: Path) -> None:
     _write_file(baileys_src / "Socket" / "newsletter.ts", "export {}\n")
     _write_file(baileys_src / "Socket" / "socket.ts", "export {}\n")
 
+    return waton_root, baileys_src
+
+
+@pytest.fixture
+def parity_tree(tmp_path: Path) -> tuple[Path, Path]:
+    return _create_minimal_parity_tree(tmp_path)
+
+
+def test_scan_parity_rejects_evidence_without_required_top_level_fields(
+    parity_tree: tuple[Path, Path],
+) -> None:
+    waton_root, baileys_src = parity_tree
     evidence = {
         "domains": {
-            "messages-recv": {"replay_pass_rate": 1.0, "unknown_event_count": 0},
+            "messages-recv": {"replay_pass_rate": 1.0},
         }
+    }
+
+    with pytest.raises(ValueError) as exc_info:
+        scan_parity(
+            waton_root=str(waton_root),
+            baileys_src=str(baileys_src),
+            evidence=evidence,
+        )
+
+    assert str(exc_info.value).startswith("missing required evidence top-level fields")
+
+
+@pytest.mark.parametrize(
+    "evidence",
+    [
+        {
+            "run_id": "",
+            "commit_sha": "abc123",
+            "timestamp": "2026-03-03T00:00:00+00:00",
+            "domains": {},
+        },
+        {
+            "run_id": "r1",
+            "commit_sha": "   ",
+            "timestamp": "2026-03-03T00:00:00+00:00",
+            "domains": {},
+        },
+        {
+            "run_id": "r1",
+            "commit_sha": "abc123",
+            "timestamp": None,
+            "domains": {},
+        },
+        {
+            "run_id": "r1",
+            "commit_sha": "abc123",
+            "timestamp": "2026-03-03T00:00:00+00:00",
+            "domains": [],
+        },
+    ],
+)
+def test_scan_parity_rejects_invalid_evidence_top_level_shapes(
+    parity_tree: tuple[Path, Path], evidence: dict[str, object]
+) -> None:
+    waton_root, baileys_src = parity_tree
+
+    with pytest.raises(ValueError, match="invalid evidence top-level field types/shapes"):
+        scan_parity(
+            waton_root=str(waton_root),
+            baileys_src=str(baileys_src),
+            evidence=evidence,
+        )
+
+
+def test_scan_parity_accepts_evidence_overlay(parity_tree: tuple[Path, Path]) -> None:
+    waton_root, baileys_src = parity_tree
+    evidence = {
+        "run_id": "r1",
+        "commit_sha": "abc123",
+        "timestamp": "2026-03-03T00:00:00+00:00",
+        "domains": {
+            "messages-recv": {"replay_pass_rate": 1.0, "unknown_event_count": 0},
+        },
     }
 
     report = scan_parity(
@@ -57,3 +137,25 @@ def test_scan_parity_accepts_evidence_overlay(tmp_path: Path) -> None:
         "unknown_event_count": 0,
     }
     assert report["domains"]["messages-send"]["evidence"] == {}
+
+
+def test_scan_parity_preserves_evidence_top_level_metadata(parity_tree: tuple[Path, Path]) -> None:
+    waton_root, baileys_src = parity_tree
+    evidence = {
+        "run_id": "r2",
+        "commit_sha": "def456",
+        "timestamp": "2026-03-04T00:00:00+00:00",
+        "domains": {
+            "messages-recv": {"replay_pass_rate": 1.0, "unknown_event_count": 0},
+        },
+    }
+
+    report = scan_parity(
+        waton_root=str(waton_root),
+        baileys_src=str(baileys_src),
+        evidence=evidence,
+    )
+
+    assert report["run_id"] == "r2"
+    assert report["commit_sha"] == "def456"
+    assert report["timestamp"] == "2026-03-04T00:00:00+00:00"

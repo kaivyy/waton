@@ -48,9 +48,31 @@ def _domain_status(
     }
 
 
+def _validate_evidence_top_level(evidence: dict[str, object]) -> None:
+    required_fields = ("run_id", "commit_sha", "timestamp", "domains")
+    missing_fields = [field for field in required_fields if field not in evidence]
+    if missing_fields:
+        raise ValueError("missing required evidence top-level fields: " + ", ".join(missing_fields))
+
+    invalid_fields: list[str] = []
+    for field in ("run_id", "commit_sha", "timestamp"):
+        value = evidence.get(field)
+        if not isinstance(value, str) or not value.strip():
+            invalid_fields.append(field)
+
+    if not isinstance(evidence.get("domains"), dict):
+        invalid_fields.append("domains")
+
+    if invalid_fields:
+        raise ValueError("invalid evidence top-level field types/shapes: " + ", ".join(invalid_fields))
+
+
 def scan_parity(waton_root: str, baileys_src: str, evidence: dict | None = None) -> dict:
     waton = Path(waton_root)
     baileys = Path(baileys_src)
+
+    if evidence is not None:
+        _validate_evidence_top_level(evidence)
 
     domains = {
         "messages-recv": _domain_status(
@@ -95,9 +117,12 @@ def scan_parity(waton_root: str, baileys_src: str, evidence: dict | None = None)
         ),
     }
 
-    report = {"domains": domains}
+    report: dict[str, object] = {"domains": domains}
 
     if evidence and isinstance(evidence.get("domains"), dict):
+        report["run_id"] = evidence["run_id"]
+        report["commit_sha"] = evidence["commit_sha"]
+        report["timestamp"] = evidence["timestamp"]
         for domain, payload in report["domains"].items():
             ev = evidence["domains"].get(domain, {})
             payload["evidence"] = ev if isinstance(ev, dict) else {}

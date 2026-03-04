@@ -51,6 +51,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Path to parity evidence JSON (required for --parity-strict)",
     )
+    parser.add_argument(
+        "--expected-commit-sha",
+        default=None,
+        help="Expected parity report commit SHA in strict mode",
+    )
     return parser
 
 
@@ -95,7 +100,11 @@ def main() -> int:
             return code
 
     report = load_parity_report(config.parity_out)
-    issues = validate_parity_report(report, strict=args.parity_strict)
+    issues = validate_parity_report(
+        report,
+        strict=args.parity_strict,
+        expected_commit_sha=args.expected_commit_sha,
+    )
     if issues:
         print("[preflight] parity validation failed:")
         for issue in issues:

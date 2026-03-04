@@ -1,0 +1,98 @@
+name: parity-gate
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  parity-oracle-main-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[dev]
+      - name: Verify Baileys main source path
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+
+          p = (Path('.').resolve().parent / 'Baileys' / 'src').resolve()
+          print(f'Baileys src: {p}')
+          raise SystemExit(0 if p.is_dir() else 1)
+          PY
+
+  parity-diff-wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[dev]
+      - name: Run wire differential tests
+        run: python -m pytest tests/unit/test_parity_differential_harness.py -q
+
+  parity-diff-behavior:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[dev]
+      - name: Run behavior differential tests
+        run: python -m pytest tests/unit/test_parity_evidence_pipeline.py -q
+
+  parity-strict-evidence:
+    runs-on: ubuntu-latest
+    env:
+      PARITY_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+      EXPECTED_SHA: ${{ github.sha }}
+      PARITY_EVIDENCE_PATH: docs/parity/artifacts/strict-evidence-ci.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[dev]
+      - name: Generate CI strict evidence metadata
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          from tools.parity.evidence import build_empty_evidence
+
+          run_id = "${{ env.PARITY_RUN_ID }}"
+          commit_sha = "${{ env.EXPECTED_SHA }}"
+          out_path = Path("${{ env.PARITY_EVIDENCE_PATH }}")
+          out_path.parent.mkdir(parents=True, exist_ok=True)
+          out_path.write_text(json.dumps(build_empty_evidence(run_id, commit_sha), indent=2) + "\n", encoding="utf-8")
+          print(f"Wrote CI strict evidence metadata to {out_path}")
+          PY
+      - name: Run strict parity preflight
+        run: python scripts/preflight_check.py --parity-strict --parity-evidence ${{ env.PARITY_EVIDENCE_PATH }} --expected-commit-sha ${{ env.EXPECTED_SHA }} --skip-lint --skip-typecheck
+      - name: Upload parity artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-artifacts-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          path: |
+            docs/parity/artifacts/**/*.json
+            docs/parity/artifacts/**/*.txt
+            docs/parity/artifacts/**/*.log

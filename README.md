@@ -156,7 +156,37 @@ Fast local run (skip lint/typecheck):
 python scripts/preflight_check.py --skip-lint --skip-typecheck
 ```
 
-### 1.7 Browser Dashboard for Quick Testing
+Strict parity release gate (requires evidence, enforces `replay_pass_rate >= 0.995` and `drift_count == 0` for `status=done` domains):
+
+```bash
+python scripts/preflight_check.py --parity-strict --parity-evidence docs/parity/artifacts/strict-evidence-sample.json --skip-lint --skip-typecheck
+```
+
+CI strict gate (fresh CI-generated evidence + expected commit SHA enforcement):
+
+```bash
+python scripts/preflight_check.py --parity-strict --parity-evidence docs/parity/artifacts/strict-evidence-ci.json --expected-commit-sha <commit-sha> --skip-lint --skip-typecheck
+```
+
+Note: sample evidence files are for local/dev smoke usage only.
+
+### 1.7 Parity Evidence Smoke
+
+Run parity scan + replay smoke in one command:
+
+```bash
+python scripts/parity_evidence_smoke.py
+```
+
+Run hybrid strict parity smoke (includes differential wire/behavior checks + strict evidence gate):
+
+```bash
+python scripts/parity_evidence_smoke.py --parity-evidence docs/parity/artifacts/strict-evidence-sample.json
+```
+
+This command is intended as a fast parity confidence smoke gate for development/release checks.
+
+### 1.8 Browser Dashboard for Quick Testing
 
 If you want a browser UI instead of terminal-only testing:
 

@@ -75,6 +75,9 @@ def test_load_parity_report_and_validate_done(tmp_path: Path) -> None:
 
 def test_validate_parity_report_strict_passes_with_required_evidence() -> None:
     report = {
+        "run_id": "r1",
+        "commit_sha": "abc123",
+        "timestamp": "2026-03-03T00:00:00+00:00",
         "domains": {
             "messages-recv": {
                 "status": "done",
@@ -82,9 +85,59 @@ def test_validate_parity_report_strict_passes_with_required_evidence() -> None:
                     "replay_pass_rate": 1.0,
                     "unknown_event_count": 0,
                     "drift_count": 0,
+                    "wire_diff_artifact": "docs/parity/artifacts/r1/wire/messages-recv.json",
+                    "behavior_diff_artifact": "docs/parity/artifacts/r1/behavior/messages-recv.json",
+                },
+            }
+        },
+    }
+    issues = validate_parity_report(report, strict=True)
+    assert issues == []
+
+
+def test_validate_parity_report_strict_fails_when_replay_below_threshold() -> None:
+    report = {
+        "domains": {
+            "messages-recv": {
+                "status": "done",
+                "evidence": {
+                    "replay_pass_rate": 0.99,
+                    "unknown_event_count": 0,
+                    "drift_count": 0,
+                    "wire_diff_artifact": "docs/parity/artifacts/r1/wire/messages-recv.json",
+                    "behavior_diff_artifact": "docs/parity/artifacts/r1/behavior/messages-recv.json",
                 },
             }
         }
     }
     issues = validate_parity_report(report, strict=True)
-    assert issues == []
+    assert any("replay_pass_rate" in issue for issue in issues)
+
+
+def test_validate_parity_report_strict_fails_when_drift_nonzero() -> None:
+    report = {
+        "run_id": "r1",
+        "commit_sha": "abc123",
+        "timestamp": "2026-03-03T00:00:00+00:00",
+        "domains": {
+            "messages-recv": {
+                "status": "done",
+                "evidence": {
+                    "replay_pass_rate": 1.0,
+                    "unknown_event_count": 0,
+                    "drift_count": 1,
+                    "wire_diff_artifact": "docs/parity/artifacts/r1/wire/messages-recv.json",
+                    "behavior_diff_artifact": "docs/parity/artifacts/r1/behavior/messages-recv.json",
+                },
+            }
+        },
+    }
+    issues = validate_parity_report(report, strict=True)
+    assert any("drift_count" in issue for issue in issues)
+
+
+def test_release_checklist_mentions_expected_commit_sha_enforcement() -> None:
+    text = (
+        Path(__file__).resolve().parents[2] / "docs" / "runbooks" / "parity-release-checklist.md"
+    ).read_text(encoding="utf-8")
+    assert "expected commit sha" in text.lower()

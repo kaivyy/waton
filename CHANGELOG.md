@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Unknown-event telemetry summarizer at `tools/parity/unknown_telemetry.py` with unit coverage in `tests/unit/test_unknown_telemetry.py` and sample artifact `docs/parity/artifacts/unknown-telemetry-sample.json`.
+- Parity domain governance runbook at `docs/runbooks/parity-domain-ownership.md` defining ownership matrix, backup owners, SLA/SLO targets, and release blocking policy for parity domains.
+- Aggregate parity evidence smoke command at `scripts/parity_evidence_smoke.py` with unit coverage in `tests/unit/test_parity_evidence_smoke_script.py`.
+- Strict preflight evidence sample artifact at `docs/parity/artifacts/strict-evidence-sample.json` for parity strict-mode readiness checks.
 - New simple callback API surface for drop-in usage: `from waton import simple` with `SimpleClient` and `SimpleIncomingMessage` wrappers for minimal `on_message`/`on_ready` flows.
 - New unit coverage for simple API behavior in `tests/unit/test_simple_api.py`.
 - New isolated browser dashboard devtool at `tools/dashboard/` with Flask API + HTML UI for real WhatsApp browser testing (`/api/connect`, `/api/disconnect`, `/api/connection`, `/api/qr`, `/api/events`, `/api/send`) without touching `waton/*` runtime code.
@@ -20,6 +24,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WhatsApp Web-style dashboard layout with chat list pane (left) and active message thread pane (right), backed by real runtime chat APIs (`/api/chats`, `/api/chats/<jid>/messages`, `/api/chats/<jid>/read`).
 
 ### Changed
+- Task 1 baseline artifacts now use explicit current snapshots (`.tmp/ruff-current.json`, `.tmp/pyright-current.json`) with stronger integrity assertions in `tests/unit/test_lint_type_baseline_artifacts.py` and refreshed baseline evidence summary in `docs/parity/artifacts/lint-type-baseline-2026-03-01.md`.
+- Task 3 lint/type debt closure reached `python -m pyright` clean state (0 errors) by tightening typed narrowing and private-helper boundaries across key runtime modules, including `waton/client/*`, `waton/core/*`, `waton/protocol/*`, and `waton/utils/*`.
+- Task 4 deterministic Ruff auto-fix wave reduced lint findings from 283 (`.tmp/ruff-before-autofix.json`) to 84 (`.tmp/ruff-after-autofix.json`), with `.tmp/ruff-current.json` synchronized to the same post-fix count for stable manual-fix follow-up.
+- Task 6 full non-skip gate verification now passes end-to-end: `pytest tests -q` (314 passed, 2 skipped), `ruff check waton tests tools` (clean), `pyright` (0 errors), strict preflight with parity evidence (`ALL CHECKS PASSED`), and parity evidence smoke (`ALL CHECKS PASSED`).
+- Strict parity evidence policy now enforces fresh top-level metadata (`run_id`, `commit_sha`, `timestamp`) and optional CI expected commit SHA matching (`--expected-commit-sha`) in preflight/smoke paths.
+- Strict parity preflight validation now enforces release thresholds for `status=done` domains: `replay_pass_rate >= 0.995` and `drift_count == 0` (in addition to required evidence keys).
+- Strict parity evidence now also requires differential artifact pointers per done domain (`wire_diff_artifact`, `behavior_diff_artifact`) and validates them in preflight strict mode.
+- `scripts/parity_evidence_smoke.py` now includes hybrid strict parity stages (`parity-oracle-main-sync`, `parity-diff-wire`, `parity-diff-behavior`, optional `parity-strict-evidence`).
+- Added parity differential harness primitives (`tools/parity/canonicalize.py`, `tools/parity/differential_harness.py`, `tools/parity/oracle_runner.py`) with unit coverage.
+- Added PR hard-block parity workflow skeleton at `.github/workflows/parity-gate.yml` and incident runbook `docs/runbooks/parity-pr-incident-flow.md`.
+- `docs/runbooks/parity-release-checklist.md` now explicitly marks which strict parity thresholds are enforced by preflight.
+- `README.md` preflight section now includes a strict parity release-gate example command with evidence wiring.
+- `README.md` now includes a dedicated "Parity Evidence Smoke" section for running the aggregate parity smoke pipeline.
+- `docs/parity/baileys-parity-baseline.json` synchronized with refreshed latest parity output for this implementation cycle.
+- `docs/plans/2026-03-01-waton-baileys-gap-master-report.md` now includes implementation status and verification snapshot for the parity-evidence rollout.
 - README and Read the Docs pages now include `waton.simple` onboarding path (`getting-started`, `quickstart-app`, `app-framework-reference`, and migration/readthedocs operational notes).
 - Incoming E2EE decryption path in `waton/utils/process_message.py` now applies
   PNâ†”LID candidate fallback (Baileys-style) instead of single-JID decrypt attempt.

@@ -13,6 +13,9 @@ Required fields:
 - `timestamp` (string): ISO-8601 timestamp (UTC recommended) for when the evidence bundle was generated
 - `domains` (object/map): per-domain evidence payloads keyed by domain name
 
+For strict/release parity gate usage, these top-level fields are mandatory and must be non-empty values.
+In CI, `commit_sha` should match the commit being validated (for example via `--expected-commit-sha`).
+
 ### Example (minimal)
 
 ```json
@@ -34,3 +37,31 @@ Evidence payloads are intentionally extensible. Domain payloads may include (non
 - unknown-event telemetry counts
 - drift detection counts or summaries
 - artifact references (file names under `docs/parity/artifacts/`)
+
+For hybrid strict parity runs, include explicit differential artifact pointers for both wire and behavior results.
+
+Required per-domain keys for hybrid strict parity evidence:
+
+- `wire_diff_artifact` (string): path to wire differential artifact for the run
+- `behavior_diff_artifact` (string): path to behavior differential artifact for the run
+
+Example:
+
+```json
+{
+  "domains": {
+    "messages-recv": {
+      "status": "done",
+      "evidence": {
+        "replay_pass_rate": 1.0,
+        "unknown_event_count": 0,
+        "drift_count": 0,
+        "wire_diff_artifact": "docs/parity/artifacts/<run-id>/wire/messages-recv.json",
+        "behavior_diff_artifact": "docs/parity/artifacts/<run-id>/behavior/messages-recv.json"
+      }
+    }
+  }
+}
+```
+
+For strict preflight parity validation, required keys are evaluated from `domains.<domain>.evidence` when `domains.<domain>.status == "done"`.

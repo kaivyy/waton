@@ -2,6 +2,8 @@
 
 Use this checklist before claiming Baileys-equivalent parity for a release candidate.
 
+For this repository, a claim of **100% parity** means the release candidate passes the hybrid strict gate: **wire parity + behavior parity + strict evidence parity**.
+
 ## 1) Code and Architecture
 
 1. No critical-path stub markers in `waton/client`, `waton/protocol`, `waton/utils`.
@@ -39,7 +41,42 @@ Required:
 1. Critical domains are not `missing`.
 2. Any `partial` domain must have explicit follow-up tasks in `docs/plans`.
 
-## 4) Live Reliability
+## 4) Parity Evidence Release Gate (Strict)
+
+This strict gate is one leg of the hybrid 100% parity definition (`wire + behavior + strict evidence`).
+
+Required evidence bundle must follow [docs/parity/evidence-schema.md](../parity/evidence-schema.md).
+
+For each domain with `status=done`, evidence payload must include:
+1. `replay_pass_rate`
+2. `unknown_event_count`
+3. `drift_count`
+4. `wire_diff_artifact`
+5. `behavior_diff_artifact`
+
+Minimum release thresholds (policy):
+1. `replay_pass_rate >= 0.995` (**enforced by strict preflight**)
+2. `drift_count == 0` (**enforced by strict preflight**)
+3. `unknown_event_count` is explicitly reviewed and accepted in release notes.
+
+Strict gate command:
+
+```bash
+python scripts/preflight_check.py --parity-strict --parity-evidence <path-to-evidence-json>
+```
+
+CI strict gate command (with expected commit sha enforcement):
+
+```bash
+python scripts/preflight_check.py --parity-strict --parity-evidence <path-to-evidence-json> --expected-commit-sha <commit-sha>
+```
+
+Required:
+1. Command exits with status 0.
+2. No domain-level `missing evidence [...]` issues are printed.
+3. No `commit_sha mismatch` issues are printed when CI expected commit sha is provided.
+
+## 5) Live Reliability
 
 Run:
 
@@ -64,7 +101,7 @@ Required:
 4. Only one active client session is running for the same auth DB during test
    (avoid `440 conflict` false negatives).
 
-## 5) Release Hygiene
+## 6) Release Hygiene
 
 1. `CHANGELOG.md` updated under `Unreleased`.
 2. Parity plan status updated in `docs/plans`.
