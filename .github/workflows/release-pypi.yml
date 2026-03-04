@@ -4,12 +4,6 @@ on:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Tag version to publish (example: v0.1.3)"
-        required: true
-        type: string
 
 permissions:
   contents: write
@@ -27,13 +21,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Resolve ref for manual run
-        if: github.event_name == 'workflow_dispatch'
-        shell: bash
-        run: |
-          git fetch --tags --force
-          git checkout "refs/tags/${{ inputs.tag }}"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -89,11 +76,7 @@ jobs:
         id: tag
         shell: bash
         run: |
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "value=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "value=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-          fi
+          echo "value=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
         uses: actions/checkout@v4
