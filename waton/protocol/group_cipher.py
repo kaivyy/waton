@@ -41,7 +41,7 @@ def _decode_distribution_payload(payload: bytes) -> bytes:
 class GroupCipher:
     """Manages sender keys for encrypting/decrypting group messages.
 
-    The key lifecycle mirrors the Baileys flow at a high level:
+    The key lifecycle mirrors the reference flow at a high level:
     - each participant has a sender key per group
     - every encrypt/decrypt rotates and persists key material
     - sender-key distribution can bootstrap or update stored key state

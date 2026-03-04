@@ -129,6 +129,29 @@ function renderChatList(chats) {
   });
 }
 
+function renderMediaBlock(msg) {
+  const media = msg.media;
+  if (!media || !media.kind) return "";
+  const src = media.proxy_url || media.url || "";
+  if (!src) return "";
+  const safeSrc = escapeHtml(src);
+  const kind = String(media.kind || "");
+  if (kind === "image" || kind === "sticker") {
+    return `<img class="media-image ${kind === "sticker" ? "sticker" : ""}" src="${safeSrc}" alt="media" loading="lazy">`;
+  }
+  if (kind === "video") {
+    return `<video class="media-video" controls preload="metadata" src="${safeSrc}"></video>`;
+  }
+  if (kind === "audio") {
+    return `<audio class="media-audio" controls src="${safeSrc}"></audio>`;
+  }
+  if (kind === "document") {
+    const fileName = escapeHtml(media.file_name || "document");
+    return `<a class="media-doc" href="${safeSrc}" target="_blank" rel="noreferrer">${fileName}</a>`;
+  }
+  return "";
+}
+
 function renderThread(messages) {
   const threadEl = document.getElementById("message-thread");
   const previousLastId = threadEl.dataset.lastMessageId || "";
@@ -145,6 +168,7 @@ function renderThread(messages) {
     .map((msg) => `
       <div class="msg-row ${msg.from_me ? "out" : "in"}">
         <div class="bubble">
+          ${renderMediaBlock(msg)}
           <div class="bubble-text">${escapeHtml(msg.text || "")}</div>
           <div class="bubble-meta">${formatTime(msg.timestamp)} - ${escapeHtml(msg.status || "")}</div>
         </div>
@@ -230,6 +254,42 @@ async function sendMessage() {
   }
 }
 
+async function sendMedia() {
+  if (!activeChatJid) {
+    alert("Select a chat first.");
+    return;
+  }
+  const fileInput = document.getElementById("send-media-file");
+  const kindInput = document.getElementById("send-media-kind");
+  const captionInput = document.getElementById("send-text");
+  const file = fileInput.files && fileInput.files[0];
+  if (!file) return;
+
+  const form = new FormData();
+  form.append("to", activeChatJid);
+  form.append("kind", kindInput.value || "image");
+  form.append("caption", captionInput.value.trim());
+  form.append("file", file);
+
+  try {
+    const res = await fetch("/api/send/media", {
+      method: "POST",
+      body: form
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || `Request failed: ${res.status}`);
+    }
+    fileInput.value = "";
+    captionInput.value = "";
+    autoResizeComposer();
+    await refreshChats();
+    await refreshActiveThread();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
 async function openNewChatFromInput() {
   const raw = document.getElementById("new-chat-jid").value.trim();
   if (!raw) return;
@@ -252,6 +312,9 @@ async function init() {
       event.preventDefault();
       void sendMessage();
     }
+  });
+  document.getElementById("send-media-file").addEventListener("change", () => {
+    void sendMedia();
   });
 
   await refreshConnectionState();

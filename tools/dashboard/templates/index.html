@@ -46,12 +46,15 @@
       <section id="message-thread" class="wa-thread"></section>
 
       <footer class="wa-composer">
-        <button type="button" class="icon-btn" title="Attach (coming soon)" disabled aria-label="Attach">
-          +
-        </button>
-        <button type="button" class="icon-btn" title="Emoji (coming soon)" disabled aria-label="Emoji">
-          :)
-        </button>
+        <label for="send-media-file" class="icon-btn" title="Attach media" aria-label="Attach media">+</label>
+        <input id="send-media-file" type="file" hidden>
+        <select id="send-media-kind" class="media-kind-select" aria-label="Media type">
+          <option value="image">Image</option>
+          <option value="video">Video</option>
+          <option value="audio">Audio</option>
+          <option value="document">Document</option>
+          <option value="sticker">Sticker</option>
+        </select>
         <div class="composer-input-wrap">
           <textarea id="send-text" rows="1" placeholder="Type a message"></textarea>
         </div>

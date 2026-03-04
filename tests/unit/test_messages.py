@@ -1248,7 +1248,7 @@ def test_process_incoming_message_stores_mapping_from_recipient_pn(
                 attrs={
                     "id": "m-map-recipient",
                     "from": "179981124669483:0@lid",
-                    "recipient_pn": "628980145555@s.whatsapp.net",
+                    "recipient_pn": "6287000000001@s.whatsapp.net",
                     "type": "text",
                 },
                 content=[BinaryNode(tag="enc", attrs={"type": "msg", "v": "2"}, content=b"cipher")],
@@ -1257,8 +1257,8 @@ def test_process_incoming_message_stores_mapping_from_recipient_pn(
         )
 
         lid_mapping = (fake_client.creds.additional_data or {}).get("lid_mapping", {})
-        assert lid_mapping.get("lid_to_pn_user", {}).get("179981124669483") == "628980145555"
-        assert lid_mapping.get("pn_to_lid_user", {}).get("628980145555") == "179981124669483"
+        assert lid_mapping.get("lid_to_pn_user", {}).get("179981124669483") == "6287000000001"
+        assert lid_mapping.get("pn_to_lid_user", {}).get("6287000000001") == "179981124669483"
 
     _run(_case())
 

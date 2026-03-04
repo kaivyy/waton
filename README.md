@@ -19,7 +19,7 @@
 - **Blazing Fast Crypto** — Signal Protocol encryption powered by Rust (via PyO3)
 - **Lightweight** — ~30-60MB memory footprint, minimal dependencies
 - **Multi-Device Ready** — Full support for WhatsApp's multi-device architecture
-- **No Node.js** — Not a Baileys wrapper, zero JavaScript runtime dependency
+- **No Node.js** — Standalone implementation, zero JavaScript runtime dependency
 
 ## Features
 
@@ -33,7 +33,7 @@
 ## Installation
 
 ```bash
-pip install waton
+pip install waton==0.1.2
 ```
 
 > Prebuilt wheels include the Rust crypto extension — no Rust toolchain needed for installation.
@@ -71,7 +71,7 @@ If you only want the browser dashboard and do not need reinstall, you can skip e
 python -m tools.dashboard.server --host 127.0.0.1 --port 8080
 ```
 
-### Package Footprint (`pip install waton`)
+### Package Footprint (`pip install waton==0.1.2`)
 
 Published artifacts are intentionally runtime-only:
 - included: `waton/`, Rust extension module, metadata files
@@ -322,6 +322,7 @@ pytest tests/
 ## Documentation (Read the Docs)
 
 Sphinx docs source is in `docs/source/` with RTD config in `.readthedocs.yaml`.
+This release targets docs for Waton `v0.1.2`.
 
 Local docs build:
 

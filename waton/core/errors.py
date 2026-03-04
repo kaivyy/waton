@@ -17,7 +17,7 @@ class ConnectionError(WatonError):
 
 
 class DisconnectReason(IntEnum):
-    """Port of Baileys DisconnectReason."""
+    """Disconnect reason constants aligned with WhatsApp-Web behavior."""
     CONNECTION_CLOSED = 428
     CONNECTION_LOST = 408
     CONNECTION_REPLACED = 440

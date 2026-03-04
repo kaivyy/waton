@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "waton"
-version = "0.1.0"
+version = "0.1.2"
 description = "Python WhatsApp Web Multi-Device library"
 readme = "README.md"
 requires-python = ">=3.11"

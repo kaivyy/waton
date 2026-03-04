@@ -76,14 +76,14 @@ async def test_decrypt_and_normalize_enc_message_falls_back_lid_to_pn() -> None:
         tag="message",
         attrs={
             "from": "179981124669483:0@lid",
-            "recipient_pn": "628980145555@s.whatsapp.net",
+            "recipient_pn": "6287000000001@s.whatsapp.net",
             "id": "m-1b",
             "t": "124",
         },
         content=[BinaryNode(tag="enc", attrs={"type": "msg", "v": "2"}, content=b"ciphertext")],
     )
     event = await decode_incoming_message_node(enc_node, FakeRepo())
-    assert attempts == ["179981124669483:0@lid", "628980145555@s.whatsapp.net"]
+    assert attempts == ["179981124669483:0@lid", "6287000000001@s.whatsapp.net"]
     assert event["type"] == "messages.upsert"
     assert event["message"]["id"] == "m-1b"
     assert event["message"]["text"] == "fallback text"

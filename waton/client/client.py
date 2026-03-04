@@ -1047,7 +1047,7 @@ class WAClient:
     async def _refresh_unregistered_creds(self) -> None:
         """Refresh pre-key signatures for non-registered sessions.
 
-        Older waton builds generated signatures with a non-Baileys-compatible
+        Older waton builds generated signatures with a non-reference-compatible
         routine. Re-signing here avoids forcing users to delete DB files.
         """
         if not self.creds or self.creds.registered:

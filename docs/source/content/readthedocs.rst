@@ -18,6 +18,7 @@ Build configuration used
 - Builder: Sphinx
 - Sphinx config: ``docs/source/conf.py``
 - Install command: ``pip install .[docs]``
+- Release documentation target: ``waton==0.1.2``
 
 Local verification before pushing
 ---------------------------------
@@ -38,11 +39,12 @@ Operational checklist
 
 Before release/tag:
 
-1. Update ``CHANGELOG.md``.
-2. Ensure docs pages are linked from ``docs/source/index.rst``.
-3. Build docs locally and confirm success.
-4. Push branch/tag and verify RTD build result.
-5. Open published docs and smoke-test key pages:
+1. Bump package version in ``pyproject.toml``, ``Cargo.toml``, and ``waton/__init__.py`` (current release: ``0.1.2``).
+2. Update ``CHANGELOG.md``.
+3. Ensure docs pages are linked from ``docs/source/index.rst``.
+4. Build docs locally and confirm success.
+5. Push branch/tag and verify RTD build result.
+6. Open published docs and smoke-test key pages:
    - Getting Started (including ``waton.simple`` snippet)
    - Quickstart App
    - Event Model

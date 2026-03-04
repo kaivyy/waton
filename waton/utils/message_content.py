@@ -1,6 +1,6 @@
 """Shared incoming message content parser.
 
-This module mirrors Baileys' normalize/content-type approach in a lightweight
+This module mirrors WhatsApp-Web style normalize/content-type handling in a lightweight
 way by parsing protobuf wire fields directly. It avoids requiring full WAProto
 coverage while still exposing richer message metadata.
 """
@@ -87,15 +87,18 @@ def _extract_context_message_secret_b64(context_payload: bytes | None) -> str | 
 
 
 def _decode_image(payload: bytes) -> dict[str, Any]:
+    media_key = _field_bytes(payload, 8)
     return {
         "url": _decode_utf8(_field_bytes(payload, 1)),
         "mimetype": _decode_utf8(_field_bytes(payload, 2)),
         "caption": _decode_utf8(_field_bytes(payload, 3)),
         "direct_path": _decode_utf8(_field_bytes(payload, 10)),
+        "media_key_b64": base64.b64encode(media_key).decode("ascii") if media_key is not None else None,
     }
 
 
 def _decode_document(payload: bytes) -> dict[str, Any]:
+    media_key = _field_bytes(payload, 7)
     return {
         "url": _decode_utf8(_field_bytes(payload, 1)),
         "mimetype": _decode_utf8(_field_bytes(payload, 2)),
@@ -103,20 +106,24 @@ def _decode_document(payload: bytes) -> dict[str, Any]:
         "file_name": _decode_utf8(_field_bytes(payload, 8)),
         "direct_path": _decode_utf8(_field_bytes(payload, 10)),
         "caption": _decode_utf8(_field_bytes(payload, 20)),
+        "media_key_b64": base64.b64encode(media_key).decode("ascii") if media_key is not None else None,
     }
 
 
 def _decode_audio(payload: bytes) -> dict[str, Any]:
+    media_key = _field_bytes(payload, 7)
     return {
         "url": _decode_utf8(_field_bytes(payload, 1)),
         "mimetype": _decode_utf8(_field_bytes(payload, 2)),
         "seconds": _field_varint(payload, 5),
         "ptt": _field_bool(payload, 6),
         "direct_path": _decode_utf8(_field_bytes(payload, 9)),
+        "media_key_b64": base64.b64encode(media_key).decode("ascii") if media_key is not None else None,
     }
 
 
 def _decode_video(payload: bytes) -> dict[str, Any]:
+    media_key = _field_bytes(payload, 6)
     return {
         "url": _decode_utf8(_field_bytes(payload, 1)),
         "mimetype": _decode_utf8(_field_bytes(payload, 2)),
@@ -125,10 +132,12 @@ def _decode_video(payload: bytes) -> dict[str, Any]:
         "height": _field_varint(payload, 9),
         "width": _field_varint(payload, 10),
         "direct_path": _decode_utf8(_field_bytes(payload, 13)),
+        "media_key_b64": base64.b64encode(media_key).decode("ascii") if media_key is not None else None,
     }
 
 
 def _decode_sticker(payload: bytes) -> dict[str, Any]:
+    media_key = _field_bytes(payload, 4)
     return {
         "url": _decode_utf8(_field_bytes(payload, 1)),
         "mimetype": _decode_utf8(_field_bytes(payload, 5)),
@@ -136,6 +145,7 @@ def _decode_sticker(payload: bytes) -> dict[str, Any]:
         "width": _field_varint(payload, 7),
         "direct_path": _decode_utf8(_field_bytes(payload, 8)),
         "is_animated": _field_bool(payload, 13),
+        "media_key_b64": base64.b64encode(media_key).decode("ascii") if media_key is not None else None,
     }
 
 

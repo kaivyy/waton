@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-03-04
+
 ### Added
 - Unknown-event telemetry summarizer at `tools/parity/unknown_telemetry.py` with unit coverage in `tests/unit/test_unknown_telemetry.py` and sample artifact `docs/parity/artifacts/unknown-telemetry-sample.json`.
 - Parity domain governance runbook at `docs/runbooks/parity-domain-ownership.md` defining ownership matrix, backup owners, SLA/SLO targets, and release blocking policy for parity domains.
@@ -56,7 +58,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `from=s.whatsapp.net`.
 - Unified-session ID generation now uses tracked server-time offset from stanza
   timestamps for deterministic session telemetry IDs.
-
+- Version metadata is now aligned to release `0.1.2` across `pyproject.toml`,
+  `Cargo.toml`, and `waton/__init__.py`.
+- Install snippets now pin this release explicitly with
+  `pip install waton==0.1.2` in README and quickstart docs.
+- Read the Docs release operations guide now includes explicit release-target
+  tracking for `waton==0.1.2` plus version-bump checklist steps.
+- Source distribution packaging now uses explicit Cargo include allowlist
+  (`waton/`, `rust/`, and release metadata files) so published artifacts
+  stay focused on runtime files and exclude docs/tests/tools/examples.
 
 ### Fixed
 - CLI receive flow no longer silently drops inbound messages when parse/decrypt

@@ -1,4 +1,4 @@
-"""Binary protocol constants parsed from Baileys."""
+"""Binary protocol constants parsed from WhatsApp-Web reference data."""
 
 from typing import TypedDict
 

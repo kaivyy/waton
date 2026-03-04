@@ -5,7 +5,8 @@ from waton.protocol.binary_node import BinaryNode
 def test_golden_binary_codec():
     """
     Golden byte-level reference test.
-    In a complete port, we would capture actual WebSocket frames from Baileys
+    In a complete port, we would capture actual WebSocket frames from the
+    reference implementation
     and ensure `encode_binary_node` produces identical bytes.
     For now, we verify that our logic produces a stable known output for a Ping node.
     """

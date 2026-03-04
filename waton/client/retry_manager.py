@@ -1,6 +1,6 @@
 """Retry state management for send/retry receipt flows.
 
-This mirrors core behavior from Baileys' MessageRetryManager while keeping a
+This mirrors core behavior from a proven message retry manager while keeping a
 Python-first API surface.
 """
 

@@ -5,7 +5,7 @@ import os
 import pathlib
 from typing import Any, Protocol
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 
 from .runtime import DashboardRuntime
 from .state import normalize_wa_id
@@ -27,6 +27,19 @@ class DashboardRuntimeLike(Protocol):
     def disconnect(self) -> dict[str, Any]: ...
 
     def send_text(self, to_jid: str, text: str) -> str: ...
+
+    def send_media(
+        self,
+        *,
+        to_jid: str,
+        kind: str,
+        media_bytes: bytes,
+        file_name: str,
+        mimetype: str,
+        caption: str,
+    ) -> str: ...
+
+    def get_media_blob(self, message_id: str) -> tuple[bytes, str] | None: ...
 
 
 def _template_dir() -> str:
@@ -124,6 +137,14 @@ def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = 
             return jsonify({"error": f"Failed to disconnect: {exc}"}), 500
         return jsonify(state)
 
+    @app.post("/api/reconnect")
+    def reconnect() -> Any:
+        try:
+            state = dashboard_runtime.ensure_connected()
+        except Exception as exc:
+            return jsonify({"error": f"Failed to reconnect: {exc}"}), 500
+        return jsonify(state)
+
     @app.post("/api/send")
     def send() -> Any:
         data = request.get_json(silent=True) or {}
@@ -147,6 +168,55 @@ def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = 
             return jsonify({"error": f"Send failed: {exc}"}), 500
 
         return jsonify({"status": "queued", "to": to_jid, "message_id": message_id})
+
+    @app.post("/api/send/media")
+    def send_media() -> Any:
+        raw_to = (request.form.get("to") or "").strip()
+        kind = (request.form.get("kind") or "").strip().lower()
+        caption = (request.form.get("caption") or "").strip()
+        upload = request.files.get("file")
+
+        if not raw_to or not kind or upload is None:
+            return jsonify({"error": "`to`, `kind`, and `file` are required."}), 400
+
+        state = dashboard_runtime.connection_state()
+        if state.get("state") != "connected":
+            return jsonify({"error": "WhatsApp is not connected. Scan QR first."}), 409
+
+        file_name = upload.filename or "upload.bin"
+        mimetype = upload.mimetype or "application/octet-stream"
+        media_bytes = upload.read()
+        if not media_bytes:
+            return jsonify({"error": "`file` must not be empty."}), 400
+        if kind == "sticker" and not file_name.lower().endswith(".webp"):
+            return jsonify({"error": "Sticker upload must use .webp file."}), 400
+
+        try:
+            to_jid, _ = _build_send_payload(raw_to=raw_to, text="x")
+            message_id = dashboard_runtime.send_media(
+                to_jid=to_jid,
+                kind=kind,
+                media_bytes=media_bytes,
+                file_name=file_name,
+                mimetype=mimetype,
+                caption=caption,
+            )
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        except RuntimeError as exc:
+            return jsonify({"error": str(exc)}), 409
+        except Exception as exc:
+            return jsonify({"error": f"Send failed: {exc}"}), 500
+
+        return jsonify({"status": "queued", "to": to_jid, "message_id": message_id})
+
+    @app.get("/api/media/<message_id>")
+    def media_blob(message_id: str) -> Any:
+        blob = dashboard_runtime.get_media_blob(message_id)
+        if blob is None:
+            return jsonify({"error": "Media not found."}), 404
+        data, mimetype = blob
+        return Response(data, mimetype=mimetype)
 
     return app
 

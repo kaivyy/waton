@@ -4,6 +4,9 @@ import asyncio
 import atexit
 import base64
 import contextlib
+import mimetypes
+import os
+import pathlib
 import logging
 import threading
 import time
@@ -13,6 +16,7 @@ import qrcode
 
 from waton.client.client import WAClient
 from waton.client.messages import MessagesAPI
+from waton.core.errors import ConnectionError as WatonConnectionError
 from waton.core.jid import S_WHATSAPP_NET, jid_decode, jid_encode, jid_normalized_user
 from waton.infra.storage_sqlite import SQLiteStorage
 from waton.protocol.binary_node import BinaryNode
@@ -149,6 +153,39 @@ def choose_lid_chat_fallback(
     return active_chat_jid
 
 
+def build_media_descriptor(*, content_type: str | None, content: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(content_type, str):
+        return None
+    kind = content_type.strip().lower()
+    if kind not in {"image", "video", "audio", "sticker", "document"}:
+        return None
+    payload = content if isinstance(content, dict) else {}
+    descriptor = {
+        "kind": kind,
+        "url": payload.get("url"),
+        "mimetype": payload.get("mimetype"),
+        "caption": payload.get("caption"),
+        "direct_path": payload.get("direct_path"),
+        "media_key_b64": payload.get("media_key_b64"),
+    }
+    return descriptor
+
+
+def should_schedule_auto_reconnect(*, reason: Exception, explicit_disconnect: bool) -> bool:
+    if explicit_disconnect:
+        return False
+
+    status_code = getattr(reason, "status_code", None)
+    if isinstance(reason, WatonConnectionError) and status_code is not None:
+        if int(status_code) in {401, 403, 411, 440, 500}:
+            return False
+        return True
+
+    reason_text = str(reason).lower()
+    fatal_markers = ("logged out", "forbidden", "401", "403", "bad session")
+    return not any(marker in reason_text for marker in fatal_markers)
+
+
 class DashboardRuntime:
     """Real WhatsApp runtime used by the browser dashboard."""
 
@@ -162,6 +199,8 @@ class DashboardRuntime:
         self._lid_chat_hints: dict[str, str] = {}
         self._active_chat_jid: str | None = None
         self._max_messages_per_chat = 400
+        self._media_cache_dir = pathlib.Path(os.getenv("WATON_DASHBOARD_MEDIA_CACHE_DIR", ".cache/dashboard-media"))
+        self._media_cache_dir.mkdir(parents=True, exist_ok=True)
         self._state: dict[str, Any] = {
             "state": "disconnected",
             "status": "disconnected",
@@ -180,6 +219,8 @@ class DashboardRuntime:
         self._messages: MessagesAPI | None = None
         self._storage: SQLiteStorage | None = None
         self._connect_guard = asyncio.Lock()
+        self._manual_disconnect = False
+        self._reconnect_scheduled = False
 
         atexit.register(self.close)
 
@@ -236,13 +277,79 @@ class DashboardRuntime:
             self._active_chat_jid = chat_jid
 
     def ensure_connected(self) -> dict[str, Any]:
+        self._manual_disconnect = False
         return self._run_coro_sync(self._ensure_connected_async())
 
     def disconnect(self) -> dict[str, Any]:
+        self._manual_disconnect = True
         return self._run_coro_sync(self._disconnect_async())
 
     def send_text(self, to_jid: str, text: str) -> str:
         return self._run_coro_sync(self._send_text_async(to_jid, text))
+
+    def send_media(
+        self,
+        *,
+        to_jid: str,
+        kind: str,
+        media_bytes: bytes,
+        file_name: str,
+        mimetype: str,
+        caption: str,
+    ) -> str:
+        return self._run_coro_sync(
+            self._send_media_async(
+                to_jid=to_jid,
+                kind=kind,
+                media_bytes=media_bytes,
+                file_name=file_name,
+                mimetype=mimetype,
+                caption=caption,
+            )
+        )
+
+    def get_media_blob(self, message_id: str) -> tuple[bytes, str] | None:
+        with self._chat_lock:
+            for messages in self._messages_by_chat.values():
+                for item in reversed(messages):
+                    if item.get("id") != message_id:
+                        continue
+                    media = item.get("media")
+                    if not isinstance(media, dict):
+                        return None
+                    cache_path_str = media.get("cache_path")
+                    mimetype = media.get("mimetype")
+                    if not isinstance(mimetype, str) or not mimetype:
+                        mimetype = "application/octet-stream"
+                    if isinstance(cache_path_str, str) and cache_path_str:
+                        try:
+                            data = pathlib.Path(cache_path_str).read_bytes()
+                        except OSError:
+                            return None
+                        return data, mimetype
+                    media_url = media.get("url")
+                    media_key_b64 = media.get("media_key_b64")
+                    kind = media.get("kind")
+                    if (
+                        isinstance(media_url, str)
+                        and media_url
+                        and isinstance(media_key_b64, str)
+                        and media_key_b64
+                        and isinstance(kind, str)
+                        and kind
+                    ):
+                        return self._run_coro_sync(
+                            self._download_and_cache_media_async(
+                                message_id=message_id,
+                                media_url=media_url,
+                                media_key_b64=media_key_b64,
+                                kind=kind,
+                                mimetype=mimetype,
+                                media=media,
+                            )
+                        )
+                    return None
+        return None
 
     async def _ensure_connected_async(self) -> dict[str, Any]:
         async with self._connect_guard:
@@ -311,6 +418,74 @@ class DashboardRuntime:
                 kind="outgoing",
                 source="dashboard",
                 payload={"to": to_jid, "text": text, "message_id": msg_id},
+            )
+        )
+        return msg_id
+
+    async def _send_media_async(
+        self,
+        *,
+        to_jid: str,
+        kind: str,
+        media_bytes: bytes,
+        file_name: str,
+        mimetype: str,
+        caption: str,
+    ) -> str:
+        if not self._client or not self._messages or not self._client.is_authenticated:
+            raise RuntimeError("WhatsApp is not connected yet.")
+
+        media_kind = kind.strip().lower()
+        if media_kind == "image":
+            msg_id = await self._messages.send_image(to_jid, media_bytes, caption=caption)
+        elif media_kind == "video":
+            msg_id = await self._messages.send_video(to_jid, media_bytes, caption=caption, mimetype=mimetype)
+        elif media_kind == "audio":
+            msg_id = await self._messages.send_audio(to_jid, media_bytes, mimetype=mimetype)
+        elif media_kind == "document":
+            msg_id = await self._messages.send_document(
+                to_jid,
+                media_bytes,
+                file_name=file_name,
+                mimetype=mimetype,
+                caption=caption,
+            )
+        elif media_kind == "sticker":
+            if not file_name.lower().endswith(".webp"):
+                raise ValueError("sticker must use .webp file")
+            msg_id = await self._messages.send_sticker(to_jid, media_bytes, mimetype="image/webp")
+        else:
+            raise ValueError(f"Unsupported media kind: {media_kind}")
+
+        sender_jid = None
+        if self._client.creds and self._client.creds.me:
+            sender_jid = self._client.creds.me.get("id")
+        cache_path = self._persist_media_blob(msg_id, media_bytes, mimetype=mimetype, file_name=file_name)
+        media = {
+            "kind": media_kind,
+            "mimetype": mimetype,
+            "caption": caption,
+            "cache_path": str(cache_path),
+            "url": f"/api/media/{msg_id}",
+            "file_name": file_name,
+        }
+        display_text = caption or f"[{media_kind}]"
+        self._append_chat_message(
+            chat_jid=to_jid,
+            sender_jid=sender_jid or "me",
+            text=display_text,
+            from_me=True,
+            status="sent",
+            message_id=msg_id,
+            media=media,
+        )
+        with self._chat_lock:
+            self._active_chat_jid = to_jid
+        self._events.add_event(
+            DashboardEvent(
+                kind="outgoing",
+                source="dashboard",
+                payload={"to": to_jid, "kind": media_kind, "message_id": msg_id},
             )
         )
         return msg_id
@@ -498,9 +673,20 @@ class DashboardRuntime:
                         and not msg.text
                         and msg.message_type in {"unknown", "text"}
                     )
-                    display_text = msg.text or (
-                        "[undecrypted message]" if inferred_undecrypted else "[non-text message]"
+                    media = build_media_descriptor(
+                        content_type=msg.content_type if isinstance(msg.content_type, str) else None,
+                        content=msg.content if isinstance(msg.content, dict) else None,
                     )
+                    if media is not None:
+                        display_text = msg.text or (media.get("caption") or f"[{media.get('kind')}]")
+                        media_url = media.get("url")
+                        media_key_b64 = media.get("media_key_b64")
+                        if isinstance(media_url, str) and media_url and isinstance(media_key_b64, str) and media_key_b64:
+                            media["proxy_url"] = f"/api/media/{msg.id}"
+                    else:
+                        display_text = msg.text or (
+                            "[undecrypted message]" if inferred_undecrypted else "[non-text message]"
+                        )
                     display_status = "undecrypted" if inferred_undecrypted else ("received" if not from_me else "sent")
 
                     payload["message"] = {
@@ -523,6 +709,7 @@ class DashboardRuntime:
                         status=display_status,
                         message_id=msg.id,
                         timestamp_s=msg.timestamp if msg.timestamp else None,
+                        media=media,
                     )
             self._events.add_event(DashboardEvent(kind="node", source="wa-client", payload=payload))
         except Exception as exc:  # pragma: no cover - defensive guard for background tasks
@@ -575,6 +762,8 @@ class DashboardRuntime:
                 payload={"status": "close", "state": "disconnected", "reason": reason},
             )
         )
+        if should_schedule_auto_reconnect(reason=exc, explicit_disconnect=self._manual_disconnect):
+            self._schedule_auto_reconnect(reason)
 
     def close(self) -> None:
         if not self._loop.is_running():
@@ -648,6 +837,7 @@ class DashboardRuntime:
         status: str,
         message_id: str | None = None,
         timestamp_s: int | None = None,
+        media: dict[str, Any] | None = None,
     ) -> None:
         if not chat_jid:
             return
@@ -666,6 +856,11 @@ class DashboardRuntime:
             "timestamp": timestamp_ms,
             "status": status,
         }
+        if isinstance(media, dict):
+            media_copy = dict(media)
+            if message_id:
+                media_copy.setdefault("proxy_url", f"/api/media/{message_id}")
+            msg["media"] = media_copy
         with self._chat_lock:
             chat_messages = self._messages_by_chat.setdefault(chat_jid, [])
             chat_messages.append(msg)
@@ -697,6 +892,76 @@ class DashboardRuntime:
                         if chat and chat.get("last_timestamp") == item.get("timestamp"):
                             chat["last_text"] = item.get("text", "")
                         return
+
+    def _persist_media_blob(self, message_id: str, media_bytes: bytes, *, mimetype: str, file_name: str) -> pathlib.Path:
+        extension = pathlib.Path(file_name).suffix.strip()
+        if not extension:
+            guessed = mimetypes.guess_extension(mimetype or "")
+            extension = guessed or ".bin"
+        safe_extension = extension if extension.startswith(".") else f".{extension}"
+        target = self._media_cache_dir / f"{message_id}{safe_extension}"
+        target.write_bytes(media_bytes)
+        return target
+
+    def _schedule_auto_reconnect(self, reason: str) -> None:
+        if self._reconnect_scheduled:
+            return
+        self._reconnect_scheduled = True
+
+        async def _reconnect_worker() -> None:
+            try:
+                await asyncio.sleep(1.5)
+                self._events.add_event(
+                    DashboardEvent(
+                        kind="system",
+                        source="dashboard",
+                        payload={"event": "auto_reconnect_attempt", "reason": reason},
+                    )
+                )
+                await self._ensure_connected_async()
+            except Exception as reconnect_exc:  # pragma: no cover
+                self._events.add_event(
+                    DashboardEvent(
+                        kind="system",
+                        source="dashboard",
+                        payload={"event": "auto_reconnect_failed", "error": str(reconnect_exc)},
+                    )
+                )
+            finally:
+                self._reconnect_scheduled = False
+
+        self._loop.call_soon_threadsafe(lambda: asyncio.create_task(_reconnect_worker()))
+
+    async def _download_and_cache_media_async(
+        self,
+        *,
+        message_id: str,
+        media_url: str,
+        media_key_b64: str,
+        kind: str,
+        mimetype: str,
+        media: dict[str, Any],
+    ) -> tuple[bytes, str] | None:
+        if self._client is None:
+            return None
+        try:
+            media_key = base64.b64decode(media_key_b64)
+        except Exception:
+            return None
+
+        from waton.client.media import MediaManager
+
+        manager = MediaManager()
+        try:
+            data = await manager.download_and_decrypt(media_url, media_key, kind)
+        except Exception:
+            return None
+
+        file_name = f"{message_id}{mimetypes.guess_extension(mimetype or '') or '.bin'}"
+        cache_path = self._persist_media_blob(message_id, data, mimetype=mimetype, file_name=file_name)
+        media["cache_path"] = str(cache_path)
+        media.setdefault("proxy_url", f"/api/media/{message_id}")
+        return data, mimetype
 
     @staticmethod
     def _parse_node_timestamp(node: BinaryNode) -> int | None:

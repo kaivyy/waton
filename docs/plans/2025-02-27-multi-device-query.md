@@ -305,7 +305,7 @@ from pywa.core.jid import S_WHATSAPP_NET, jid_normalized_user, jid_decode, jid_e
 
 ```bash
 $env:PYWA_AUTH_DB='pywa_live.db'
-$env:PYWA_TEST_JID='628980145555@s.whatsapp.net'
+$env:PYWA_TEST_JID='6287000000001@s.whatsapp.net'
 $env:PYWA_TEST_TEXT='test multi-device from pywa'
 python -u examples/live_connect.py
 ```

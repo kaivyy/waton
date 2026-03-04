@@ -886,7 +886,7 @@ def build_placeholder_resend_request(
 class OfflineNodeProcessor:
     """Queue and drain incoming nodes in a predictable order.
 
-    Baileys keeps separate lanes for high-priority protocol traffic and regular
+    The reference implementation keeps separate lanes for high-priority protocol traffic and regular
     message traffic. This class provides a lightweight equivalent for Python.
     """
 

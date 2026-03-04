@@ -225,10 +225,10 @@ def test_signal_repository_store_and_lookup_lid_mapping() -> None:
         creds = init_auth_creds()
         repo = SignalRepository(creds, storage)
 
-        await repo.store_lid_pn_mapping("179981124669483@lid", "628980145555@s.whatsapp.net")
+        await repo.store_lid_pn_mapping("179981124669483@lid", "6287000000001@s.whatsapp.net")
 
-        assert await repo.get_lid_for_pn("628980145555@s.whatsapp.net") == "179981124669483@lid"
-        assert await repo.get_pn_for_lid("179981124669483@lid") == "628980145555@s.whatsapp.net"
+        assert await repo.get_lid_for_pn("6287000000001@s.whatsapp.net") == "179981124669483@lid"
+        assert await repo.get_pn_for_lid("179981124669483@lid") == "6287000000001@s.whatsapp.net"
 
     _run(_case())
 
@@ -239,16 +239,16 @@ def test_signal_repository_store_lid_mapping_detects_reverse_side_change() -> No
         creds = init_auth_creds()
         creds.additional_data = {
             "lid_mapping": {
-                "pn_to_lid_user": {"628980145555": "179981124669483"},
+                "pn_to_lid_user": {"6287000000001": "179981124669483"},
                 "lid_to_pn_user": {},
             }
         }
         repo = SignalRepository(creds, storage)
 
-        changed = await repo.store_lid_pn_mapping("179981124669483@lid", "628980145555@s.whatsapp.net")
+        changed = await repo.store_lid_pn_mapping("179981124669483@lid", "6287000000001@s.whatsapp.net")
 
         assert changed is True
-        assert await repo.get_pn_for_lid("179981124669483@lid") == "628980145555@s.whatsapp.net"
+        assert await repo.get_pn_for_lid("179981124669483@lid") == "6287000000001@s.whatsapp.net"
 
     _run(_case())
 
@@ -258,9 +258,9 @@ def test_signal_repository_migrate_session_copies_bytes() -> None:
         storage = _MemoryStorage()
         creds = init_auth_creds()
         repo = SignalRepository(creds, storage)
-        await repo.save_session("628980145555@s.whatsapp.net", b"session-pn")
+        await repo.save_session("6287000000001@s.whatsapp.net", b"session-pn")
 
-        migrated = await repo.migrate_session("628980145555@s.whatsapp.net", "179981124669483@lid")
+        migrated = await repo.migrate_session("6287000000001@s.whatsapp.net", "179981124669483@lid")
 
         assert migrated is True
         assert await repo.get_session("179981124669483@lid") == b"session-pn"

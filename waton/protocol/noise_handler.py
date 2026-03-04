@@ -41,7 +41,7 @@ class TransportState:
 
 
 class NoiseHandler:
-    """Port of Baileys makeNoiseHandler semantics for waton."""
+    """Port of reference makeNoiseHandler semantics for waton."""
 
     def __init__(
         self,
