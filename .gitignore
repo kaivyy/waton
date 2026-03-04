@@ -12,6 +12,8 @@ target/
 .ruff_cache/
 .pytest_cache/
 .tmp-*/
+.tmp/
+.pyright*
 *.db
 *.log
 debug.txt
