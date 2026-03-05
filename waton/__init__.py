@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from .core.errors import ConnectionError as ConnectionError  # noqa: A004
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 
 __all__ = [

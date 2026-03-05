@@ -33,7 +33,7 @@
 ## Installation
 
 ```bash
-pip install waton==0.1.2
+pip install waton==0.1.3
 ```
 
 > Prebuilt wheels include the Rust crypto extension — no Rust toolchain needed for installation.
@@ -71,7 +71,7 @@ If you only want the browser dashboard and do not need reinstall, you can skip e
 python -m tools.dashboard.server --host 127.0.0.1 --port 8080
 ```
 
-### Package Footprint (`pip install waton==0.1.2`)
+### Package Footprint (`pip install waton==0.1.3`)
 
 Published artifacts are intentionally runtime-only:
 - included: `waton/`, Rust extension module, metadata files
@@ -93,7 +93,7 @@ Waton now provides a **simple callback API** for fastest onboarding, plus the ex
 If you want automation agents to run Waton with minimum prompt/context overhead:
 
 - Install latest stable: `pip install -U waton`
-- Or pin reproducible release: `pip install waton==0.1.2`
+- Or pin reproducible release: `pip install waton==0.1.3`
 - Start with simple API: `from waton import simple`
 - Keep one linked WA session active during tests to avoid conflict `440`
 - Use quick docs page: `docs/source/content/ai-agent-quickstart.rst`
@@ -335,7 +335,7 @@ pytest tests/
 ## Documentation (Read the Docs)
 
 Sphinx docs source is in `docs/source/` with RTD config in `.readthedocs.yaml`.
-This release targets docs for Waton `v0.1.2`.
+This release targets docs for Waton `v0.1.3`.
 
 Local docs build:
 

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-03-05
+
 ### Added
 - New CI dependency vulnerability gate at `.github/workflows/security-audit.yml` using `pip-audit --strict` on push/PR to `main`.
 
@@ -16,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dashboard media cache persistence now validates message IDs with strict allowlist and enforces cache-root path containment.
 - Media download/decrypt path now validates media URL scheme/host resolution and blocks loopback/private/link-local/reserved network ranges.
 - README and AI quickstart docs now include strict dashboard auth requirements.
+- Version metadata bumped to `0.1.3` in `pyproject.toml`, `Cargo.toml`, and `waton/__init__.py`.
+- Install snippets/docs now target `pip install waton==0.1.3` across README and docs quickstarts.
 
 ## [0.1.2] - 2026-03-04
 

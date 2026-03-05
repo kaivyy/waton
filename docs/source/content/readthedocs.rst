@@ -18,7 +18,7 @@ Build configuration used
 - Builder: Sphinx
 - Sphinx config: ``docs/source/conf.py``
 - Install command: ``pip install .[docs]``
-- Release documentation target: ``waton==0.1.2``
+- Release documentation target: ``waton==0.1.3``
 
 Local verification before pushing
 ---------------------------------
@@ -39,7 +39,7 @@ Operational checklist
 
 Before release/tag:
 
-1. Bump package version in ``pyproject.toml``, ``Cargo.toml``, and ``waton/__init__.py`` (current release: ``0.1.2``).
+1. Bump package version in ``pyproject.toml``, ``Cargo.toml``, and ``waton/__init__.py`` (current release: ``0.1.3``).
 2. Update ``CHANGELOG.md``.
 3. Ensure docs pages are linked from ``docs/source/index.rst``.
 4. Build docs locally and confirm success.
