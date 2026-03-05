@@ -22,6 +22,7 @@ class MediaManager:
     """Handles media encryption, upload and decryption helpers."""
 
     def __init__(self) -> None:
+        # Keep shared client for backward compatibility with callers/tests.
         self.http = httpx.AsyncClient()
 
     @staticmethod

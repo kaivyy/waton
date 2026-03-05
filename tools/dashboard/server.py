@@ -104,8 +104,6 @@ def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = 
             return jsonify({"error": "Dashboard API token is not configured."}), 401
 
         provided_token = _extract_bearer_token(request.headers.get("Authorization"))
-        if not provided_token:
-            provided_token = (request.args.get("token") or "").strip()
         if not provided_token or not hmac.compare_digest(provided_token, api_token):
             return jsonify({"error": "Unauthorized."}), 401
 
