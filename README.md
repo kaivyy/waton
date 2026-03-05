@@ -202,12 +202,15 @@ If you want a browser UI instead of terminal-only testing:
 
 ```bash
 pip install -e .[dashboard]
+export WATON_DASHBOARD_API_TOKEN="change-this-token"
 python -m tools.dashboard.server --host 127.0.0.1 --port 8080
 ```
 
 Open `http://127.0.0.1:8080`.
 
-- Security note: keep dashboard bound to local host (`127.0.0.1`) unless protected by a trusted reverse proxy/auth layer.
+- Security note: dashboard API is now strict-by-default. You must provide `WATON_DASHBOARD_API_TOKEN` and send `Authorization: Bearer <token>` for all `/api/*` calls.
+- Keep dashboard bound to local host (`127.0.0.1`) unless protected by a trusted reverse proxy/auth layer.
+- Remote API access is blocked by default; only enable with `WATON_DASHBOARD_ALLOW_REMOTE=1` when you intentionally expose it.
 - The dashboard is isolated in `tools/dashboard/` and does not modify core runtime modules.
 - It uses real WhatsApp connection flow (QR pairing + real send API).
 - Status will show:

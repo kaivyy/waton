@@ -4,10 +4,11 @@ import asyncio
 import atexit
 import base64
 import contextlib
+import logging
 import mimetypes
 import os
 import pathlib
-import logging
+import re
 import threading
 import time
 from typing import TYPE_CHECKING, Any
@@ -29,6 +30,8 @@ if TYPE_CHECKING:
     from waton.core.events import ConnectionEvent
 
 logger = logging.getLogger(__name__)
+
+_MESSAGE_ID_RE = re.compile(r"^[A-Za-z0-9._-]{1,128}$")
 
 
 def _qr_svg_data_url(qr_text: str) -> str:
@@ -177,9 +180,7 @@ def should_schedule_auto_reconnect(*, reason: Exception, explicit_disconnect: bo
 
     status_code = getattr(reason, "status_code", None)
     if isinstance(reason, WatonConnectionError) and status_code is not None:
-        if int(status_code) in {401, 403, 411, 440, 500}:
-            return False
-        return True
+        return int(status_code) not in {401, 403, 411, 440, 500}
 
     reason_text = str(reason).lower()
     fatal_markers = ("logged out", "forbidden", "401", "403", "bad session")
@@ -681,7 +682,12 @@ class DashboardRuntime:
                         display_text = msg.text or (media.get("caption") or f"[{media.get('kind')}]")
                         media_url = media.get("url")
                         media_key_b64 = media.get("media_key_b64")
-                        if isinstance(media_url, str) and media_url and isinstance(media_key_b64, str) and media_key_b64:
+                        if (
+                            isinstance(media_url, str)
+                            and media_url
+                            and isinstance(media_key_b64, str)
+                            and media_key_b64
+                        ):
                             media["proxy_url"] = f"/api/media/{msg.id}"
                     else:
                         display_text = msg.text or (
@@ -893,13 +899,26 @@ class DashboardRuntime:
                             chat["last_text"] = item.get("text", "")
                         return
 
-    def _persist_media_blob(self, message_id: str, media_bytes: bytes, *, mimetype: str, file_name: str) -> pathlib.Path:
+    def _persist_media_blob(
+        self,
+        message_id: str,
+        media_bytes: bytes,
+        *,
+        mimetype: str,
+        file_name: str,
+    ) -> pathlib.Path:
+        if not _MESSAGE_ID_RE.fullmatch(message_id or ""):
+            raise ValueError("Invalid message id for media cache path.")
+
         extension = pathlib.Path(file_name).suffix.strip()
         if not extension:
             guessed = mimetypes.guess_extension(mimetype or "")
             extension = guessed or ".bin"
         safe_extension = extension if extension.startswith(".") else f".{extension}"
-        target = self._media_cache_dir / f"{message_id}{safe_extension}"
+
+        cache_root = self._media_cache_dir.resolve()
+        target = (cache_root / f"{message_id}{safe_extension}").resolve()
+        target.relative_to(cache_root)
         target.write_bytes(media_bytes)
         return target
 

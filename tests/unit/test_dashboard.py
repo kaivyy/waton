@@ -2,9 +2,8 @@ import io
 
 import pytest
 
-from waton.core.errors import ConnectionError as WatonConnectionError
-
 from tools.dashboard.runtime import (
+    DashboardRuntime,
     build_media_descriptor,
     choose_lid_chat_fallback,
     compute_route_keys,
@@ -15,6 +14,7 @@ from tools.dashboard.runtime import (
 )
 from tools.dashboard.server import create_app
 from tools.dashboard.state import DashboardEvent, DashboardState, normalize_wa_id
+from waton.core.errors import ConnectionError as WatonConnectionError
 
 
 def test_normalize_wa_id_accepts_plain_plus_and_jid():
@@ -153,6 +153,32 @@ def test_choose_lid_chat_fallback_returns_none_when_multiple_pn_chats():
     assert fallback is None
 
 
+def test_persist_media_blob_rejects_path_traversal(monkeypatch, tmp_path):
+    monkeypatch.setenv("WATON_DASHBOARD_MEDIA_CACHE_DIR", str(tmp_path))
+    runtime = DashboardRuntime(auth_db_path=str(tmp_path / "test.db"))
+    try:
+        with pytest.raises(ValueError):
+            runtime._persist_media_blob("../evil", b"x", mimetype="image/png", file_name="a.png")
+        with pytest.raises(ValueError):
+            runtime._persist_media_blob("..\\evil", b"x", mimetype="image/png", file_name="a.png")
+        with pytest.raises(ValueError):
+            runtime._persist_media_blob("a/b", b"x", mimetype="image/png", file_name="a.png")
+    finally:
+        runtime.close()
+
+
+def test_persist_media_blob_writes_inside_cache(monkeypatch, tmp_path):
+    monkeypatch.setenv("WATON_DASHBOARD_MEDIA_CACHE_DIR", str(tmp_path))
+    runtime = DashboardRuntime(auth_db_path=str(tmp_path / "test.db"))
+    try:
+        target = runtime._persist_media_blob("msg_123", b"hello", mimetype="image/png", file_name="x.png")
+        assert target.exists()
+        assert target.read_bytes() == b"hello"
+        assert target.resolve().is_relative_to(tmp_path.resolve())
+    finally:
+        runtime.close()
+
+
 def test_build_media_descriptor_for_image_content():
     media = build_media_descriptor(
         content_type="image",
@@ -202,7 +228,13 @@ def test_should_schedule_auto_reconnect_blocks_logged_out_reason():
 
 
 def test_should_schedule_auto_reconnect_blocks_status_401():
-    assert should_schedule_auto_reconnect(reason=RuntimeError("Connection Failure (401)"), explicit_disconnect=False) is False
+    assert (
+        should_schedule_auto_reconnect(
+            reason=RuntimeError("Connection Failure (401)"),
+            explicit_disconnect=False,
+        )
+        is False
+    )
 
 
 def test_should_schedule_auto_reconnect_blocks_logged_out_status_code():
@@ -232,13 +264,49 @@ def test_dashboard_state_trims_old_events():
 
 
 @pytest.fixture
-def dashboard_client():
+def dashboard_client(monkeypatch):
     pytest.importorskip("flask")
+    monkeypatch.setenv("WATON_DASHBOARD_API_TOKEN", "test-token")
+    monkeypatch.delenv("WATON_DASHBOARD_ALLOW_REMOTE", raising=False)
     runtime = _FakeRuntime()
     app = create_app(testing=True, runtime=runtime)
     app.config["DASHBOARD_RUNTIME"] = runtime
     with app.test_client() as client:
+        client.environ_base["HTTP_AUTHORIZATION"] = "Bearer test-token"
+        client.environ_base["REMOTE_ADDR"] = "127.0.0.1"
         yield client
+
+
+def test_dashboard_api_requires_bearer_token(monkeypatch):
+    pytest.importorskip("flask")
+    monkeypatch.setenv("WATON_DASHBOARD_API_TOKEN", "test-token")
+    app = create_app(testing=True, runtime=_FakeRuntime())
+    with app.test_client() as client:
+        client.environ_base["REMOTE_ADDR"] = "127.0.0.1"
+        res = client.get("/api/health")
+    assert res.status_code == 401
+
+
+def test_dashboard_api_rejects_non_loopback_by_default(monkeypatch):
+    pytest.importorskip("flask")
+    monkeypatch.setenv("WATON_DASHBOARD_API_TOKEN", "test-token")
+    monkeypatch.delenv("WATON_DASHBOARD_ALLOW_REMOTE", raising=False)
+    app = create_app(testing=True, runtime=_FakeRuntime())
+    with app.test_client() as client:
+        client.environ_base["REMOTE_ADDR"] = "10.10.10.10"
+        res = client.get("/api/health", headers={"Authorization": "Bearer test-token"})
+    assert res.status_code == 403
+
+
+def test_dashboard_api_allows_remote_when_explicitly_enabled(monkeypatch):
+    pytest.importorskip("flask")
+    monkeypatch.setenv("WATON_DASHBOARD_API_TOKEN", "test-token")
+    monkeypatch.setenv("WATON_DASHBOARD_ALLOW_REMOTE", "1")
+    app = create_app(testing=True, runtime=_FakeRuntime())
+    with app.test_client() as client:
+        client.environ_base["REMOTE_ADDR"] = "10.10.10.10"
+        res = client.get("/api/health", headers={"Authorization": "Bearer test-token"})
+    assert res.status_code == 200
 
 
 def test_dashboard_health_endpoint(dashboard_client):

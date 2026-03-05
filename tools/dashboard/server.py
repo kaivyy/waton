@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import hmac
 import os
 import pathlib
+from ipaddress import ip_address
 from typing import Any, Protocol
 
 from flask import Flask, Response, jsonify, render_template, request
@@ -55,6 +57,24 @@ def _build_send_payload(raw_to: str, text: str) -> tuple[str, str]:
     return f"{wa_id}@s.whatsapp.net", text
 
 
+def _is_loopback_remote(remote_addr: str | None) -> bool:
+    if not remote_addr:
+        return False
+    try:
+        return ip_address(remote_addr).is_loopback
+    except ValueError:
+        return False
+
+
+def _extract_bearer_token(auth_header: str | None) -> str:
+    if not auth_header:
+        return ""
+    prefix = "Bearer "
+    if not auth_header.startswith(prefix):
+        return ""
+    return auth_header[len(prefix) :].strip()
+
+
 def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = None) -> Flask:
     app = Flask(
         __name__,
@@ -66,6 +86,30 @@ def create_app(*, testing: bool = False, runtime: DashboardRuntimeLike | None = 
     auth_db_path = os.getenv("WATON_DASHBOARD_AUTH_DB", "waton_dashboard.db")
     dashboard_runtime = runtime or DashboardRuntime(auth_db_path=auth_db_path)
     app.config["DASHBOARD_RUNTIME"] = dashboard_runtime
+
+    api_token = os.getenv("WATON_DASHBOARD_API_TOKEN", "").strip()
+    if not api_token and not testing:
+        raise RuntimeError("WATON_DASHBOARD_API_TOKEN is required in strict mode.")
+    allow_remote = os.getenv("WATON_DASHBOARD_ALLOW_REMOTE", "0").strip() == "1"
+
+    @app.before_request
+    def _security_gate() -> Any:
+        if not request.path.startswith("/api/"):
+            return None
+
+        if not allow_remote and not _is_loopback_remote(request.remote_addr):
+            return jsonify({"error": "Remote dashboard API access is disabled."}), 403
+
+        if not api_token:
+            return jsonify({"error": "Dashboard API token is not configured."}), 401
+
+        provided_token = _extract_bearer_token(request.headers.get("Authorization"))
+        if not provided_token:
+            provided_token = (request.args.get("token") or "").strip()
+        if not provided_token or not hmac.compare_digest(provided_token, api_token):
+            return jsonify({"error": "Unauthorized."}), 401
+
+        return None
 
     @app.get("/")
     def index() -> Any:

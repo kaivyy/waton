@@ -54,10 +54,11 @@ Operational Checklist for Agents
 --------------------------------
 
 1. Install package (prefer pinned version).
-2. Start process and pair via QR on first run.
-3. Wait until connection state is open/ready.
-4. Send/receive a small text message as smoke test.
-5. Persist auth DB volume/path for restart continuity.
+2. If using dashboard API, set `WATON_DASHBOARD_API_TOKEN` and include `Authorization: Bearer <token>` in every `/api/*` request.
+3. Start process and pair via QR on first run.
+4. Wait until connection state is open/ready.
+5. Send/receive a small text message as smoke test.
+6. Persist auth DB volume/path for restart continuity.
 
 Troubleshooting
 ---------------

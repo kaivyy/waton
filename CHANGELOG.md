@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- New CI dependency vulnerability gate at `.github/workflows/security-audit.yml` using `pip-audit --strict` on push/PR to `main`.
+
+### Changed
+- Dashboard API now enforces strict bearer-token authentication for all `/api/*` routes using `WATON_DASHBOARD_API_TOKEN`.
+- Dashboard API now blocks non-loopback clients by default; remote access requires explicit `WATON_DASHBOARD_ALLOW_REMOTE=1` opt-in.
+- Dashboard media cache persistence now validates message IDs with strict allowlist and enforces cache-root path containment.
+- Media download/decrypt path now validates media URL scheme/host resolution and blocks loopback/private/link-local/reserved network ranges.
+- README and AI quickstart docs now include strict dashboard auth requirements.
+
 ## [0.1.2] - 2026-03-04
 
 ### Added

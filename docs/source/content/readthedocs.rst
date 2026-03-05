@@ -44,8 +44,16 @@ Before release/tag:
 3. Ensure docs pages are linked from ``docs/source/index.rst``.
 4. Build docs locally and confirm success.
 5. Push branch/tag and verify RTD build result.
-6. Open published docs and smoke-test key pages:
+6. Run security dependency gate locally before release:
+
+   .. code-block:: bash
+
+      python -m pip install pip-audit
+      pip-audit --strict
+
+7. Open published docs and smoke-test key pages:
    - Getting Started (including ``waton.simple`` snippet)
+   - AI Agent Quickstart
    - Quickstart App
    - Event Model
    - Browser Dashboard
