@@ -1,0 +1,30 @@
+{
+  "status": "drift",
+  "waton_version": [
+    2,
+    3000,
+    1033846690
+  ],
+  "baileys_version": [
+    2,
+    3000,
+    1035194821
+  ],
+  "components": {
+    "primary": {
+      "waton": 2,
+      "baileys": 2,
+      "matches": true
+    },
+    "secondary": {
+      "waton": 3000,
+      "baileys": 3000,
+      "matches": true
+    },
+    "tertiary": {
+      "waton": 1033846690,
+      "baileys": 1035194821,
+      "matches": false
+    }
+  }
+}

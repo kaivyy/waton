@@ -30,3 +30,21 @@ def test_parity_scan_includes_metrics() -> None:
     assert recv["waton_lines"] > 0
     assert recv["baileys_lines"] > 0
     assert isinstance(recv["ratio"], float)
+
+
+def test_parity_scan_includes_baileys_v7_delta_matrix() -> None:
+    report = scan_parity(
+        waton_root=r"C:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton",
+        baileys_src=r"C:\Users\Arvy Kairi\Desktop\whatsapp\Baileys\src",
+    )
+
+    matrix = report["baileys_v7"]
+    domains = matrix["domains"]
+
+    assert matrix["reference"] == "baileys-v7-rc11"
+    assert "lid-mapping" in domains
+    assert "tctoken" in domains
+    assert "retry-resend" in domains
+    assert "wa-version-drift" in domains
+    assert domains["lid-mapping"]["activation_gate"] == "storage-first-shadow-mode"
+    assert domains["retry-resend"]["default_behavior"] == "unchanged"

@@ -40,7 +40,9 @@ def build_commands(
             "args": [
                 "python",
                 "-c",
-                "from pathlib import Path; import sys; p=Path(sys.argv[1]).resolve(); print(p); raise SystemExit(0 if p.is_dir() else 1)",
+                "from pathlib import Path; import sys; "
+                "p=Path(sys.argv[1]).resolve(); print(p); "
+                "raise SystemExit(0 if p.is_dir() else 1)",
                 baileys_src,
             ],
         },

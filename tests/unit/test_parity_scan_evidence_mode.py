@@ -159,3 +159,34 @@ def test_scan_parity_preserves_evidence_top_level_metadata(parity_tree: tuple[Pa
     assert report["run_id"] == "r2"
     assert report["commit_sha"] == "def456"
     assert report["timestamp"] == "2026-03-04T00:00:00+00:00"
+
+
+def test_scan_parity_promotes_static_partial_when_strict_evidence_passes(
+    parity_tree: tuple[Path, Path],
+) -> None:
+    waton_root, baileys_src = parity_tree
+    _write_file(baileys_src / "Socket" / "messages-recv.ts", "\n".join(["export {}"] * 10))
+    evidence = {
+        "run_id": "r3",
+        "commit_sha": "abc123",
+        "timestamp": "2026-03-05T00:00:00+00:00",
+        "domains": {
+            "messages-recv": {
+                "replay_pass_rate": 1.0,
+                "unknown_event_count": 0,
+                "drift_count": 0,
+                "wire_diff_artifact": "docs/parity/artifacts/r3/wire/messages-recv.json",
+                "behavior_diff_artifact": "docs/parity/artifacts/r3/behavior/messages-recv.json",
+            },
+        },
+    }
+
+    report = scan_parity(
+        waton_root=str(waton_root),
+        baileys_src=str(baileys_src),
+        evidence=evidence,
+    )
+
+    domain = report["domains"]["messages-recv"]
+    assert domain["static_status"] == "partial"
+    assert domain["status"] == "done"

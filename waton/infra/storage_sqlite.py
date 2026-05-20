@@ -1,6 +1,7 @@
 import asyncio
 import json
 from base64 import b64decode, b64encode
+from typing import Any, cast
 
 import aiosqlite
 
@@ -56,6 +57,14 @@ class SQLiteStorage(StoragePort):
                 sender_jid TEXT,
                 data TEXT,
                 PRIMARY KEY (group_jid, sender_jid)
+            )
+        ''')
+        await self._db.execute('''
+            CREATE TABLE IF NOT EXISTS metadata (
+                namespace TEXT,
+                key TEXT,
+                data TEXT,
+                PRIMARY KEY (namespace, key)
             )
         ''')
         await self._db.commit()
@@ -257,5 +266,32 @@ class SQLiteStorage(StoragePort):
             await db.execute(
                 'INSERT OR REPLACE INTO sender_keys (group_jid, sender_jid, data) VALUES (?, ?, ?)',
                 (group_jid, sender_jid, encoded)
+            )
+            await db.commit()
+
+    async def get_metadata(self, namespace: str, key: str) -> dict[str, Any] | None:
+        await self.connect()
+        db = self._db
+        if db is None:
+            return None
+        async with db.execute(
+            'SELECT data FROM metadata WHERE namespace=? AND key=?',
+            (namespace, key)
+        ) as cursor:
+            row = await cursor.fetchone()
+            if not row:
+                return None
+            payload = json.loads(row[0])
+            return cast("dict[str, Any]", payload) if isinstance(payload, dict) else None
+
+    async def save_metadata(self, namespace: str, key: str, payload: dict[str, Any]) -> None:
+        await self.connect()
+        db = self._db
+        if db is None:
+            return
+        async with self._lock:
+            await db.execute(
+                'INSERT OR REPLACE INTO metadata (namespace, key, data) VALUES (?, ?, ?)',
+                (namespace, key, json.dumps(payload, separators=(",", ":")))
             )
             await db.commit()

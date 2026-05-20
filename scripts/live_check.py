@@ -27,7 +27,13 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from waton.utils.live_check import LiveCheckConfig, LiveCheckError, config_from_env, format_report, run_live_check
+from waton.utils.live_check import (  # noqa: E402
+    LiveCheckConfig,
+    LiveCheckError,
+    config_from_env,
+    format_report,
+    run_live_check,
+)
 
 
 def _build_parser() -> argparse.ArgumentParser:

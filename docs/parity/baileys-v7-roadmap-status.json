@@ -1,0 +1,55 @@
+{
+  "reference": "baileys-v7-rc11",
+  "policy": "additive-first-defaults-unchanged",
+  "release_target": "0.1.4rc3",
+  "domains": {
+    "lid-mapping": {
+      "status": "partial",
+      "risk": "high",
+      "default_behavior": "unchanged",
+      "activation_gate": "storage-first-shadow-mode"
+    },
+    "tctoken": {
+      "status": "planned",
+      "risk": "high",
+      "default_behavior": "unchanged",
+      "activation_gate": "feature-flag-and-replay-evidence"
+    },
+    "retry-resend": {
+      "status": "partial",
+      "risk": "high",
+      "default_behavior": "unchanged",
+      "activation_gate": "feature-flag-and-differential-fixtures"
+    },
+    "app-state-resilience": {
+      "status": "partial",
+      "risk": "medium",
+      "default_behavior": "unchanged",
+      "activation_gate": "shadow-mode-error-classification"
+    },
+    "offline-node-batching": {
+      "status": "partial",
+      "risk": "medium",
+      "default_behavior": "unchanged",
+      "activation_gate": "batching-benchmarks-and-event-order-fixtures"
+    },
+    "send-media-robustness": {
+      "status": "partial",
+      "risk": "medium",
+      "default_behavior": "unchanged",
+      "activation_gate": "per-recipient-diagnostics-feature-flag"
+    },
+    "notification-surface": {
+      "status": "partial",
+      "risk": "medium",
+      "default_behavior": "unchanged",
+      "activation_gate": "optional-event-fields-only"
+    },
+    "wa-version-drift": {
+      "status": "planned",
+      "risk": "low",
+      "default_behavior": "unchanged",
+      "activation_gate": "preflight-report-only"
+    }
+  }
+}

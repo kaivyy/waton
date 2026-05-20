@@ -39,4 +39,10 @@ DEFAULT_CONNECTION_CONFIG = {
     "enable_offline_node_buffer": True,
     "incoming_node_buffer_size": 1024,
     "incoming_node_yield_every": 20,
+    "baileys_v7_reference": "7.0.0-rc11",
+    "baileys_v7_power_mode": "compatibility",
+    "enable_baileys_v7_shadow_decoders": False,
+    "enable_baileys_v7_retry": False,
+    "enable_baileys_v7_app_state_resilience": False,
+    "enable_baileys_v7_send_diagnostics": False,
 }

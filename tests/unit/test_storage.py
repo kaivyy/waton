@@ -41,6 +41,13 @@ def test_sqlite_storage_roundtrip() -> None:
 
         await storage.save_sender_key("group@g.us", "user@s.whatsapp.net", b"sender-key")
         assert await storage.get_sender_key("group@g.us", "user@s.whatsapp.net") == b"sender-key"
+
+        await storage.save_metadata("lid_mapping", "6287000000001@s.whatsapp.net", {"lid": "179@lid"})
+        assert await storage.get_metadata("lid_mapping", "6287000000001@s.whatsapp.net") == {"lid": "179@lid"}
+
+        await storage.save_metadata("tc_token", "179@lid", {"token": "abc", "timestamp": 123})
+        assert await storage.get_metadata("tc_token", "179@lid") == {"token": "abc", "timestamp": 123}
+
         await storage.close()
 
     _run(_case())
@@ -65,5 +72,27 @@ def test_json_storage_roundtrip() -> None:
 
         await storage.save_sender_key("group@g.us", "user@s.whatsapp.net", b"sender")
         assert await storage.get_sender_key("group@g.us", "user@s.whatsapp.net") == b"sender"
+
+        await storage.save_metadata("device_list", "user@s.whatsapp.net", {"devices": ["user:0@s.whatsapp.net"]})
+        assert await storage.get_metadata("device_list", "user@s.whatsapp.net") == {
+            "devices": ["user:0@s.whatsapp.net"]
+        }
+
+        await storage.save_metadata("message_retry_state", "msg-1", {"count": 1, "reason": "missing-key"})
+        assert await storage.get_metadata("message_retry_state", "msg-1") == {
+            "count": 1,
+            "reason": "missing-key",
+        }
+
+    _run(_case())
+
+
+def test_json_storage_reads_legacy_file_without_metadata(tmp_path: Path) -> None:
+    async def _case() -> None:
+        state_path = tmp_path / "state.json"
+        state_path.write_text('{"creds":null,"sessions":{},"prekeys":{},"sender_keys":{}}', encoding="utf-8")
+        storage = JsonStorage(state_path)
+
+        assert await storage.get_metadata("identity_change_state", "user@s.whatsapp.net") is None
 
     _run(_case())

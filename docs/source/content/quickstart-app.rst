@@ -16,7 +16,7 @@ Install
 
 .. code-block:: bash
 
-    pip install waton==0.1.3
+    pip install waton==0.1.4rc3
 
 For local development from repository root:
 

@@ -13,6 +13,76 @@ STUB_MARKERS = (
 )
 
 
+BAILEYS_V7_REFERENCE = "baileys-v7-rc11"
+
+BAILEYS_V7_DOMAINS: dict[str, dict[str, object]] = {
+    "lid-mapping": {
+        "status": "partial",
+        "risk": "high",
+        "default_behavior": "unchanged",
+        "activation_gate": "storage-first-shadow-mode",
+        "waton_files": ["waton/core/jid.py", "waton/protocol/signal_repo.py"],
+        "baileys_files": ["src/Signal/lid-mapping.ts", "src/Utils/sync-action-utils.ts"],
+    },
+    "tctoken": {
+        "status": "planned",
+        "risk": "high",
+        "default_behavior": "unchanged",
+        "activation_gate": "feature-flag-and-replay-evidence",
+        "waton_files": ["waton/client/retry_manager.py"],
+        "baileys_files": ["src/Utils/tc-token-utils.ts"],
+    },
+    "retry-resend": {
+        "status": "partial",
+        "risk": "high",
+        "default_behavior": "unchanged",
+        "activation_gate": "feature-flag-and-differential-fixtures",
+        "waton_files": ["waton/client/retry_manager.py", "waton/client/messages_recv.py"],
+        "baileys_files": ["src/Utils/message-retry-manager.ts", "src/Socket/messages-recv.ts"],
+    },
+    "app-state-resilience": {
+        "status": "partial",
+        "risk": "medium",
+        "default_behavior": "unchanged",
+        "activation_gate": "shadow-mode-error-classification",
+        "waton_files": ["waton/protocol/app_state.py", "waton/utils/chat_utils.py"],
+        "baileys_files": ["src/Utils/chat-utils.ts", "src/Utils/process-message.ts"],
+    },
+    "offline-node-batching": {
+        "status": "partial",
+        "risk": "medium",
+        "default_behavior": "unchanged",
+        "activation_gate": "batching-benchmarks-and-event-order-fixtures",
+        "waton_files": ["waton/client/event_pipeline.py", "waton/client/client.py"],
+        "baileys_files": ["src/Utils/offline-node-processor.ts"],
+    },
+    "send-media-robustness": {
+        "status": "partial",
+        "risk": "medium",
+        "default_behavior": "unchanged",
+        "activation_gate": "per-recipient-diagnostics-feature-flag",
+        "waton_files": ["waton/client/messages.py", "waton/client/media.py"],
+        "baileys_files": ["src/Socket/messages-send.ts", "src/Utils/messages-media.ts"],
+    },
+    "notification-surface": {
+        "status": "partial",
+        "risk": "medium",
+        "default_behavior": "unchanged",
+        "activation_gate": "optional-event-fields-only",
+        "waton_files": ["waton/client/messages_recv.py", "waton/core/events.py"],
+        "baileys_files": ["src/Socket/messages-recv.ts", "src/Types/Events.ts"],
+    },
+    "wa-version-drift": {
+        "status": "planned",
+        "risk": "low",
+        "default_behavior": "unchanged",
+        "activation_gate": "preflight-report-only",
+        "waton_files": ["waton/defaults/config.py"],
+        "baileys_files": ["src/Defaults/baileys-version.json"],
+    },
+}
+
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
@@ -24,6 +94,14 @@ def _line_count(path: Path) -> int:
 def _has_stub_marker(path: Path) -> bool:
     text = _read_text(path)
     return any(marker in text for marker in STUB_MARKERS)
+
+
+def _baileys_v7_matrix() -> dict[str, object]:
+    return {
+        "reference": BAILEYS_V7_REFERENCE,
+        "compatibility_policy": "additive-first-defaults-unchanged",
+        "domains": {domain: dict(payload) for domain, payload in BAILEYS_V7_DOMAINS.items()},
+    }
 
 
 def _domain_status(
@@ -65,6 +143,26 @@ def _validate_evidence_top_level(evidence: dict[str, object]) -> None:
 
     if invalid_fields:
         raise ValueError("invalid evidence top-level field types/shapes: " + ", ".join(invalid_fields))
+
+
+def _evidence_passes_strict_gate(evidence: dict[str, object]) -> bool:
+    replay = evidence.get("replay_pass_rate")
+    drift = evidence.get("drift_count")
+    wire_artifact = evidence.get("wire_diff_artifact")
+    behavior_artifact = evidence.get("behavior_diff_artifact")
+
+    return (
+        not isinstance(replay, bool)
+        and isinstance(replay, (int, float))
+        and replay >= 0.995
+        and not isinstance(drift, bool)
+        and isinstance(drift, int)
+        and drift == 0
+        and isinstance(wire_artifact, str)
+        and bool(wire_artifact.strip())
+        and isinstance(behavior_artifact, str)
+        and bool(behavior_artifact.strip())
+    )
 
 
 def scan_parity(waton_root: str, baileys_src: str, evidence: dict | None = None) -> dict:
@@ -117,7 +215,7 @@ def scan_parity(waton_root: str, baileys_src: str, evidence: dict | None = None)
         ),
     }
 
-    report: dict[str, object] = {"domains": domains}
+    report: dict[str, object] = {"domains": domains, "baileys_v7": _baileys_v7_matrix()}
 
     if evidence and isinstance(evidence.get("domains"), dict):
         report["run_id"] = evidence["run_id"]
@@ -126,6 +224,9 @@ def scan_parity(waton_root: str, baileys_src: str, evidence: dict | None = None)
         for domain, payload in report["domains"].items():
             ev = evidence["domains"].get(domain, {})
             payload["evidence"] = ev if isinstance(ev, dict) else {}
+            if isinstance(ev, dict) and _evidence_passes_strict_gate(ev):
+                payload["static_status"] = payload.get("status")
+                payload["status"] = "done"
 
     return report
 

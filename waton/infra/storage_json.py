@@ -6,7 +6,7 @@ import asyncio
 import json
 from base64 import b64decode, b64encode
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from waton.utils.auth import AuthCreds, StoragePort
 from waton.utils.crypto import generate_keypair
@@ -26,6 +26,7 @@ class JsonStorage(StoragePort):
                 "sessions": {},
                 "prekeys": {},
                 "sender_keys": {},
+                "metadata": {},
             }
         raw = await asyncio.to_thread(self.path.read_text, "utf-8")
         data = json.loads(raw)
@@ -34,6 +35,7 @@ class JsonStorage(StoragePort):
             "sessions": data.get("sessions", {}),
             "prekeys": data.get("prekeys", {}),
             "sender_keys": data.get("sender_keys", {}),
+            "metadata": data.get("metadata", {}),
         }
 
     async def _write_state(self, state: dict[str, Any]) -> None:
@@ -191,4 +193,25 @@ class JsonStorage(StoragePort):
             state = await self._read_state()
             bucket = state["sender_keys"].setdefault(group_jid, {})
             bucket[sender_jid] = self._b64_encode(data)
+            await self._write_state(state)
+
+    async def get_metadata(self, namespace: str, key: str) -> dict[str, Any] | None:
+        state = await self._read_state()
+        metadata_obj = state.get("metadata", {})
+        if not isinstance(metadata_obj, dict):
+            return None
+        metadata = cast("dict[str, object]", metadata_obj)
+        namespace_obj = metadata.get(namespace, {})
+        if not isinstance(namespace_obj, dict):
+            return None
+        namespace_bucket = cast("dict[str, object]", namespace_obj)
+        payload = namespace_bucket.get(key)
+        return cast("dict[str, Any]", payload) if isinstance(payload, dict) else None
+
+    async def save_metadata(self, namespace: str, key: str, payload: dict[str, Any]) -> None:
+        async with self._lock:
+            state = await self._read_state()
+            metadata = state.setdefault("metadata", {})
+            namespace_bucket = metadata.setdefault(namespace, {})
+            namespace_bucket[key] = payload
             await self._write_state(state)

@@ -2,42 +2,45 @@
   "domains": {
     "messages-recv": {
       "status": "done",
-      "ratio": 0.8387,
-      "waton_lines": 1399,
-      "baileys_lines": 1668,
+      "ratio": 0.6481,
+      "waton_lines": 1409,
+      "baileys_lines": 2174,
       "evidence": {
         "replay_pass_rate": 1.0,
         "unknown_event_count": 0,
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/messages-recv.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/messages-recv.json"
-      }
+      },
+      "static_status": "partial"
     },
     "app-state-sync": {
       "status": "done",
-      "ratio": 1.5122,
+      "ratio": 1.494,
       "waton_lines": 124,
-      "baileys_lines": 82,
+      "baileys_lines": 83,
       "evidence": {
         "replay_pass_rate": 1.0,
         "unknown_event_count": 0,
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/app-state-sync.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/app-state-sync.json"
-      }
+      },
+      "static_status": "done"
     },
     "retry-manager": {
       "status": "done",
-      "ratio": 0.9254,
+      "ratio": 0.8006,
       "waton_lines": 273,
-      "baileys_lines": 295,
+      "baileys_lines": 341,
       "evidence": {
         "replay_pass_rate": 1.0,
         "unknown_event_count": 0,
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/retry-manager.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/retry-manager.json"
-      }
+      },
+      "static_status": "done"
     },
     "group-signal": {
       "status": "done",
@@ -50,46 +53,50 @@
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/group-signal.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/group-signal.json"
-      }
+      },
+      "static_status": "done"
     },
     "messages-send": {
       "status": "done",
-      "ratio": 0.8171,
+      "ratio": 0.7463,
       "waton_lines": 1059,
-      "baileys_lines": 1296,
+      "baileys_lines": 1419,
       "evidence": {
         "replay_pass_rate": 1.0,
         "unknown_event_count": 0,
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/messages-send.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/messages-send.json"
-      }
+      },
+      "static_status": "partial"
     },
     "process-message": {
       "status": "done",
-      "ratio": 1.1761,
-      "waton_lines": 788,
-      "baileys_lines": 670,
+      "ratio": 1.0598,
+      "waton_lines": 798,
+      "baileys_lines": 753,
       "evidence": {
         "replay_pass_rate": 1.0,
         "unknown_event_count": 0,
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/process-message.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/process-message.json"
-      }
+      },
+      "static_status": "done"
     },
     "groups-api": {
       "status": "done",
-      "ratio": 0.9668,
+      "ratio": 0.9089,
       "waton_lines": 349,
-      "baileys_lines": 361,
+      "baileys_lines": 384,
       "evidence": {
         "replay_pass_rate": 1.0,
         "unknown_event_count": 0,
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/groups-api.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/groups-api.json"
-      }
+      },
+      "static_status": "done"
     },
     "communities-api": {
       "status": "done",
@@ -102,7 +109,8 @@
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/communities-api.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/communities-api.json"
-      }
+      },
+      "static_status": "done"
     },
     "newsletter-api": {
       "status": "done",
@@ -115,19 +123,134 @@
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/newsletter-api.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/newsletter-api.json"
-      }
+      },
+      "static_status": "done"
     },
     "connection-core": {
       "status": "done",
-      "ratio": 0.9921,
+      "ratio": 0.9481,
       "waton_lines": 1132,
-      "baileys_lines": 1141,
+      "baileys_lines": 1194,
       "evidence": {
         "replay_pass_rate": 1.0,
         "unknown_event_count": 0,
         "drift_count": 0,
         "wire_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/wire/connection-core.json",
         "behavior_diff_artifact": "docs/parity/artifacts/strict-sample-2026-03-01/behavior/connection-core.json"
+      },
+      "static_status": "done"
+    }
+  },
+  "baileys_v7": {
+    "reference": "baileys-v7-rc11",
+    "compatibility_policy": "additive-first-defaults-unchanged",
+    "domains": {
+      "lid-mapping": {
+        "status": "partial",
+        "risk": "high",
+        "default_behavior": "unchanged",
+        "activation_gate": "storage-first-shadow-mode",
+        "waton_files": [
+          "waton/core/jid.py",
+          "waton/protocol/signal_repo.py"
+        ],
+        "baileys_files": [
+          "src/Signal/lid-mapping.ts",
+          "src/Utils/sync-action-utils.ts"
+        ]
+      },
+      "tctoken": {
+        "status": "planned",
+        "risk": "high",
+        "default_behavior": "unchanged",
+        "activation_gate": "feature-flag-and-replay-evidence",
+        "waton_files": [
+          "waton/client/retry_manager.py"
+        ],
+        "baileys_files": [
+          "src/Utils/tc-token-utils.ts"
+        ]
+      },
+      "retry-resend": {
+        "status": "partial",
+        "risk": "high",
+        "default_behavior": "unchanged",
+        "activation_gate": "feature-flag-and-differential-fixtures",
+        "waton_files": [
+          "waton/client/retry_manager.py",
+          "waton/client/messages_recv.py"
+        ],
+        "baileys_files": [
+          "src/Utils/message-retry-manager.ts",
+          "src/Socket/messages-recv.ts"
+        ]
+      },
+      "app-state-resilience": {
+        "status": "partial",
+        "risk": "medium",
+        "default_behavior": "unchanged",
+        "activation_gate": "shadow-mode-error-classification",
+        "waton_files": [
+          "waton/protocol/app_state.py",
+          "waton/utils/chat_utils.py"
+        ],
+        "baileys_files": [
+          "src/Utils/chat-utils.ts",
+          "src/Utils/process-message.ts"
+        ]
+      },
+      "offline-node-batching": {
+        "status": "partial",
+        "risk": "medium",
+        "default_behavior": "unchanged",
+        "activation_gate": "batching-benchmarks-and-event-order-fixtures",
+        "waton_files": [
+          "waton/client/event_pipeline.py",
+          "waton/client/client.py"
+        ],
+        "baileys_files": [
+          "src/Utils/offline-node-processor.ts"
+        ]
+      },
+      "send-media-robustness": {
+        "status": "partial",
+        "risk": "medium",
+        "default_behavior": "unchanged",
+        "activation_gate": "per-recipient-diagnostics-feature-flag",
+        "waton_files": [
+          "waton/client/messages.py",
+          "waton/client/media.py"
+        ],
+        "baileys_files": [
+          "src/Socket/messages-send.ts",
+          "src/Utils/messages-media.ts"
+        ]
+      },
+      "notification-surface": {
+        "status": "partial",
+        "risk": "medium",
+        "default_behavior": "unchanged",
+        "activation_gate": "optional-event-fields-only",
+        "waton_files": [
+          "waton/client/messages_recv.py",
+          "waton/core/events.py"
+        ],
+        "baileys_files": [
+          "src/Socket/messages-recv.ts",
+          "src/Types/Events.ts"
+        ]
+      },
+      "wa-version-drift": {
+        "status": "planned",
+        "risk": "low",
+        "default_behavior": "unchanged",
+        "activation_gate": "preflight-report-only",
+        "waton_files": [
+          "waton/defaults/config.py"
+        ],
+        "baileys_files": [
+          "src/Defaults/baileys-version.json"
+        ]
       }
     }
   },

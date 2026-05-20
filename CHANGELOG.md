@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4rc3] - 2026-05-20
+
+### Added
+- Baileys-compatible JID parsing/classification helpers for agent IDs, hosted PN/LID users, newsletters, status broadcast, Meta AI bot JIDs, and PN bot JID patterns.
+- Additive JSON and SQLite metadata storage namespaces for future Baileys v7 identity/retry state, including LID mapping, device lists, tctoken, message retry state, and identity change state.
+- Legacy JSON storage compatibility coverage proving old state files remain readable without metadata.
+
+### Changed
+- Version metadata advanced to `0.1.4rc3` across `pyproject.toml`, `Cargo.toml`, `Cargo.lock`, and `waton/__init__.py`.
+- README, Read the Docs install snippets, and Baileys v7 parity docs now target `waton==0.1.4rc3`.
+
+## [0.1.4rc2] - 2026-05-13
+
+### Added
+- Baileys v7/rc11 power-mode compatibility defaults with all new behavior flags disabled by default, preserving existing runtime behavior while documenting the next capability surface.
+- Machine-readable Baileys v7 parity matrix in the parity scanner, covering LID mapping, tctoken, retry/resend, app-state resilience, offline batching, media robustness, notification coverage, and WA version drift.
+- WhatsApp Web version drift tracker at `tools/parity/wa_version_tracker.py` for comparing Waton's configured WA Web version with a local Baileys checkout.
+- Baileys v7 power roadmap at `docs/plans/2026-05-13-waton-baileys-v7-power-roadmap.md`.
+
+### Changed
+- Version metadata advanced to `0.1.4rc2` across `pyproject.toml`, `Cargo.toml`, `Cargo.lock`, and `waton/__init__.py`.
+- README and Read the Docs install snippets now pin `waton==0.1.4rc2`.
+- Parity scan output now includes a `baileys_v7` section without changing legacy `domains` output.
+
 ## [0.1.3] - 2026-03-05
 
 ### Added

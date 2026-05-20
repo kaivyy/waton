@@ -33,7 +33,7 @@
 ## Installation
 
 ```bash
-pip install waton==0.1.3
+pip install waton==0.1.4rc3
 ```
 
 > Prebuilt wheels include the Rust crypto extension — no Rust toolchain needed for installation.
@@ -71,7 +71,7 @@ If you only want the browser dashboard and do not need reinstall, you can skip e
 python -m tools.dashboard.server --host 127.0.0.1 --port 8080
 ```
 
-### Package Footprint (`pip install waton==0.1.3`)
+### Package Footprint (`pip install waton==0.1.4rc3`)
 
 Published artifacts are intentionally runtime-only:
 - included: `waton/`, Rust extension module, metadata files
@@ -93,7 +93,7 @@ Waton now provides a **simple callback API** for fastest onboarding, plus the ex
 If you want automation agents to run Waton with minimum prompt/context overhead:
 
 - Install latest stable: `pip install -U waton`
-- Or pin reproducible release: `pip install waton==0.1.3`
+- Or pin reproducible release: `pip install waton==0.1.4rc3`
 - Start with simple API: `from waton import simple`
 - Keep one linked WA session active during tests to avoid conflict `440`
 - Use quick docs page: `docs/source/content/ai-agent-quickstart.rst`
@@ -196,7 +196,18 @@ python scripts/parity_evidence_smoke.py --parity-evidence docs/parity/artifacts/
 
 This command is intended as a fast parity confidence smoke gate for development/release checks.
 
-### 1.8 Browser Dashboard for Quick Testing
+### 1.8 Baileys V7 Compatibility Tracking
+
+Waton tracks Baileys v7/rc11 capability drift without changing default runtime behavior:
+
+```bash
+python -m tools.parity.scan_baileys_parity --waton waton --baileys ../Baileys/src --out docs/parity/baileys-parity-latest.json
+python -m tools.parity.wa_version_tracker --baileys ../Baileys --out docs/parity/wa-version-drift-latest.json
+```
+
+The scanner writes a `baileys_v7` section covering LID mapping, tctoken, retry/resend, app-state resilience, offline batching, media robustness, notification coverage, and WA Web version drift. All Baileys v7 power-mode behavior is disabled by default in `DEFAULT_CONNECTION_CONFIG`; these flags are scaffolding for future parity work, not runtime behavior changes.
+
+### 1.9 Browser Dashboard for Quick Testing
 
 If you want a browser UI instead of terminal-only testing:
 
@@ -335,7 +346,7 @@ pytest tests/
 ## Documentation (Read the Docs)
 
 Sphinx docs source is in `docs/source/` with RTD config in `.readthedocs.yaml`.
-This release targets docs for Waton `v0.1.3`.
+This release targets docs for Waton `v0.1.4rc3`.
 
 Local docs build:
 

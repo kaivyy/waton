@@ -79,7 +79,8 @@ def main() -> int:
         parity_out = ROOT_DIR / parity_out
     if args.parity_strict and not args.parity_evidence:
         print(
-            "[preflight] ERROR: --parity-strict requires --parity-evidence <path> so evidence can be wired into the parity scan"
+            "[preflight] ERROR: --parity-strict requires --parity-evidence <path> "
+            "so evidence can be wired into the parity scan"
         )
         return 1
 
