@@ -1,7 +1,7 @@
 {
   "reference": "baileys-v7-rc11",
   "policy": "additive-first-defaults-unchanged",
-  "release_target": "0.1.4rc3",
+  "release_target": "0.1.4",
   "domains": {
     "lid-mapping": {
       "status": "partial",

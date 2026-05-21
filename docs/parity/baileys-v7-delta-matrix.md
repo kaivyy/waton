@@ -17,7 +17,7 @@ Policy: new capability lands as additive metadata, storage support, diagnostics,
 
 ## Release Target
 
-`0.1.4rc3` extends the tracking and compatibility scaffolding:
+`0.1.4` extends the tracking and compatibility scaffolding:
 
 - disabled-by-default Baileys v7 power flags in default config;
 - machine-readable v7 matrix in parity scan output;
@@ -28,7 +28,7 @@ Policy: new capability lands as additive metadata, storage support, diagnostics,
 
 ## Default Behavior Contract
 
-The following behavior remains unchanged in `0.1.4rc3`:
+The following behavior remains unchanged in `0.1.4`:
 
 - current ACK policy;
 - current retry/resend behavior;

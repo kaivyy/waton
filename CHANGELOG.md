@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.4rc3] - 2026-05-20
+## [0.1.4] - 2026-05-21
 
 ### Added
 - Baileys-compatible JID parsing/classification helpers for agent IDs, hosted PN/LID users, newsletters, status broadcast, Meta AI bot JIDs, and PN bot JID patterns.
@@ -15,8 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Legacy JSON storage compatibility coverage proving old state files remain readable without metadata.
 
 ### Changed
-- Version metadata advanced to `0.1.4rc3` across `pyproject.toml`, `Cargo.toml`, `Cargo.lock`, and `waton/__init__.py`.
-- README, Read the Docs install snippets, and Baileys v7 parity docs now target `waton==0.1.4rc3`.
+- Version metadata advanced to stable `0.1.4` across `pyproject.toml`, `Cargo.toml`, `Cargo.lock`, and `waton/__init__.py`.
+- README, Read the Docs install snippets, and Baileys v7 parity docs now target stable `waton==0.1.4` so regular `pip install -U waton` upgrades to the latest release.
 
 ## [0.1.4rc2] - 2026-05-13
 
