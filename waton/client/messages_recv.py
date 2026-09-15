@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import contextlib
 import time
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
@@ -206,11 +207,15 @@ async def _extract_message_payload(node: BinaryNode, signal_repo: SignalReposito
         enc_type = enc_node.attrs.get("type", "msg")
         ciphertext = bytes(enc_node.content)
         candidates = _decryption_candidates(node.attrs)
+        from_jid = str(node.attrs.get("from", ""))
+        group_jid = from_jid if from_jid.endswith("@g.us") else None
 
         last_error: Exception | None = None
         for jid in candidates:
             try:
-                return await signal_repo.decrypt_message(jid, enc_type, ciphertext)
+                return await signal_repo.decrypt_message(
+                    jid, enc_type, ciphertext, group_jid=group_jid
+                )
             except Exception as exc:  # pragma: no cover - candidate fallback
                 last_error = exc
 
@@ -234,6 +239,18 @@ async def decode_incoming_message_node(node: BinaryNode, signal_repo: SignalRepo
     plaintext = await _extract_message_payload(node, signal_repo)
     payload = _unpad_random_max16(plaintext) if _get_child(node, "enc") is not None else plaintext
     summary = parse_message_payload(payload)
+
+    sk_dist = summary.get("sender_key_distribution")
+    if sk_dist and sk_dist.get("group_id") and sk_dist.get("axolotl_sender_key_distribution_message"):
+        author_jid = node.attrs.get("participant") or node.attrs.get("from")
+        if author_jid:
+            with contextlib.suppress(Exception):
+                await signal_repo.process_sender_key_distribution_message(
+                    sk_dist["group_id"],
+                    author_jid,
+                    sk_dist["axolotl_sender_key_distribution_message"],
+                )
+
     message_payload = {
         "id": node.attrs.get("id"),
         "from": node.attrs.get("from"),

@@ -257,6 +257,13 @@ def _decode_newsletter_follower_invite(payload: bytes) -> dict[str, Any]:
     }
 
 
+def _decode_sender_key_distribution(payload: bytes) -> dict[str, Any]:
+    return {
+        "group_id": _decode_utf8(_field_bytes(payload, 1)),
+        "axolotl_sender_key_distribution_message": _field_bytes(payload, 2),
+    }
+
+
 def parse_message_payload(payload: bytes, *, allow_device_sent: bool = True) -> dict[str, Any]:
     """Parse incoming Message payload into a normalized content summary."""
     summary: dict[str, Any] = {
@@ -269,6 +276,7 @@ def parse_message_payload(payload: bytes, *, allow_device_sent: bool = True) -> 
         "content_type": "unknown",
         "content": {},
         "message_secret_b64": None,
+        "sender_key_distribution": None,
         "wrappers": [],
     }
     if not payload:
@@ -305,6 +313,10 @@ def parse_message_payload(payload: bytes, *, allow_device_sent: bool = True) -> 
     direct_message_secret = _extract_context_message_secret_b64(_field_bytes(normalized_payload, 35))
     if direct_message_secret:
         summary["message_secret_b64"] = direct_message_secret
+
+    sender_key_payload = _field_bytes(normalized_payload, 2)
+    if sender_key_payload is not None:
+        summary["sender_key_distribution"] = _decode_sender_key_distribution(sender_key_payload)
 
     if allow_device_sent:
         device_sent_payload = _field_bytes(normalized_payload, 31)

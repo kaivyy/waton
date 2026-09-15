@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from waton.core.jid import jid_decode, jid_encode
+from waton.protocol.group_cipher import GroupCipher
 from waton.utils.crypto import (
     generate_keypair,
     signal_process_prekey_bundle,
@@ -188,11 +189,18 @@ class SignalRepository:
         )
         await self.save_session(jid, session)
 
-    async def decrypt_message(self, jid: str, type_str: str, ciphertext: bytes) -> bytes:
-        """
-        Decrypts an incoming P2P message.
-        `type_str` is either 'pkmsg' or 'msg'.
-        """
+    async def decrypt_message(
+        self,
+        jid: str,
+        type_str: str,
+        ciphertext: bytes,
+        *,
+        group_jid: str | None = None,
+    ) -> bytes:
+        if type_str == "skmsg":
+            target_group = group_jid or jid
+            return await self.decrypt_group_message(target_group, jid, ciphertext)
+
         signal_name, signal_device = self.jid_to_signal_address(jid)
         session = await self.get_session(jid)
 
@@ -297,6 +305,26 @@ class SignalRepository:
 
         else:
             raise ValueError(f"Unknown message type: {type_str}")
+
+    async def decrypt_group_message(self, group_jid: str, author_jid: str, ciphertext: bytes) -> bytes:
+        cipher = GroupCipher(group_jid, self.storage)
+        return await cipher.decrypt(author_jid, ciphertext)
+
+    async def encrypt_group_message(self, group_jid: str, me_jid: str, plaintext: bytes) -> tuple[bytes, bytes]:
+        cipher = GroupCipher(group_jid, self.storage)
+        ciphertext = await cipher.encrypt(me_jid, plaintext)
+        skdm = await cipher.export_sender_key_distribution(me_jid) or b""
+        return ciphertext, skdm
+
+    async def process_sender_key_distribution_message(
+        self,
+        group_jid: str,
+        author_jid: str,
+        skmsg: bytes,
+    ) -> None:
+        cipher = GroupCipher(group_jid, self.storage)
+        await cipher.process_sender_key_distribution(author_jid, skmsg)
+
 
     async def encrypt_message(self, jid: str, plaintext: bytes) -> tuple[str, bytes]:
         """

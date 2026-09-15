@@ -487,6 +487,25 @@ class MessagesAPI:
 
         target_jid = jid_normalized_user(to_jid)
         me_jid = jid_normalized_user(self.client.creds.me["id"])
+
+        if target_jid.endswith("@g.us"):
+            padded_payload = _write_random_pad_max16(payload)
+            ciphertext, _skdm = await signal_repo.encrypt_group_message(target_jid, me_jid, padded_payload)
+            msg_id = generate_message_id()
+            node = BinaryNode(
+                tag="message",
+                attrs={"to": target_jid, "id": msg_id, "type": message_type},
+                content=[
+                    BinaryNode(
+                        tag="enc",
+                        attrs={"v": "2", "type": "skmsg"},
+                        content=ciphertext,
+                    )
+                ],
+            )
+            await self.client.send_node(node)
+            return msg_id
+
         all_device_jids = await self._collect_target_devices(signal_repo, usync, target_jid, me_jid)
         await self._assert_sessions(signal_repo, all_device_jids)
 
