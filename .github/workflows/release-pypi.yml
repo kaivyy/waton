@@ -92,24 +92,23 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate release notes body
-        id: notes
         shell: bash
         run: |
           ver="${{ steps.tag.outputs.value }}"
           ver_no_v="${ver#v}"
-          echo "body<<EOF" >> "$GITHUB_OUTPUT"
-          echo "## Waton ${ver} release" >> "$GITHUB_OUTPUT"
-          echo "" >> "$GITHUB_OUTPUT"
-          echo "Published to PyPI:" >> "$GITHUB_OUTPUT"
-          echo "- https://pypi.org/project/waton/${ver_no_v}/" >> "$GITHUB_OUTPUT"
-          echo "" >> "$GITHUB_OUTPUT"
-          echo "Install:" >> "$GITHUB_OUTPUT"
-          echo "\`\`\`bash" >> "$GITHUB_OUTPUT"
-          echo "pip install waton==${ver_no_v}" >> "$GITHUB_OUTPUT"
-          echo "\`\`\`" >> "$GITHUB_OUTPUT"
-          echo "" >> "$GITHUB_OUTPUT"
-          echo "For full details, see CHANGELOG.md in this tag." >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          python - <<PY
+          import re
+          from pathlib import Path
+
+          ver_no_v = "${ver_no_v}"
+          text = Path("CHANGELOG.md").read_text(encoding="utf-8")
+          match = re.search(r"## \[" + re.escape(ver_no_v) + r"\][^\n]*\n(.*?)(?=\n## \[|\Z)", text, re.DOTALL)
+          notes = match.group(1).strip() if match else "See CHANGELOG.md for details."
+
+          header = f"## Waton v{ver_no_v} Release\n\nPublished to PyPI: https://pypi.org/project/waton/{ver_no_v}/\n\n### Installation\n\n\`\`\`bash\npip install waton=={ver_no_v}\n\`\`\`\n\n---\n\n"
+          full_body = header + notes
+          Path("release_notes.md").write_text(full_body, encoding="utf-8")
+          PY
 
       - name: Create or update release
         env:
@@ -118,7 +117,7 @@ jobs:
         run: |
           tag="${{ steps.tag.outputs.value }}"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release edit "$tag" --title "${tag}" --notes "${{ steps.notes.outputs.body }}"
+            gh release edit "$tag" --title "${tag}" --notes-file release_notes.md
           else
-            gh release create "$tag" --title "${tag}" --notes "${{ steps.notes.outputs.body }}"
+            gh release create "$tag" --title "${tag}" --notes-file release_notes.md
           fi
