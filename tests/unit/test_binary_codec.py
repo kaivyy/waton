@@ -54,3 +54,21 @@ def test_prefix_and_compressed_decode() -> None:
     compressed = bytes([0x02]) + zlib.compress(encoded[1:])
     decoded = decode_binary_node(compressed)
     assert decoded.tag == "iq"
+
+
+def test_ad_jid_hosted_domains() -> None:
+    import io
+    from waton.protocol.binary_codec import _read_ad_jid, _write_ad_jid
+
+    buf_hosted = bytearray()
+    _write_ad_jid("12345", 0, "hosted", buf_hosted)
+    assert buf_hosted[1] == 128
+    stream_hosted = io.BytesIO(buf_hosted[1:])
+    assert _read_ad_jid(stream_hosted) == "12345:0@hosted"
+
+    buf_hosted_lid = bytearray()
+    _write_ad_jid("67890", 1, "hosted.lid", buf_hosted_lid)
+    assert buf_hosted_lid[1] == 129
+    stream_hosted_lid = io.BytesIO(buf_hosted_lid[1:])
+    assert _read_ad_jid(stream_hosted_lid) == "67890:1@hosted.lid"
+

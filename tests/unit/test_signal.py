@@ -113,7 +113,6 @@ def test_signal_decrypt_pkmsg(monkeypatch: pytest.MonkeyPatch) -> None:
     async def _case() -> None:
         storage = _MemoryStorage()
         creds = init_auth_creds()
-        # Mock the prekey response
         await storage.save_prekey(123, b"prekey_private")
 
         # Build fake protobuf payload manually: version byte + preKeyId (tag 1) + signedPreKeyId (tag 2)
@@ -211,7 +210,6 @@ def test_group_cipher_contracts() -> None:
         cipher = GroupCipher("group@g.us", storage)
         out = await cipher.encrypt("me@s.whatsapp.net", b"hello")
         assert out == b"hello"
-        # save key for author, then decrypt
         await storage.save_sender_key("group@g.us", "alice@s.whatsapp.net", b"k")
         pt = await cipher.decrypt("alice@s.whatsapp.net", b"cipher")
         assert pt == b"cipher"
@@ -266,3 +264,18 @@ def test_signal_repository_migrate_session_copies_bytes() -> None:
         assert await repo.get_session("179981124669483@lid") == b"session-pn"
 
     _run(_case())
+
+
+def test_signal_repository_hosted_domain_address_normalization() -> None:
+    storage = _MemoryStorage()
+    creds = init_auth_creds()
+    repo = SignalRepository(creds, storage)
+
+    name_hosted, device_hosted = repo.jid_to_signal_address("12345@hosted")
+    assert name_hosted == "12345_128"
+    assert device_hosted == 0
+
+    name_hosted_lid, device_hosted_lid = repo.jid_to_signal_address("67890:2@hosted.lid")
+    assert name_hosted_lid == "67890_129"
+    assert device_hosted_lid == 2
+

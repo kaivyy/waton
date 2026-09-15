@@ -75,7 +75,6 @@ def _write_string(s: str, buf: bytearray) -> None:
     if s == "c.us":
         s = "s.whatsapp.net"
 
-    # Try token
     token_info = TOKEN_MAP.get(s)
     if token_info:
         if token_info["dict"] == 0:
@@ -85,7 +84,6 @@ def _write_string(s: str, buf: bytearray) -> None:
             buf.append(token_info["index"])
         return
 
-    # Try JID
     jid_idx = s.find("@")
     if jid_idx >= 0:  # pyright: ignore[reportUnnecessaryComparison]
         user_part = s[:jid_idx]
@@ -100,14 +98,13 @@ def _write_string(s: str, buf: bytearray) -> None:
             _write_jid(user_part, server, buf)
         return
 
-    # Fallback to UTF-8
     _write_bytes(s.encode('utf-8'), buf)
 
 _DOMAIN_TYPE_MAP = {
     "s.whatsapp.net": 0,
     "lid": 1,
-    "hosted": 2,
-    "hosted.lid": 3,
+    "hosted": 128,
+    "hosted.lid": 129,
 }
 
 def _write_ad_jid(user: str, device: int, server: str, buf: bytearray) -> None:
@@ -126,8 +123,6 @@ def _write_jid(user: str, server: str, buf: bytearray) -> None:
         _write_string(user, buf)
     _write_string(server, buf)
 
-
-# --- DECODE ---
 
 def decode_binary_node(data: bytes) -> BinaryNode:
     if not data:
@@ -150,7 +145,6 @@ def _decode_node(stream: io.BytesIO) -> BinaryNode:
 
     content = None
     if list_size % 2 == 0:
-        # has content
         val = stream.read(1)
         if not val:
             raise EOFError("EOF reading content")
@@ -269,9 +263,9 @@ def _read_ad_jid(stream: io.BytesIO) -> str:
     server = "s.whatsapp.net"
     if domain_type == 1:
         server = "lid"
-    elif domain_type == 2:
+    elif domain_type == 128:
         server = "hosted"
-    elif domain_type == 3:
+    elif domain_type == 129:
         server = "hosted.lid"
     return f"{user}:{device}@{server}"
 

@@ -25,8 +25,8 @@ class SignalRepository:
         self._domain_suffix = {
             "s.whatsapp.net": "",
             "lid": "_1",
-            "hosted": "_2",
-            "hosted.lid": "_3",
+            "hosted": "_128",
+            "hosted.lid": "_129",
         }
 
     def _session_key(self, jid: str) -> str:
@@ -255,7 +255,6 @@ class SignalRepository:
                     # Missing prekey, backend might still succeed if it was already processed
                     pass
 
-            # Our signed prekey
             signed_prekey_private = self.creds.signed_pre_key["keyPair"]["private"]
 
             safe_session = session or b""
@@ -273,7 +272,6 @@ class SignalRepository:
                 ciphertext=ciphertext,
             )
 
-            # update session
             session_bytes = cast("bytes", res["session"])
             plaintext_bytes = cast("bytes", res["ciphertext"])
             await self.save_session(jid, session_bytes)
@@ -321,5 +319,4 @@ class SignalRepository:
         return msg_type, ciphertext
 
     async def decrypt_message_node(self, node: object) -> bytes:
-        # Stub for the tests
         return b""
