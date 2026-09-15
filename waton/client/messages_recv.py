@@ -805,11 +805,18 @@ def decode_ib_node(node: BinaryNode) -> dict[str, Any]:
     }
 
 
-def build_message_ack(node: BinaryNode, error_code: int | None = None) -> BinaryNode:
+def build_message_ack(
+    node: BinaryNode,
+    error_code: int | None = None,
+    *,
+    me_jid: str | None = None,
+) -> BinaryNode:
     attrs: dict[str, str] = {
         "to": node.attrs.get("from", "s.whatsapp.net"),
         "class": node.tag,
     }
+    if me_jid:
+        attrs["from"] = me_jid
     for key in ("id", "participant", "recipient", "type", "t"):
         value = node.attrs.get(key)
         if value:

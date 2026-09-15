@@ -1001,7 +1001,9 @@ class MessagesAPI:
             # If server returned base JID but we requested device-specific JIDs,
             # save session for all requested device JIDs of that user
             decoded_response = jid_decode(response_jid)
-            if decoded_response:
+            if decoded_response and decoded_response.device is not None:
+                jids_to_save = [response_jid]
+            elif decoded_response:
                 base_response_jid = jid_encode(decoded_response.user, decoded_response.server)
                 jids_to_save = requested_map.get(base_response_jid, [response_jid])
             else:

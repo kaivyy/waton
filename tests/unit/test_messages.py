@@ -1267,3 +1267,75 @@ def test_derive_media_keys_lengths() -> None:
     assert len(keys["cipher_key"]) == 32
     assert len(keys["mac_key"]) == 32
     assert len(keys["ref_key"]) == 32
+
+
+def test_build_message_ack_includes_from_when_provided() -> None:
+    from waton.client.messages_recv import build_message_ack
+    from waton.protocol.binary_node import BinaryNode
+
+    node = BinaryNode(tag="message", attrs={"from": "1234@s.whatsapp.net", "id": "ABC"})
+    ack = build_message_ack(node, me_jid="me@s.whatsapp.net")
+    assert ack.attrs.get("from") == "me@s.whatsapp.net"
+    assert ack.attrs.get("to") == "1234@s.whatsapp.net"
+
+
+@pytest.mark.asyncio
+async def test_parse_and_inject_sessions_isolates_device_jids() -> None:
+    from waton.client.messages import MessagesAPI
+    from waton.protocol.binary_node import BinaryNode
+    from waton.protocol.signal_repo import SignalRepository
+    from waton.utils.auth import init_auth_creds
+
+    class MemoryStorage:
+        def __init__(self) -> None:
+            self.sessions: dict[str, bytes] = {}
+
+        async def get_session(self, jid: str) -> bytes | None:
+            return self.sessions.get(jid)
+
+        async def save_session(self, jid: str, session: bytes) -> None:
+            self.sessions[jid] = session
+
+    storage = MemoryStorage()
+    creds = init_auth_creds()
+    repo = SignalRepository(creds, storage)  # type: ignore[arg-type]
+
+    # Node for device 0
+    node_dev0 = BinaryNode(
+        tag="user",
+        attrs={"jid": "628999:0@s.whatsapp.net"},
+        content=[
+            BinaryNode(tag="registration", attrs={}, content=b"\x00\x00\x00\x01"),
+            BinaryNode(tag="identity", attrs={}, content=b"\x00" * 32),
+            BinaryNode(
+                tag="skey",
+                attrs={},
+                content=[
+                    BinaryNode(tag="id", attrs={}, content=b"\x00\x00\x00\x01"),
+                    BinaryNode(tag="value", attrs={}, content=b"\x01" * 32),
+                    BinaryNode(tag="signature", attrs={}, content=b"\x02" * 64),
+                ],
+            ),
+        ],
+    )
+
+    class DummyClient:
+        pass
+
+    api = MessagesAPI(DummyClient())  # type: ignore[arg-type]
+
+    requested_jids = ["628999:0@s.whatsapp.net", "628999:1@s.whatsapp.net"]
+    injected = []
+
+    async def mock_inject(jid: str, **kwargs):
+        injected.append(jid)
+
+    repo.inject_session_from_prekey_bundle = mock_inject  # type: ignore[method-assign]
+
+    node_list = BinaryNode(tag="list", attrs={}, content=[node_dev0])
+    node_root = BinaryNode(tag="iq", attrs={}, content=[node_list])
+    await api._parse_and_inject_sessions(repo, node_root, requested_jids=requested_jids)
+
+    # Must only inject for device 0, NOT splash over device 1
+    assert injected == ["628999:0@s.whatsapp.net"]
+
