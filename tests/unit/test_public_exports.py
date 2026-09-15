@@ -13,6 +13,6 @@ def test_stable_release_version_metadata_is_aligned() -> None:
     pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
     cargo = (root / "Cargo.toml").read_text(encoding="utf-8")
 
-    assert waton.__version__ == "0.1.4"
-    assert 'version = "0.1.4"' in pyproject
-    assert 'version = "0.1.4"' in cargo
+    assert waton.__version__ == "0.1.5"
+    assert 'version = "0.1.5"' in pyproject
+    assert 'version = "0.1.5"' in cargo

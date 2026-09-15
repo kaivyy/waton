@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-09-15
+
+### Added
+- Integrated WhatsApp MMS media connection handling via `MediaUploadManager`, including `<iq type="set"><media_conn/></iq>` query resolution, auth token lifecycle management, and streaming HTTP upload transport to MMS hosts.
+- Integrated `GroupCipher` and `senderKeyDistributionMessage` support for full WhatsApp group message encryption (`enc type="skmsg"`) and decryption parity with Baileys.
+- Added comprehensive media HKDF key mappings (`sticker` to Image, `ptv` to Video, `ptt` to Audio, `md-msg-hist` to History) matching the official WhatsApp specification.
+- Modernized documentation stylesheet (`docs/source/_static/custom.css`) with clean, minimalist design, native dual Light/Dark theme support, unhidden header navigation, and WCAG AAA contrast standards.
+
+### Fixed
+- Fixed HMAC parameter order (`key`, `data`) in message addon and poll vote key derivations (`derive_addon_keys`, `decrypt_poll_vote`), resolving MAC mismatch decryption failures.
+- Fixed AD_JID hosted domain enum byte representations (`hosted: 128`, `hosted.lid: 129`) aligning binary codec and Signal repository address normalization with WhatsApp protocol specs.
+- Fixed multi-device prekey injection to isolate sessions per device ID when present in response JIDs, avoiding session key collisions across companion devices.
+- Fixed receipt acknowledgments in `build_message_ack` to include sender attribution (`from=me_jid`), preventing server-side retry delivery loops.
+- Fixed static Windows absolute paths in unit parity scanner tests to use dynamic repository root discovery.
+
+### Changed
+- Advanced version metadata to stable `0.1.5` across `pyproject.toml`, `Cargo.toml`, `Cargo.lock`, and `waton/__init__.py`.
+- Updated test assertions in `tests/unit/test_public_exports.py` to target `0.1.5`.
+- Updated documentation installation targets and references to `waton==0.1.5`.
+
 ## [0.1.4] - 2026-05-21
 
 ### Added

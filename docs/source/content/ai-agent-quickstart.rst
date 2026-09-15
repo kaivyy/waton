@@ -11,7 +11,7 @@ For reproducible agent runs, pin exact version:
 
 .. code-block:: bash
 
-    pip install waton==0.1.4
+    pip install waton==0.1.5
 
 If you always want newest release:
 
