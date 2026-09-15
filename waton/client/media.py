@@ -15,15 +15,18 @@ from waton.utils.crypto import (
     hmac_sha256,
     sha256,
 )
+from waton.client.media_upload import MediaUploadManager
 from waton.utils.media_utils import derive_media_keys, upload_once, verify_remote_checksum
 
 
 class MediaManager:
     """Handles media encryption, upload and decryption helpers."""
 
-    def __init__(self) -> None:
-        # Keep shared client for backward compatibility with callers/tests.
+    def __init__(self, client: Any | None = None) -> None:
+        self.client = client
         self.http = httpx.AsyncClient()
+        self.upload_manager = MediaUploadManager()
+
 
     @staticmethod
     def _force_ip_connect_transport(*, host: str, resolved_ip: str) -> httpx.AsyncBaseTransport:
@@ -111,16 +114,29 @@ class MediaManager:
 
         file_hash = sha256(raw_media)
         enc_file_hash = sha256(final_encrypted)
-        upload_result = upload_with_retry(final_encrypted)
 
-        return {
-            "url": upload_result["url"],
+        direct_path = ""
+        if self.client is not None and hasattr(self.client, "query"):
+            upload_result = await self.upload_manager.upload_media(
+                self.client, final_encrypted, media_type, enc_file_hash
+            )
+            url = str(upload_result["url"])
+            direct_path = upload_result.get("direct_path", "")
+        else:
+            upload_result = upload_with_retry(final_encrypted)
+            url = str(upload_result["url"])
+
+        meta: dict[str, str | bytes | int] = {
+            "url": url,
             "mediaKey": media_key,
             "fileSha256": file_hash,
             "fileEncSha256": enc_file_hash,
             "fileLength": len(raw_media),
             "mediaType": media_type,
         }
+        if direct_path:
+            meta["directPath"] = direct_path
+        return meta
 
     async def download_and_decrypt(self, url: str, media_key: bytes, media_type: str) -> bytes:
         """Downloads encrypted media and decrypts it using media key."""

@@ -30,3 +30,6 @@ howtouse.md
 .claude/
 .worktrees/
 docs/_build/
+repos/
+graphify-out/
+anti-slop/
