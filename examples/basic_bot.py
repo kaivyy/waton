@@ -19,7 +19,6 @@ async def ready(ctx):
     
 @app.message(filters.text & filters.private)
 async def on_private_text(ctx):
-    # Auto reply to ping
     if ctx.text.lower() == "ping":
         print(f"Received ping from {ctx.from_jid}, replying...")
         await ctx.reply("pong from waton!")

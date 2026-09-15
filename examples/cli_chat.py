@@ -36,8 +36,7 @@ async def on_ready(a: App) -> None:
     print("Ketik pesan dengan format: nomor pesan")
     print("Contoh: 628123456789 halo apa kabar?")
     print("Ketik 'quit' atau 'exit' untuk keluar.\n")
-    
-    # Start the input watcher loop in the background
+
     asyncio.create_task(cli_input_loop(a))
 
 
@@ -104,8 +103,7 @@ async def cli_input_loop(a: App) -> None:
             
         target_number = parts[0]
         text_message = parts[1]
-        
-        # Simple formatting for target jid
+
         if not target_number.endswith("@s.whatsapp.net") and not target_number.endswith("@g.us"):
             target_number = f"{target_number}@s.whatsapp.net"
             

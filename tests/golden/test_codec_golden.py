@@ -17,11 +17,9 @@ def test_golden_binary_codec():
 
     encoded = encode_binary_node(node)
 
-    # We verify it doesn't crash and is stable
     assert isinstance(encoded, bytes)
     assert len(encoded) > 0
 
-    # Verify roundtrip for good measure in golden test
     decoded = decode_binary_node(encoded)
     assert decoded.tag == node.tag
     assert decoded.attrs == node.attrs
@@ -33,6 +31,5 @@ def test_golden_double_byte_tokens():
     encoded = encode_binary_node(node)
 
     # Should start with LIST_EMPTY (0) or similar, then dictionary tag
-    # We just ensure it roundtrips precisely
     decoded = decode_binary_node(encoded)
     assert decoded.tag == "image"

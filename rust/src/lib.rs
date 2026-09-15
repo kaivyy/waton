@@ -7,7 +7,6 @@ mod hkdf_utils;
 mod hmac_utils;
 mod signal;
 
-// AES-GCM
 #[pyfunction]
 fn aes_gcm_encrypt<'a>(py: Python<'a>, plaintext: &[u8], key: &[u8], iv: &[u8], aad: &[u8]) -> PyResult<Bound<'a, PyBytes>> {
     let ct = aes_gcm::aes_gcm_encrypt(plaintext, key, iv, aad)
@@ -36,7 +35,6 @@ fn aes_cbc_decrypt<'a>(py: Python<'a>, ciphertext: &[u8], key: &[u8], iv: &[u8])
     Ok(PyBytes::new_bound(py, &pt))
 }
 
-// Curve25519
 #[pyfunction]
 fn curve25519_generate_keypair<'a>(py: Python<'a>) -> PyResult<Bound<'a, PyDict>> {
     let keys = curve::generate_keypair();
@@ -66,7 +64,6 @@ fn curve25519_verify(public_bytes: &[u8], message: &[u8], signature_bytes: &[u8]
         .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
 }
 
-// HKDF & HMAC
 #[pyfunction]
 fn hkdf_sha256<'a>(py: Python<'a>, input: &[u8], length: usize, salt: &[u8], info: &[u8]) -> PyResult<Bound<'a, PyBytes>> {
     let out = hkdf_utils::hkdf_sha256(input, length, salt, info)

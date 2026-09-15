@@ -32,7 +32,6 @@ class WebSocketTransport:
         except Exception as e:
             raise WatonConnectionError(f"Failed to connect to {self.url}: {e}") from e
 
-        # Start listening loop
         self._recv_task = asyncio.create_task(self._listen_loop())
 
     async def disconnect(self) -> None:

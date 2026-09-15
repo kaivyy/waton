@@ -26,5 +26,4 @@ def encode_payload_frame(node: BinaryNode) -> bytes:
 
 def decode_payload_frame(payload: bytes) -> BinaryNode:
     """Decodes a plain WA frame payload into a binary node."""
-    # Ignore the first dummy bytes if needed, but normally raw payload is just decoded
     return decode_binary_node(payload)
