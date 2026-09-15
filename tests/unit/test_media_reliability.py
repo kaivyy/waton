@@ -45,3 +45,24 @@ def test_media_url_guard_blocks_ipv6_loopback(monkeypatch) -> None:
     )
     with pytest.raises(ValueError):
         MediaManager._validated_endpoint("https://example.com/file")
+
+
+def test_derive_media_keys_mapping() -> None:
+    from waton.utils.media_utils import derive_media_keys
+
+    key = b"\x03" * 32
+    # sticker must expand with "WhatsApp Image Keys"
+    keys_sticker = derive_media_keys(key, "sticker")
+    keys_image = derive_media_keys(key, "image")
+    assert keys_sticker["cipher_key"] == keys_image["cipher_key"]
+
+    # ptv must expand with "WhatsApp Video Keys"
+    keys_ptv = derive_media_keys(key, "ptv")
+    keys_video = derive_media_keys(key, "video")
+    assert keys_ptv["cipher_key"] == keys_video["cipher_key"]
+
+    # ptt must expand with "WhatsApp Audio Keys"
+    keys_ptt = derive_media_keys(key, "ptt")
+    keys_audio = derive_media_keys(key, "audio")
+    assert keys_ptt["cipher_key"] == keys_audio["cipher_key"]
+

@@ -15,7 +15,7 @@ from waton.utils.crypto import (
     hmac_sha256,
     sha256,
 )
-from waton.utils.media_utils import upload_once, verify_remote_checksum
+from waton.utils.media_utils import derive_media_keys, upload_once, verify_remote_checksum
 
 
 class MediaManager:
@@ -100,12 +100,10 @@ class MediaManager:
         """
         media_key = generate_random_bytes(32)
 
-        info = f"WhatsApp {media_type.capitalize()} Keys".encode()
-        derived = hkdf(media_key, 112, bytes(32), info)
-
-        iv = derived[:16]
-        cipher_key = derived[16:48]
-        mac_key = derived[48:80]
+        keys = derive_media_keys(media_key, media_type)
+        iv = keys["iv"]
+        cipher_key = keys["cipher_key"]
+        mac_key = keys["mac_key"]
 
         enc_media = aes_cbc_encrypt(raw_media, cipher_key, iv)
         mac = hmac_sha256(mac_key, iv + enc_media)[:10]
@@ -136,11 +134,9 @@ class MediaManager:
         finally:
             await transport.aclose()
 
-        info = f"WhatsApp {media_type.capitalize()} Keys".encode()
-        derived = hkdf(media_key, 112, bytes(32), info)
-
-        iv = derived[:16]
-        cipher_key = derived[16:48]
+        keys = derive_media_keys(media_key, media_type)
+        iv = keys["iv"]
+        cipher_key = keys["cipher_key"]
 
         actual_ciphertext = encrypted_data[:-10]
         return aes_cbc_decrypt(actual_ciphertext, cipher_key, iv)
