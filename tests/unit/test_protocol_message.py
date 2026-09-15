@@ -4,17 +4,24 @@ import base64
 
 from waton.protocol.protobuf.wire import _encode_len_delimited, _encode_varint_field
 from waton.utils.crypto import aes_encrypt, hmac_sha256
-from waton.utils.protocol_message import decrypt_event_response, decrypt_poll_vote
+from waton.utils.protocol_message import (
+    _derive_message_addon_key,
+    decrypt_event_response,
+    decrypt_poll_vote,
+)
 
 
-def _derive_message_addon_key(
-    *,
-    addon_label: str,
-    message_id: str,
-    creator_jid: str,
-    actor_jid: str,
-    message_secret: bytes,
-) -> bytes:
+def test_derive_addon_keys_matches_baileys_and_rfc5869() -> None:
+    import hashlib
+    import hmac
+
+
+    message_secret = b"\x01" * 32
+    message_id = "msg123"
+    creator_jid = "creator@s.whatsapp.net"
+    actor_jid = "actor@s.whatsapp.net"
+    addon_label = "Poll Vote"
+
     sign = b"".join(
         (
             message_id.encode("utf-8"),
@@ -24,8 +31,21 @@ def _derive_message_addon_key(
             b"\x01",
         )
     )
-    key0 = hmac_sha256(message_secret, bytes(32))
-    return hmac_sha256(sign, key0)
+
+    # In RFC 5869 / Baileys: key0 = HMAC(key=zeros, data=message_secret), decKey = HMAC(key=key0, data=sign)
+    expected_key0 = hmac.new(bytes(32), message_secret, hashlib.sha256).digest()
+    expected_deckey = hmac.new(expected_key0, sign, hashlib.sha256).digest()
+
+    actual_deckey = _derive_message_addon_key(
+        addon_label=addon_label,
+        message_id=message_id,
+        creator_jid=creator_jid,
+        actor_jid=actor_jid,
+        message_secret=message_secret,
+    )
+    assert actual_deckey == expected_deckey
+
+
 
 
 def test_decrypt_poll_vote_roundtrip() -> None:

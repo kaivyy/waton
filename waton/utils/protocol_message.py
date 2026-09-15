@@ -248,8 +248,8 @@ def _derive_message_addon_key(
             b"\x01",
         )
     )
-    key0 = hmac_sha256(message_secret, bytes(32))
-    return hmac_sha256(sign, key0)
+    key0 = hmac_sha256(bytes(32), message_secret)
+    return hmac_sha256(key0, sign)
 
 
 def _decode_poll_vote_message(payload: bytes) -> dict[str, Any]:

@@ -44,7 +44,6 @@ def _unpad_random_max16(msg: bytes) -> bytes:
     # optionally verify all padding bytes are the same
     for i in range(1, pad_len + 1):
         if msg[-i] != pad_len:
-            # invalid padding
             return msg
     return msg[:-pad_len]
 
@@ -96,8 +95,8 @@ def _derive_message_addon_key(
             b"\x01",
         )
     )
-    key0 = hmac_sha256(message_secret, bytes(32))
-    return hmac_sha256(sign, key0)
+    key0 = hmac_sha256(bytes(32), message_secret)
+    return hmac_sha256(key0, sign)
 
 
 MediaInfo = Mapping[str, object]

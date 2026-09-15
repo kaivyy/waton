@@ -56,11 +56,9 @@ class _FakeClient:
     async def query(self, node: BinaryNode, timeout: float | None = None) -> BinaryNode:
         xmlns = node.attrs.get("xmlns", "")
 
-        # Handle usync device query
         if xmlns == "usync":
             return self._handle_usync_query(node)
 
-        # Handle encrypt key query
         return self._handle_encrypt_query(node)
 
     def _handle_usync_query(self, node: BinaryNode) -> BinaryNode:
@@ -204,8 +202,8 @@ def _derive_addon_key(
             b"\x01",
         )
     )
-    key0 = hmac_sha256(message_secret, bytes(32))
-    return hmac_sha256(sign, key0)
+    key0 = hmac_sha256(bytes(32), message_secret)
+    return hmac_sha256(key0, sign)
 
 
 def test_send_text_builds_message_node(monkeypatch: pytest.MonkeyPatch) -> None:
