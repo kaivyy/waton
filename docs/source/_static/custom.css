@@ -1,32 +1,83 @@
+/* ==========================================================================
+   Waton Documentation Theme - Minimalist & Modern Technical Design
+   Compatible with Sphinx Book Theme & ReadTheDocs
+   ========================================================================== */
+
+/* Design Tokens & CSS Variables */
 :root {
-  --waton-bg: #090f1d;
-  --waton-bg-alt: #0f172b;
-  --waton-bg-card: #111d34;
-  --waton-border: #243554;
-  --waton-text: #e5ecff;
-  --waton-muted: #9aa8c9;
-  --waton-accent: #4ea3ff;
-  --waton-accent-2: #72e3ff;
-  --pst-header-height: 0rem;
-  --pst-header-article-height: 0rem;
+  --waton-radius-sm: 4px;
+  --waton-radius-md: 6px;
+  --waton-radius-lg: 8px;
+  --waton-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --waton-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --waton-transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
+/* Light Theme Variables (WCAG AAA Contrast Compliant) */
 html[data-theme="light"],
-html[data-theme="dark"] {
-  --pst-color-background: var(--waton-bg);
-  --pst-color-on-background: var(--waton-text);
-  --pst-color-surface: var(--waton-bg-alt);
-  --pst-color-primary: var(--waton-accent);
-  --pst-color-link: var(--waton-accent);
-  --pst-color-link-hover: var(--waton-accent-2);
-  --pst-color-text-base: var(--waton-text);
-  --pst-color-text-muted: var(--waton-muted);
-  --pst-color-border: var(--waton-border);
+html:not([data-theme="dark"]) {
+  --waton-bg: #ffffff;
+  --waton-surface: #f8fafc;
+  --waton-surface-hover: #f1f5f9;
+  --waton-border: #e2e8f0;
+  --waton-border-strong: #cbd5e1;
+  --waton-text: #0f172a;
+  --waton-text-muted: #475569;
+  --waton-accent: #0369a1;
+  --waton-accent-hover: #075985;
+  --waton-accent-subtle: #f0f9ff;
+  --waton-code-bg: #f8fafc;
+  --waton-code-border: #e2e8f0;
+  --waton-focus-ring: #0284c7;
+
+  /* Sphinx / PyData theme integration */
+  --pst-color-background: #ffffff;
+  --pst-color-on-background: #0f172a;
+  --pst-color-surface: #f8fafc;
+  --pst-color-primary: #0369a1;
+  --pst-color-link: #0369a1;
+  --pst-color-link-hover: #075985;
+  --pst-color-text-base: #0f172a;
+  --pst-color-text-muted: #475569;
+  --pst-color-border: #e2e8f0;
 }
 
+/* Dark Theme Variables (WCAG AAA Contrast Compliant) */
+html[data-theme="dark"] {
+  --waton-bg: #0b0f17;
+  --waton-surface: #111827;
+  --waton-surface-hover: #1e293b;
+  --waton-border: #1e293b;
+  --waton-border-strong: #334155;
+  --waton-text: #f8fafc;
+  --waton-text-muted: #94a3b8;
+  --waton-accent: #38bdf8;
+  --waton-accent-hover: #7dd3fc;
+  --waton-accent-subtle: rgba(56, 189, 248, 0.1);
+  --waton-code-bg: #0d1321;
+  --waton-code-border: #1e293b;
+  --waton-focus-ring: #38bdf8;
+
+  /* Sphinx / PyData theme integration */
+  --pst-color-background: #0b0f17;
+  --pst-color-on-background: #f8fafc;
+  --pst-color-surface: #111827;
+  --pst-color-primary: #38bdf8;
+  --pst-color-link: #38bdf8;
+  --pst-color-link-hover: #7dd3fc;
+  --pst-color-text-base: #f8fafc;
+  --pst-color-text-muted: #94a3b8;
+  --pst-color-border: #1e293b;
+}
+
+/* Base Document Setup */
 html,
 body {
-  background: #090f1d !important;
+  background-color: var(--waton-bg) !important;
+  color: var(--waton-text) !important;
+  font-family: var(--waton-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .bd-container,
@@ -34,111 +85,185 @@ body {
 .bd-page-width,
 .bd-main,
 .bd-content {
-  background: transparent !important;
+  background-color: transparent !important;
 }
 
 .bd-main .bd-content .bd-article-container {
-  max-width: 78rem;
-  padding: 1rem 1rem 1.25rem;
+  max-width: 54rem;
+  padding: 1.5rem 1.5rem 3rem;
 }
 
 .bd-main .bd-content .bd-article {
-  background: linear-gradient(180deg, rgba(14, 24, 44, 0.88), rgba(10, 19, 36, 0.78));
-  border: 1px solid rgba(114, 227, 255, 0.16);
-  border-radius: 16px;
-  padding: 1.1rem 1.1rem 1.25rem !important;
-  box-shadow: 0 14px 34px rgba(4, 8, 18, 0.34);
-}
-
-.bd-main .bd-content .bd-article section {
   background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
-.prev-next-area,
-.prev-next-area a,
-.prev-next-area p,
-.bd-content .prev-next-area {
-  background: transparent !important;
+/* Header & Navigation Bar */
+.bd-header {
+  background-color: var(--waton-bg) !important;
+  border-bottom: 1px solid var(--waton-border) !important;
+  box-shadow: none !important;
 }
 
-.bd-header,
 .bd-header-article {
-  display: none !important;
+  background-color: transparent !important;
+  border-bottom: 1px solid var(--waton-border);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
-.header-article__inner,
-.header-article-item,
-.header-article-items__start,
-.header-article-items__end {
-  display: none !important;
+.header-article__inner {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
 }
 
-a {
-  transition: color 0.15s ease, opacity 0.15s ease;
+.article-header-buttons .btn {
+  background-color: var(--waton-surface) !important;
+  border: 1px solid var(--waton-border) !important;
+  color: var(--waton-text-muted) !important;
+  border-radius: var(--waton-radius-sm) !important;
+  transition: var(--waton-transition);
 }
 
-.waton-hero-links a:hover {
-  text-decoration: none;
+.article-header-buttons .btn:hover {
+  background-color: var(--waton-surface-hover) !important;
+  color: var(--waton-text) !important;
+  border-color: var(--waton-border-strong) !important;
 }
 
-.bd-content h1,
-.bd-content h2,
-.bd-content h3 {
-  letter-spacing: 0.01em;
+.dropdown-menu {
+  background-color: var(--waton-surface) !important;
+  border: 1px solid var(--waton-border) !important;
+  border-radius: var(--waton-radius-md) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dropdown-item {
+  color: var(--waton-text) !important;
+  border-radius: var(--waton-radius-sm);
+  transition: var(--waton-transition);
+}
+
+.dropdown-item:hover {
+  background-color: var(--waton-surface-hover) !important;
+  color: var(--waton-accent) !important;
+}
+
+/* Focus Indicator for Keyboard Navigation (R-32) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--waton-focus-ring) !important;
+  outline-offset: 2px !important;
+}
+
+/* Typography Hierarchy */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--waton-text);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin-top: 1.75em;
+  margin-bottom: 0.6em;
 }
 
 .bd-content h1 {
-  font-size: clamp(2rem, 2.8vw, 3rem);
-  margin-bottom: 0.6rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  margin-top: 0;
+  margin-bottom: 1rem;
 }
 
+.bd-content h2 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid var(--waton-border);
+  padding-bottom: 0.4rem;
+}
+
+.bd-content h3 {
+  font-size: 1.2rem;
+}
+
+p, li {
+  line-height: 1.65;
+  color: var(--waton-text);
+}
+
+a {
+  color: var(--waton-accent);
+  text-decoration: none;
+  transition: var(--waton-transition);
+}
+
+a:hover {
+  color: var(--waton-accent-hover);
+  text-decoration: underline;
+}
+
+/* Hero Section (Clean Minimalist, No Glow/Orbs) */
 .waton-hero-shell {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(114, 227, 255, 0.2);
-  border-radius: 18px;
-  padding: 1.05rem 1.1rem 1.1rem;
-  margin: 0.45rem 0 1.2rem;
-  background: linear-gradient(155deg, rgba(17, 29, 52, 0.92), rgba(12, 21, 40, 0.76));
-  box-shadow: 0 16px 42px rgba(3, 8, 18, 0.42);
-}
-
-.waton-hero-shell::after {
-  content: "";
-  position: absolute;
-  width: 220px;
-  height: 220px;
-  right: -80px;
-  top: -100px;
-  background: radial-gradient(circle, rgba(114, 227, 255, 0.2) 0%, transparent 68%);
-  pointer-events: none;
+  background-color: var(--waton-surface);
+  border: 1px solid var(--waton-border);
+  border-radius: var(--waton-radius-lg);
+  padding: 1.5rem 1.75rem;
+  margin: 1rem 0 2rem;
+  box-shadow: none;
 }
 
 .waton-kicker {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  margin-bottom: 0.55rem;
-  padding: 0.2rem 0.56rem;
-  border: 1px solid rgba(114, 227, 255, 0.35);
-  border-radius: 999px;
-  font-size: 0.78rem;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--waton-border);
+  border-radius: var(--waton-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #9ad9ff;
+  letter-spacing: 0.04em;
+  color: var(--waton-accent);
+  background-color: var(--waton-bg);
+}
+
+.waton-kicker p {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline;
 }
 
 .waton-kicker::before {
   content: "";
-  width: 7px;
-  height: 7px;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #52c6ff;
-  box-shadow: 0 0 10px rgba(82, 198, 255, 0.75);
+  background-color: var(--waton-accent);
 }
 
+.waton-hero-shell p {
+  margin: 0.5rem 0 0;
+  color: var(--waton-text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.waton-hero-shell strong {
+  color: var(--waton-text);
+  font-size: 1.15rem;
+}
+
+/* Hero Quick Links */
 .waton-hero-links {
-  margin: 1.25rem 0 1.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--waton-border);
 }
 
 .waton-hero-links ul {
@@ -147,7 +272,7 @@ a {
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.625rem;
 }
 
 .waton-hero-links li {
@@ -157,55 +282,31 @@ a {
 .waton-hero-links a {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(160deg, rgba(78, 163, 255, 0.18), rgba(114, 227, 255, 0.1));
-  border: 1px solid rgba(114, 227, 255, 0.32);
+  min-height: 44px; /* Minimum 44px tap target (R-03) */
+  padding: 0.5rem 0.875rem;
+  background-color: var(--waton-bg);
+  border: 1px solid var(--waton-border);
+  border-radius: var(--waton-radius-md);
   color: var(--waton-text);
-  border-radius: 999px;
-  padding: 0.5rem 0.95rem;
-  font-weight: 600;
-  box-shadow: 0 8px 28px rgba(6, 10, 22, 0.34);
-  transition: transform 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.waton-hero-links a::before {
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  line-height: 1;
-}
-
-.waton-hero-links li:nth-child(1) a::before {
-  font-family: "Font Awesome 6 Brands";
-  content: "\f09b";
-}
-
-.waton-hero-links li:nth-child(2) a::before {
-  content: "\f135";
-}
-
-.waton-hero-links li:nth-child(3) a::before {
-  content: "\f5fd";
-}
-
-.waton-hero-links li:nth-child(4) a::before {
-  content: "\f7d9";
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: var(--waton-transition);
 }
 
 .waton-hero-links a:hover {
-  transform: translateY(-1px);
-  color: #ffffff;
-  border-color: rgba(114, 227, 255, 0.55);
+  background-color: var(--waton-surface-hover);
+  border-color: var(--waton-accent);
+  color: var(--waton-accent);
+  text-decoration: none;
 }
 
-.waton-hero-links a:focus-visible {
-  outline: 2px solid #81d7ff;
-  outline-offset: 2px;
-}
-
+/* Feature Grid Cards */
 .waton-feature-grid {
-  margin: 0.5rem 0 2rem;
+  width: 100%;
+  margin: 1.5rem 0 2.5rem;
   border-collapse: separate;
-  border-spacing: 0.85rem;
+  border-spacing: 0.75rem;
   table-layout: fixed;
 }
 
@@ -218,104 +319,214 @@ a {
 
 .waton-feature-card {
   height: 100%;
-  background: linear-gradient(180deg, rgba(17, 29, 52, 0.95), rgba(17, 29, 52, 0.75));
+  background-color: var(--waton-surface);
   border: 1px solid var(--waton-border);
-  border-radius: 14px;
-  padding: 0.95rem 1rem;
-  box-shadow: 0 12px 30px rgba(5, 9, 19, 0.35);
-  transition: transform 0.18s ease, border-color 0.18s ease;
+  border-radius: var(--waton-radius-lg);
+  padding: 1.25rem;
+  transition: var(--waton-transition);
 }
 
 .waton-feature-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(114, 227, 255, 0.45);
+  border-color: var(--waton-border-strong);
 }
 
-.waton-feature-card h3 {
-  margin: 0 0 0.35rem;
+.waton-feature-card p:first-child {
+  margin: 0 0 0.4rem;
+}
+
+.waton-feature-card strong {
+  display: block;
   font-size: 1rem;
-  color: #f0f5ff;
+  font-weight: 600;
+  color: var(--waton-text);
 }
 
-.waton-feature-card p {
+.waton-feature-card p:last-child {
   margin: 0;
-  font-size: 0.92rem;
-  color: var(--waton-muted);
+  font-size: 0.875rem;
+  color: var(--waton-text-muted);
+  line-height: 1.5;
 }
 
+/* Code Blocks */
+pre,
 .highlight pre,
-pre {
-  background: #0d1529;
-  border: 1px solid #1f2f4d;
-  border-radius: 12px;
+div.highlight {
+  background-color: var(--waton-code-bg) !important;
+  border: 1px solid var(--waton-code-border) !important;
+  border-radius: var(--waton-radius-md) !important;
+  font-family: var(--waton-font-mono) !important;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
+code {
+  font-family: var(--waton-font-mono) !important;
+  font-size: 0.875em;
+  background-color: var(--waton-surface);
+  border: 1px solid var(--waton-border);
+  border-radius: var(--waton-radius-sm);
+  padding: 0.15em 0.35em;
+  color: var(--waton-text);
+}
+
+pre code {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* Sidebar Styling (Clean & Minimal) */
 .bd-sidebar-primary,
 .bd-sidebar-secondary {
-  background: rgba(11, 18, 34, 0.72);
-  border-right: 1px solid rgba(114, 227, 255, 0.14);
+  background-color: var(--waton-bg) !important;
+  border-right: 1px solid var(--waton-border) !important;
 }
 
 .bd-sidebar-primary .sidebar-primary-item,
 .bd-sidebar-secondary .sidebar-secondary-item {
-  background: linear-gradient(180deg, rgba(15, 25, 46, 0.9), rgba(12, 22, 39, 0.82));
-  border: 1px solid rgba(114, 227, 255, 0.12);
-  border-radius: 12px;
-  padding: 0.65rem 0.7rem;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 0.25rem !important;
 }
 
 .bd-sidebar-primary .toctree-l1 > .reference,
 .bd-sidebar-secondary .toc-entry > .nav-link {
-  border-radius: 8px;
-  background: transparent;
-}
-
-.bd-sidebar-primary .toctree-l1.current > .reference,
-.bd-sidebar-primary .toctree-l1.current.active > .reference,
-.bd-sidebar-secondary .toc-entry > .nav-link.active {
-  background: rgba(78, 163, 255, 0.2) !important;
-  border: 1px solid rgba(114, 227, 255, 0.32);
-  color: #ffffff !important;
+  border-radius: var(--waton-radius-sm);
+  padding: 0.375rem 0.625rem;
+  color: var(--waton-text-muted) !important;
+  font-size: 0.875rem;
+  transition: var(--waton-transition);
 }
 
 .bd-sidebar-primary .toctree-l1 > .reference:hover,
 .bd-sidebar-secondary .toc-entry > .nav-link:hover {
-  background: rgba(78, 163, 255, 0.12);
+  background-color: var(--waton-surface);
+  color: var(--waton-text) !important;
+  text-decoration: none;
 }
 
-.toc-entry a.nav-link.active {
-  color: #ffffff;
+.bd-sidebar-primary .toctree-l1.current > .reference,
+.bd-sidebar-secondary .toc-entry > .nav-link.active {
+  background-color: var(--waton-accent-subtle) !important;
+  color: var(--waton-accent) !important;
   font-weight: 600;
+  border-left: 2px solid var(--waton-accent);
 }
 
-.admonition.note {
-  border: 1px solid rgba(114, 227, 255, 0.4);
-  border-left: 4px solid #52c6ff;
-  background: linear-gradient(180deg, rgba(14, 27, 47, 0.93), rgba(12, 23, 42, 0.76));
-  border-radius: 12px;
+/* Admonitions (Clean Technical Callouts) */
+.admonition {
+  background-color: var(--waton-surface) !important;
+  border: 1px solid var(--waton-border) !important;
+  border-left: 3px solid var(--waton-accent) !important;
+  border-radius: var(--waton-radius-md) !important;
+  box-shadow: none !important;
+  margin: 1.25rem 0;
+  padding: 0.875rem 1rem !important;
 }
 
-@media (max-width: 860px) {
+.admonition .admonition-title {
+  background: transparent !important;
+  color: var(--waton-text) !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.admonition p {
+  color: var(--waton-text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Tables (Minimalist & Clean) */
+table.table,
+table.docutils {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  border: 1px solid var(--waton-border);
+  border-radius: var(--waton-radius-md);
+  overflow: hidden;
+}
+
+table.table th,
+table.docutils th {
+  background-color: var(--waton-surface);
+  color: var(--waton-text);
+  font-weight: 600;
+  border-bottom: 1px solid var(--waton-border);
+  padding: 0.625rem 0.875rem;
+  text-align: left;
+}
+
+table.table td,
+table.docutils td {
+  border-bottom: 1px solid var(--waton-border);
+  padding: 0.625rem 0.875rem;
+  color: var(--waton-text);
+}
+
+table.table tr:last-child td,
+table.docutils tr:last-child td {
+  border-bottom: none;
+}
+
+/* Prev / Next Navigation */
+.prev-next-area {
+  border-top: 1px solid var(--waton-border);
+  padding-top: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.prev-next-area a {
+  border: 1px solid var(--waton-border) !important;
+  border-radius: var(--waton-radius-md) !important;
+  background-color: var(--waton-surface) !important;
+  transition: var(--waton-transition);
+  padding: 0.75rem 1rem !important;
+}
+
+.prev-next-area a:hover {
+  border-color: var(--waton-accent) !important;
+  background-color: var(--waton-surface-hover) !important;
+  text-decoration: none;
+}
+
+/* Mobile & Responsive Breakpoints (R-03) */
+@media (max-width: 768px) {
+  .bd-main .bd-content .bd-article-container {
+    padding: 1rem 1rem 2rem;
+  }
+
   .waton-hero-shell {
-    padding: 0.95rem 0.9rem 1rem;
-    border-radius: 14px;
+    padding: 1.25rem 1.25rem;
   }
 
   .waton-hero-links ul {
-    gap: 0.55rem;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .waton-hero-links a {
-    padding: 0.44rem 0.78rem;
-    font-size: 0.9rem;
+    width: 100%;
+    justify-content: center;
   }
 
   .waton-feature-grid {
-    border-spacing: 0.5rem;
+    display: block;
+    margin: 1rem 0 2rem;
   }
 
-  .bd-sidebar-primary,
-  .bd-sidebar-secondary {
-    border-right: none;
+  .waton-feature-grid tbody,
+  .waton-feature-grid tr,
+  .waton-feature-grid td {
+    display: block;
+    width: 100%;
+  }
+
+  .waton-feature-grid td {
+    margin-bottom: 0.75rem;
   }
 }
