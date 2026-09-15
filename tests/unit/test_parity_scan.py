@@ -1,12 +1,22 @@
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 from tools.parity.scan_baileys_parity import scan_parity
+
+ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_WATON_ROOT = os.environ.get("WATON_ROOT", str(ROOT / "waton"))
+DEFAULT_BAILEYS_SRC = os.environ.get(
+    "BAILEYS_SRC",
+    str(ROOT / "repos" / "Baileys" / "src" if (ROOT / "repos" / "Baileys" / "src").exists() else ROOT / "waton"),
+)
 
 
 def test_parity_scan_reports_core_domains() -> None:
     report = scan_parity(
-        waton_root=r"C:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton",
-        baileys_src=r"C:\Users\Arvy Kairi\Desktop\whatsapp\Baileys\src",
+        waton_root=DEFAULT_WATON_ROOT,
+        baileys_src=DEFAULT_BAILEYS_SRC,
     )
     assert "messages-recv" in report["domains"]
     assert "messages-send" in report["domains"]
@@ -22,8 +32,8 @@ def test_parity_scan_reports_core_domains() -> None:
 
 def test_parity_scan_includes_metrics() -> None:
     report = scan_parity(
-        waton_root=r"C:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton",
-        baileys_src=r"C:\Users\Arvy Kairi\Desktop\whatsapp\Baileys\src",
+        waton_root=DEFAULT_WATON_ROOT,
+        baileys_src=DEFAULT_BAILEYS_SRC,
     )
     recv = report["domains"]["messages-recv"]
     assert recv["status"] in {"missing", "partial", "done"}
@@ -34,8 +44,8 @@ def test_parity_scan_includes_metrics() -> None:
 
 def test_parity_scan_includes_baileys_v7_delta_matrix() -> None:
     report = scan_parity(
-        waton_root=r"C:\Users\Arvy Kairi\Desktop\whatsapp\waton\waton",
-        baileys_src=r"C:\Users\Arvy Kairi\Desktop\whatsapp\Baileys\src",
+        waton_root=DEFAULT_WATON_ROOT,
+        baileys_src=DEFAULT_BAILEYS_SRC,
     )
 
     matrix = report["baileys_v7"]

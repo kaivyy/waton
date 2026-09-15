@@ -213,9 +213,11 @@ async def _extract_message_payload(node: BinaryNode, signal_repo: SignalReposito
         last_error: Exception | None = None
         for jid in candidates:
             try:
-                return await signal_repo.decrypt_message(
-                    jid, enc_type, ciphertext, group_jid=group_jid
-                )
+                if group_jid:
+                    return await signal_repo.decrypt_message(
+                        jid, enc_type, ciphertext, group_jid=group_jid
+                    )
+                return await signal_repo.decrypt_message(jid, enc_type, ciphertext)
             except Exception as exc:  # pragma: no cover - candidate fallback
                 last_error = exc
 
