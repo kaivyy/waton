@@ -48,6 +48,8 @@ class MessageKey:
 class ReactionMessage:
     key: MessageKey = field(default_factory=MessageKey)
     text: str = ""
+    groupingKey: str = ""
+    senderTimestampMs: int = 0
 
     def SerializeToString(self) -> bytes:
         key_payload = self.key.SerializeToString()
@@ -55,6 +57,8 @@ class ReactionMessage:
             (
                 encode_len_delimited(1, key_payload) if key_payload else b"",
                 encode_string(2, self.text),
+                encode_string(3, self.groupingKey),
+                encode_varint_field(4, self.senderTimestampMs) if self.senderTimestampMs else b"",
             )
         )
 
@@ -64,19 +68,29 @@ class ReactionMessage:
                 self.key.ParseFromString(bytes(value))
             elif wire_type == 2 and field_no == 2:
                 self.text = bytes(value).decode("utf-8", errors="ignore")
+            elif wire_type == 2 and field_no == 3:
+                self.groupingKey = bytes(value).decode("utf-8", errors="ignore")
+            elif wire_type == 0 and field_no == 4:
+                self.senderTimestampMs = int(value)
 
 
 @dataclass
 class ExtendedTextMessage:
     text: str = ""
+    contextInfo: bytes = b""
 
     def SerializeToString(self) -> bytes:
-        return encode_string(1, self.text)
+        parts = [encode_string(1, self.text)]
+        if self.contextInfo:
+            parts.append(encode_len_delimited(17, self.contextInfo))
+        return b"".join(parts)
 
     def ParseFromString(self, data: bytes) -> None:
         for field_no, wire_type, value in iter_fields(data):
             if wire_type == 2 and field_no == 1:
                 self.text = bytes(value).decode("utf-8", errors="ignore")
+            elif wire_type == 2 and field_no == 17:
+                self.contextInfo = bytes(value)
 
 
 @dataclass
@@ -91,6 +105,7 @@ class ImageMessage:
     mediaKey: bytes = b""
     fileEncSha256: bytes = b""
     directPath: str = ""
+    contextInfo: bytes = b""
 
     def SerializeToString(self) -> bytes:
         parts: list[bytes] = []
@@ -110,6 +125,8 @@ class ImageMessage:
             parts.append(encode_len_delimited(9, self.fileEncSha256))
         if self.directPath:
             parts.append(encode_string(10, self.directPath))
+        if self.contextInfo:
+            parts.append(encode_len_delimited(17, self.contextInfo))
         return b"".join(parts)
 
     def ParseFromString(self, data: bytes) -> None:
@@ -120,6 +137,8 @@ class ImageMessage:
                 self.mimetype = bytes(value).decode("utf-8", "ignore")
             elif wire_type == 2 and field_no == 3:
                 self.caption = bytes(value).decode("utf-8", "ignore")
+            elif wire_type == 2 and field_no == 17:
+                self.contextInfo = bytes(value)
 
 class Message:
     class _NoDeviceSentMessage:

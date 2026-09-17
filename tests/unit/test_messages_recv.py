@@ -137,6 +137,69 @@ async def test_decode_plain_reaction_message_event() -> None:
 
 
 @pytest.mark.asyncio
+async def test_decode_plain_reaction_unreact_and_group_participant() -> None:
+    class FakeRepo:
+        async def decrypt_message(self, jid: str, type_str: str, ciphertext: bytes) -> bytes:
+            del jid, type_str, ciphertext
+            raise AssertionError("decrypt_message must not be called for plaintext node")
+
+    payload = wa_pb2.Message()
+    payload.reactionMessage.key.id = "msg-456"
+    payload.reactionMessage.key.remoteJid = "group-123@g.us"
+    payload.reactionMessage.key.participant = "author@s.whatsapp.net"
+    payload.reactionMessage.text = ""
+
+    event = await decode_incoming_message_node(
+        BinaryNode(
+            tag="message",
+            attrs={"id": "m-unreact", "from": "group-123@g.us", "participant": "reactor@s.whatsapp.net"},
+            content=payload.SerializeToString(),
+        ),
+        FakeRepo(),
+    )
+    assert event["type"] == "messages.reaction"
+    assert event["reaction"]["target_id"] == "msg-456"
+    assert event["reaction"]["target_participant"] == "author@s.whatsapp.net"
+    assert event["reaction"]["participant"] == "reactor@s.whatsapp.net"
+    assert event["reaction"]["is_removal"] is True
+    assert event["reaction"]["text"] == ""
+
+
+@pytest.mark.asyncio
+async def test_decode_incoming_message_node_extracts_context_info() -> None:
+    class FakeRepo:
+        async def decrypt_message(self, jid: str, type_str: str, ciphertext: bytes) -> bytes:
+            del jid, type_str, ciphertext
+            raise AssertionError("decrypt_message must not be called for plaintext node")
+
+    quoted = _encode_string(1, "Quoted hello")
+    ctx = (
+        _encode_string(1, "target-id-1")
+        + _encode_string(2, "someone@s.whatsapp.net")
+        + _encode_len_delimited(3, quoted)
+        + _encode_string(15, "mention1@s.whatsapp.net")
+    )
+    ext = _encode_string(1, "Reply text") + _encode_len_delimited(17, ctx)
+    payload = _encode_len_delimited(6, ext)
+
+    event = await decode_incoming_message_node(
+        BinaryNode(
+            tag="message",
+            attrs={"id": "m-reply-1", "from": "chat@s.whatsapp.net"},
+            content=payload,
+        ),
+        FakeRepo(),
+    )
+    assert event["type"] == "messages.upsert"
+    assert event["message"]["text"] == "Reply text"
+    assert event["message"]["context_info"] is not None
+    assert event["message"]["context_info"]["stanza_id"] == "target-id-1"
+    assert event["message"]["context_info"]["participant"] == "someone@s.whatsapp.net"
+    assert event["message"]["context_info"]["mentioned_jid"] == ["mention1@s.whatsapp.net"]
+    assert event["message"]["context_info"]["quoted_message"]["text"] == "Quoted hello"
+
+
+@pytest.mark.asyncio
 async def test_decode_plain_document_message_event() -> None:
     class FakeRepo:
         async def decrypt_message(self, jid: str, type_str: str, ciphertext: bytes) -> bytes:

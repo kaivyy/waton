@@ -32,10 +32,22 @@ class Context:
         return self.message.participant or self.message.from_jid
 
     async def reply(self, text: str) -> str:
-        return await self.app.messages.send_text(self.from_jid, text)
+        try:
+            return await self.app.messages.send_text(
+                self.from_jid,
+                text,
+                quoted=self.message,
+            )
+        except TypeError:
+            return await self.app.messages.send_text(self.from_jid, text)
 
-    async def react(self, emoji: str) -> str:
-        return await self.app.messages.send_reaction(self.from_jid, self.message.id, emoji)
+    async def react(self, emoji: str | None) -> str:
+        return await self.app.messages.send_reaction(
+            self.from_jid,
+            self.message.id,
+            emoji or "",
+            participant=self.message.participant,
+        )
 
     async def forward(self, to_jid: str) -> None:
         node = BinaryNode(
@@ -45,10 +57,17 @@ class Context:
         )
         await self.app.client.send_node(node)
 
-    async def delete(self) -> None:
-        node = BinaryNode(
-            tag="protocol",
-            attrs={"type": "revoke", "to": self.from_jid, "id": self.message.id},
+    async def delete(self) -> str:
+        me_jid = (
+            self.app.client.creds.me["id"]
+            if self.app.client.creds and self.app.client.creds.me
+            else ""
         )
-        await self.app.client.send_node(node)
+        from_me = (self.message.participant or self.message.from_jid) == me_jid
+        return await self.app.messages.send_delete(
+            self.from_jid,
+            self.message.id,
+            participant=self.message.participant,
+            from_me=from_me,
+        )
 

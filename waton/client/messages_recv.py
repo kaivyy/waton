@@ -28,12 +28,12 @@ def _unpad_random_max16(plaintext: bytes) -> bytes:
     if not plaintext:
         return plaintext
     pad_len = plaintext[-1]
-    if pad_len == 0 or pad_len > len(plaintext):
+    if pad_len < 1 or pad_len > 16 or len(plaintext) < pad_len:
         return plaintext
-    for idx in range(1, pad_len + 1):
-        if plaintext[-idx] != pad_len:
-            return plaintext
+    if plaintext[-pad_len:] != bytes([pad_len] * pad_len):
+        return plaintext
     return plaintext[:-pad_len]
+
 
 
 def _children(node: BinaryNode) -> list[BinaryNode]:
@@ -194,6 +194,8 @@ def classify_incoming_node(node: BinaryNode) -> str:
         return "notification"
     if node.tag == "call":
         return "call"
+    if node.tag in {"presence", "chatstate"}:
+        return "presence"
     if node.tag == "ack":
         return "ack"
     if node.tag == "ib":
@@ -267,7 +269,11 @@ async def decode_incoming_message_node(node: BinaryNode, signal_repo: SignalRepo
         "content_type": summary["content_type"],
         "content": summary["content"],
         "message_secret_b64": summary["message_secret_b64"],
+        "context_info": summary.get("context_info"),
+        "is_view_once": summary.get("is_view_once", False),
+        "is_ephemeral": summary.get("is_ephemeral", False),
     }
+
 
     protocol = extract_protocol_message(payload)
     if protocol is not None:
@@ -279,14 +285,20 @@ async def decode_incoming_message_node(node: BinaryNode, signal_repo: SignalRepo
 
     reaction = summary["reaction"]
     reaction_target_id = summary["reaction_target_id"]
+    is_removal = summary.get("is_reaction_removal", False)
 
-    if reaction is not None:
+    if reaction is not None or is_removal or summary.get("content_type") == "reaction":
+        reactor_jid = node.attrs.get("participant") or node.attrs.get("from")
         return {
             "type": "messages.reaction",
             "reaction": {
-                "text": reaction,
+                "text": reaction or "",
                 "target_id": reaction_target_id,
+                "target_participant": summary.get("reaction_target_participant"),
                 "from": node.attrs.get("from"),
+                "participant": reactor_jid,
+                "sender": reactor_jid,
+                "is_removal": is_removal,
             },
             "message": message_payload,
         }
@@ -332,14 +344,27 @@ def decode_receipt_node(node: BinaryNode) -> dict[str, Any]:
     retry_payload: dict[str, Any] | None = None
     if is_retry:
         retry_node = _find_nested_child(node, "retry")
+        reg_node = _find_nested_child(node, "registration")
+        keys_node = _find_nested_child(node, "keys")
+        error_attr = retry_node.attrs.get("error") if retry_node else node.attrs.get("error")
+        registration_id = None
+        if reg_node and isinstance(reg_node.content, (bytes, bytearray)):
+            registration_id = int.from_bytes(reg_node.content, "big")
+        elif reg_node and isinstance(reg_node.content, str) and reg_node.content.isdigit():
+            registration_id = int(reg_node.content)
+
         retry_payload = {
             "count": _timestamp(retry_node.attrs.get("count")) if retry_node else 0,
             "id": (retry_node.attrs.get("id") if retry_node else None) or root_id,
             "timestamp": _timestamp(retry_node.attrs.get("t")) if retry_node else 0,
             "version": retry_node.attrs.get("v") if retry_node else None,
+            "error": int(error_attr) if error_attr and str(error_attr).isdigit() else None,
+            "registration_id": registration_id,
+            "keys_node": keys_node,
         }
 
     event_type = "messages.retry_request" if is_retry else "messages.receipt"
+
 
     return {
         "type": event_type,
@@ -634,6 +659,14 @@ def decode_call_node(node: BinaryNode) -> dict[str, Any]:
         is_group = call_child.attrs.get("type") == "group" or bool(call_child.attrs.get("group-jid"))
         is_video = _get_child(call_child, "video") is not None
         group_jid = call_child.attrs.get("group-jid")
+
+    status = call_child.tag if call_child is not None else "unknown"
+    stub_type = None
+    if status == "timeout":
+        stub_type = "CALL_MISSED_VIDEO" if is_video else "CALL_MISSED_VOICE"
+    elif status == "offer":
+        stub_type = "CALL_OFFER"
+
     return {
         "type": "messages.call",
         "call": {
@@ -642,7 +675,8 @@ def decode_call_node(node: BinaryNode) -> dict[str, Any]:
             "id": call_id,
             "timestamp": _timestamp(node.attrs.get("t")),
             "offline": _attr_bool(node.attrs.get("offline")),
-            "status": call_child.tag if call_child is not None else "unknown",
+            "status": status,
+            "stub_type": stub_type,
             "is_video": is_video,
             "is_group": is_group,
             "group_jid": group_jid,
@@ -828,7 +862,13 @@ def build_message_ack(
     return BinaryNode(tag="ack", attrs=attrs)
 
 
-def build_retry_receipt_node(node: BinaryNode, retry_count: int, timestamp: int | None = None) -> BinaryNode:
+def build_retry_receipt_node(
+    node: BinaryNode,
+    retry_count: int,
+    timestamp: int | None = None,
+    registration_id: int | None = None,
+    keys_node: BinaryNode | None = None,
+) -> BinaryNode:
     message_id = node.attrs.get("id", "")
     attrs: dict[str, str] = {
         "to": node.attrs.get("from", "s.whatsapp.net"),
@@ -838,6 +878,9 @@ def build_retry_receipt_node(node: BinaryNode, retry_count: int, timestamp: int 
     participant = node.attrs.get("participant")
     if participant:
         attrs["participant"] = participant
+    recipient = node.attrs.get("recipient")
+    if recipient:
+        attrs["recipient"] = recipient
 
     retry_ts = int(time.time()) if timestamp is None else int(timestamp)
     retry_child = BinaryNode(
@@ -847,9 +890,99 @@ def build_retry_receipt_node(node: BinaryNode, retry_count: int, timestamp: int 
             "id": message_id,
             "t": str(retry_ts),
             "v": "1",
+            "error": "0",
         },
     )
-    return BinaryNode(tag="receipt", attrs=attrs, content=[retry_child])
+    content: list[BinaryNode] = [retry_child]
+    if registration_id is not None:
+        content.append(
+            BinaryNode(tag="registration", attrs={}, content=int(registration_id).to_bytes(4, "big"))
+        )
+    if keys_node is not None:
+        content.append(keys_node)
+
+    return BinaryNode(tag="receipt", attrs=attrs, content=content)
+
+
+def build_retry_keys_node(
+    *,
+    identity_key_public: bytes,
+    signed_prekey_public: bytes,
+    signed_prekey_id: int,
+    signed_prekey_signature: bytes,
+    prekey_public: bytes | None = None,
+    prekey_id: int | None = None,
+    device_identity: bytes | None = None,
+) -> BinaryNode:
+    """Constructs the <keys> bundle for retry receipts so peer can establish session."""
+    keys_content: list[BinaryNode] = [
+        BinaryNode(tag="type", attrs={}, content=b"\x05"),
+        BinaryNode(tag="identity", attrs={}, content=identity_key_public),
+    ]
+    if prekey_public is not None and prekey_id is not None:
+        keys_content.append(
+            BinaryNode(
+                tag="key",
+                attrs={},
+                content=[
+                    BinaryNode(tag="id", attrs={}, content=int(prekey_id).to_bytes(3, "big")),
+                    BinaryNode(tag="value", attrs={}, content=prekey_public),
+                ],
+            )
+        )
+    skey_content: list[BinaryNode] = [
+        BinaryNode(tag="id", attrs={}, content=int(signed_prekey_id).to_bytes(3, "big")),
+        BinaryNode(tag="value", attrs={}, content=signed_prekey_public),
+        BinaryNode(tag="signature", attrs={}, content=signed_prekey_signature),
+    ]
+    keys_content.append(BinaryNode(tag="skey", attrs={}, content=skey_content))
+    if device_identity is not None:
+        keys_content.append(BinaryNode(tag="device-identity", attrs={}, content=device_identity))
+
+    return BinaryNode(tag="keys", attrs={}, content=keys_content)
+
+
+def decode_presence_node(node: BinaryNode) -> dict[str, Any]:
+    from_jid = node.attrs.get("from", "")
+    participant = node.attrs.get("participant") or from_jid
+    presence_info: dict[str, Any] = {}
+    if node.tag == "presence":
+        presence_info["last_known_presence"] = (
+            "unavailable" if node.attrs.get("type") == "unavailable" else "available"
+        )
+        last_seen = node.attrs.get("last")
+        if last_seen and last_seen != "deny":
+            try:
+                presence_info["last_seen"] = int(last_seen)
+            except (ValueError, TypeError):
+                pass
+        if "count" in node.attrs:
+            try:
+                presence_info["group_online_count"] = int(node.attrs["count"])
+            except (ValueError, TypeError):
+                pass
+    elif node.tag == "chatstate":
+        children = _children(node)
+        if children:
+            child = children[0]
+            tag = child.tag
+            if tag == "composing" and child.attrs.get("media") == "audio":
+                presence_info["last_known_presence"] = "recording"
+            else:
+                presence_info["last_known_presence"] = tag
+            if "media" in child.attrs:
+                presence_info["media"] = child.attrs["media"]
+        else:
+            presence_info["last_known_presence"] = "available"
+
+    return {
+        "type": "presence.update",
+        "presence": {
+            "id": from_jid,
+            "presences": {participant: presence_info},
+        },
+    }
+
 
 
 def build_call_reject_node(
@@ -920,13 +1053,14 @@ class OfflineNodeProcessor:
         "receipt",
         "notification",
         "call",
+        "presence",
         "ack",
         "ib",
         "message",
         "other",
     )
 
-    def __init__(self, *, max_queue_size: int = 1024) -> None:
+    def __init__(self, *, max_queue_size: int = 10000) -> None:
         self.max_queue_size = max(1, int(max_queue_size))
         self._lanes: dict[str, list[BinaryNode]] = {lane: [] for lane in self._PRIORITY_LANES}
 
@@ -950,7 +1084,7 @@ class OfflineNodeProcessor:
         self._lanes[lane].append(node)
 
     def _drop_oldest_low_priority(self) -> None:
-        for lane in ("other", "message", "ib", "ack", "call", "notification", "receipt"):
+        for lane in ("other", "message", "ib", "ack", "presence", "call", "notification", "receipt"):
             if self._lanes[lane]:
                 self._lanes[lane].pop(0)
                 return
@@ -1009,6 +1143,8 @@ async def normalize_incoming_node(node: BinaryNode, signal_repo: SignalRepositor
         return decode_notification_node(node)
     if kind == "call":
         return decode_call_node(node)
+    if kind == "presence":
+        return decode_presence_node(node)
     if kind == "ack":
         return decode_ack_node(node)
     if kind == "ib":

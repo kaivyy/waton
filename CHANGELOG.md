@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-09-17
+
+### Added
+- Root-level WhatsApp Web v2 / Baileys v7 protocol parity across message routing, crypto sessions, and client APIs.
+- Comprehensive Noise handshake certificate chain validation verifying WhatsApp root authority signatures and serial numbers against `WA_CERT_PUBLIC_KEY`.
+- Homomorphic lattice-based LT-Hash computation support for App State Sync mutations via `make_lt_hash_generator` and `subtract_then_add`.
+- Native multi-device agent ID serialization and deserialization for `AD_JID` (tag 247) binary encoding and decoding.
+- Full metadata parsing for newsletter / channel operations including creation timestamp, subscriber count, verification badge, picture path, invite link, and viewer mute state.
+- Modernized blocklist management with phone number to LID resolution and mandatory `pn_jid` attribution matching current WhatsApp server requirements.
+- Native Call node decoding support with stub message classification (`CALL_MISSED_VOICE`, `CALL_MISSED_VIDEO`, `CALL_OFFER`).
+- Multi-device `key-index-list` parsing support in USync device queries.
+- Group metadata parity for `desc_owner_pn`, `desc_owner_username`, and participant `username` fields.
+- New test suites covering complete Baileys v7 parity, multi-device edge cases, and root-level protocol gap audits.
+
+### Fixed
+- Fixed transport framing counter overflow protection in `TransportState` to prevent AES-GCM IV reuse on long-lived connections.
+- Fixed atomic frame encoding and transmission concurrency with asynchronous write locks in `WAClient.send_node`.
+- Fixed connection teardown lifecycle to clean stale WebSocket frame queues, reject hanging IQ queries immediately, and flush buffered events before socket termination.
+- Fixed 1:1 chat sender receipt routing in `build_receipt_node` to properly set recipient attribution and companion device targeting.
+- Fixed media message encryption nodes to include explicit `mediatype` attributes required by WhatsApp media distribution infrastructure.
+- Fixed reaction message stanza attributes to include `decrypt-fail="hide"` preventing UI decryption placeholders on legacy clients.
+- Fixed community announcement group detection using canonical `default_sub_group` tag with backwards-compatible fallback.
+- Fixed USync error node handling to propagate server error status codes rather than silently returning empty dictionaries.
+- Fixed hex nibble decoding in binary codec to preserve exact lowercase string casing and avoid hash mutations.
+- Fixed newsletter channel creation to pass inline picture payload data without discarding bytes.
+- Fixed blocklist fetch query to send clean parameterless IQ get stanzas matching RFC and reference standards.
+- Fixed Signal PreKey message decryption to extract and persist sender identity keys.
+
+### Changed
+- Advanced version metadata to `0.1.6` across `pyproject.toml`, `Cargo.toml`, `Cargo.lock`, and `waton/__init__.py`.
+- Updated test assertions in `tests/unit/test_public_exports.py` to target `0.1.6`.
+- Updated documentation installation targets and references to `waton==0.1.6`.
+
 ## [0.1.5] - 2026-09-15
 
 ### Added

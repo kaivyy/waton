@@ -20,7 +20,13 @@ pub fn generate_keypair() -> HashMap<String, Vec<u8>> {
 }
 
 pub fn shared_key(private_bytes: &[u8], public_bytes: &[u8]) -> Result<Vec<u8>, String> {
-    if private_bytes.len() != 32 || public_bytes.len() != 32 {
+    let pub_slice = if public_bytes.len() == 33 && public_bytes[0] == 0x05 {
+        &public_bytes[1..]
+    } else {
+        public_bytes
+    };
+
+    if private_bytes.len() != 32 || pub_slice.len() != 32 {
         return Err("Keys must be 32 bytes".to_string());
     }
 
@@ -29,7 +35,7 @@ pub fn shared_key(private_bytes: &[u8], public_bytes: &[u8]) -> Result<Vec<u8>, 
     let secret = StaticSecret::from(priv_arr);
 
     let mut pub_arr = [0u8; 32];
-    pub_arr.copy_from_slice(public_bytes);
+    pub_arr.copy_from_slice(pub_slice);
     let public_key = PublicKey::from(pub_arr);
 
     let shared_secret = secret.diffie_hellman(&public_key);
@@ -104,7 +110,13 @@ pub fn sign(private_bytes: &[u8], message: &[u8]) -> Result<Vec<u8>, String> {
 }
 
 pub fn verify(public_bytes: &[u8], message: &[u8], signature_bytes: &[u8]) -> Result<bool, String> {
-    if public_bytes.len() != 32 {
+    let pub_slice = if public_bytes.len() == 33 && public_bytes[0] == 0x05 {
+        &public_bytes[1..]
+    } else {
+        public_bytes
+    };
+
+    if pub_slice.len() != 32 {
         return Err("Public key must be 32 bytes".to_string());
     }
     if signature_bytes.len() != 64 {
@@ -112,7 +124,7 @@ pub fn verify(public_bytes: &[u8], message: &[u8], signature_bytes: &[u8]) -> Re
     }
 
     let mut montgomery_public = [0u8; 32];
-    montgomery_public.copy_from_slice(public_bytes);
+    montgomery_public.copy_from_slice(pub_slice);
 
     // Convert X25519 Montgomery public key into Ed25519 key using sign=0 convention.
     let edwards_public = MontgomeryPoint(montgomery_public)

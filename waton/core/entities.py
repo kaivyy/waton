@@ -40,6 +40,7 @@ class Message:
     content_type: str | None = None
     content: dict[str, Any] = field(default_factory=_empty_content)
     message_secret_b64: str | None = None
+    context_info: dict[str, Any] | None = None
     raw_node: Any = None
 
 @dataclass

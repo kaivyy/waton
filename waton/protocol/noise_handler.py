@@ -11,15 +11,77 @@ from waton.protocol.binary_codec import decode_binary_node
 
 if TYPE_CHECKING:
     from waton.protocol.binary_node import BinaryNode
-from waton.utils.crypto import aes_decrypt, aes_encrypt, generate_keypair, hkdf, sha256, shared_key
+from waton.protocol.protobuf.wire import iter_fields
+from waton.utils.crypto import (
+    aes_decrypt,
+    aes_encrypt,
+    generate_keypair,
+    hkdf,
+    sha256,
+    shared_key,
+    verify,
+)
 
 EMPTY_AAD = b""
+WA_CERT_PUBLIC_KEY = bytes.fromhex("142375574d0a587166aae71ebe516437c4a28b73e3695c6ce1f7f9545da8ee6b")
+WA_CERT_SERIAL = 0
 
 
 def _generate_iv(counter: int) -> bytes:
     iv = bytearray(12)
-    iv[8:] = struct.pack(">I", counter)
+    iv[8:] = struct.pack(">I", counter & 0xFFFFFFFF)
     return bytes(iv)
+
+
+def validate_noise_cert_chain(cert_payload: bytes) -> None:
+    if not cert_payload:
+        return
+    leaf_bytes = b""
+    intermediate_bytes = b""
+    for f_no, w_type, val in iter_fields(cert_payload):
+        if w_type == 2 and f_no == 1:
+            leaf_bytes = bytes(val)
+        elif w_type == 2 and f_no == 2:
+            intermediate_bytes = bytes(val)
+
+    if not leaf_bytes or not intermediate_bytes:
+        return
+
+    leaf_details = b""
+    leaf_signature = b""
+    for f_no, w_type, val in iter_fields(leaf_bytes):
+        if w_type == 2 and f_no == 1:
+            leaf_details = bytes(val)
+        elif w_type == 2 and f_no == 2:
+            leaf_signature = bytes(val)
+
+    intermediate_details = b""
+    intermediate_signature = b""
+    for f_no, w_type, val in iter_fields(intermediate_bytes):
+        if w_type == 2 and f_no == 1:
+            intermediate_details = bytes(val)
+        elif w_type == 2 and f_no == 2:
+            intermediate_signature = bytes(val)
+
+    if not (leaf_details and leaf_signature and intermediate_details and intermediate_signature):
+        return
+
+    issuer_serial = None
+    intermediate_key = b""
+    for f_no, w_type, val in iter_fields(intermediate_details):
+        if w_type == 0 and f_no == 2:
+            issuer_serial = int(val)
+        elif w_type == 2 and f_no == 3:
+            intermediate_key = bytes(val)
+
+    if intermediate_key and not verify(intermediate_key, leaf_details, leaf_signature):
+        raise ValueError("noise certificate signature invalid")
+
+    if not verify(WA_CERT_PUBLIC_KEY, intermediate_details, intermediate_signature):
+        raise ValueError("noise intermediate certificate signature invalid")
+
+    if issuer_serial is not None and issuer_serial != WA_CERT_SERIAL:
+        raise ValueError("certification match failed: issuer serial mismatch")
 
 
 @dataclass
@@ -30,11 +92,15 @@ class TransportState:
     write_counter: int = 0
 
     def encrypt(self, plaintext: bytes) -> bytes:
+        if self.write_counter >= 0xFFFFFFFF:
+            raise ConnectionResetError("Transport write counter exhausted; reconnect required")
         out = aes_encrypt(plaintext, self.enc_key, _generate_iv(self.write_counter), EMPTY_AAD)
         self.write_counter += 1
         return out
 
     def decrypt(self, ciphertext: bytes) -> bytes:
+        if self.read_counter >= 0xFFFFFFFF:
+            raise ConnectionResetError("Transport read counter exhausted; reconnect required")
         out = aes_decrypt(ciphertext, self.dec_key, _generate_iv(self.read_counter), EMPTY_AAD)
         self.read_counter += 1
         return out
@@ -131,8 +197,9 @@ class NoiseHandler:
 
         payload = bytes(server_hello.payload or b"")
         if payload:
-            # Keep certificate payload parsing/verification optional in this layer.
-            self.decrypt(payload)
+            cert_dec = self.decrypt(payload)
+            if cert_dec:
+                validate_noise_cert_chain(cert_dec)
 
         key_enc = self.encrypt(noise_key["public"])
         self.mix_into_key(shared_key(noise_key["private"], server_ephemeral))

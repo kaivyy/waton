@@ -10,6 +10,7 @@ from waton.core.entities import Message
 from waton.protocol.signal_repo import SignalRepository
 from waton.utils.message_content import parse_message_payload
 from waton.utils.protocol_message import (
+    decrypt_enc_reaction,
     decrypt_event_response,
     decrypt_poll_vote,
     extract_enc_event_response_message,
@@ -56,8 +57,14 @@ class _ContentSummary(TypedDict):
 
 
 def _get_message_secret(client: WAClient, message_id: str) -> bytes | None:
+    if not message_id:
+        return None
+    if hasattr(client, "get_message_secret"):
+        cached = client.get_message_secret(message_id)
+        if isinstance(cached, (bytes, bytearray)):
+            return bytes(cached)
     creds = client.creds
-    if creds is None or not message_id:
+    if creds is None:
         return None
     additional_data = creds.additional_data or {}
     secrets_map = additional_data.get("message_secrets")
@@ -159,7 +166,6 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
                             pn_jid = sender if _is_pn_user(sender) else sender_alt
                             lid_jid = sender if _is_lid_user(sender) else sender_alt
                             await repo.store_lid_pn_mapping(lid_jid, pn_jid)
-                            await repo.migrate_session(pn_jid, lid_jid)
 
                         decryption_candidates: list[str] = []
                         if _is_pn_user(sender):
@@ -174,17 +180,32 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
 
                         tried: set[str] = set()
                         last_error: Exception | None = None
+                        from_jid = str(node.attrs.get("from", ""))
+                        group_jid = from_jid if from_jid.endswith("@g.us") else None
                         for candidate in decryption_candidates:
                             if candidate in tried:
                                 continue
                             tried.add(candidate)
                             try:
-                                decrypted = await repo.decrypt_message(candidate, enc_type, enc_node.content)
+                                if group_jid:
+                                    try:
+                                        decrypted = await repo.decrypt_message(
+                                            candidate, enc_type, enc_node.content, group_jid=group_jid
+                                        )
+                                    except TypeError:
+                                        decrypted = await repo.decrypt_message(
+                                            candidate, enc_type, enc_node.content
+                                        )
+                                else:
+                                    decrypted = await repo.decrypt_message(
+                                        candidate, enc_type, enc_node.content
+                                    )
                                 raw = unpad_random_max16(decrypted)
                                 last_error = None
                                 break
                             except Exception as decrypt_error:
                                 last_error = decrypt_error
+
 
                         if last_error is not None and not raw:
                             raise last_error
@@ -213,9 +234,14 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
         raw_secret = content_summary["message_secret_b64"]
         if isinstance(raw_secret, str):
             message_secret_b64 = raw_secret
+        if content_summary.get("is_reaction_removal"):
+            reaction = ""
+            kind = "reaction"
+        context_info = content_summary.get("context_info")
         protocol = extract_protocol_message(raw)
     else:
         text, media_url, reaction, reaction_target_id, destination_jid, kind = (None, None, None, None, None, "unknown")
+        context_info = None
 
     protocol_type: str | None = None
     protocol_code: int | None = None
@@ -278,6 +304,42 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
         event_response_raw = extract_enc_event_response_message(raw)
         if isinstance(event_response_raw, dict):
             event_response = event_response_raw
+
+    if encrypted_reaction is not None:
+        target_message_id = encrypted_reaction.get("target_message_id")
+        enc_payload_b64 = encrypted_reaction.get("enc_payload_b64")
+        enc_iv_b64 = encrypted_reaction.get("enc_iv_b64")
+        if (
+            isinstance(target_message_id, str)
+            and isinstance(enc_payload_b64, str)
+            and isinstance(enc_iv_b64, str)
+        ):
+            secret = _get_message_secret(client, target_message_id)
+            if secret is not None:
+                try:
+                    target_key_data = encrypted_reaction.get("target_key") or encrypted_reaction.get("target_message_key")
+                    key_jid = _resolve_key_jid(
+                        cast("Mapping[str, object | None] | None", target_key_data),
+                        node.attrs.get("from", ""),
+                    )
+
+                    reactor_jid = node.attrs.get("participant") or node.attrs.get("from", "")
+                    dec = decrypt_enc_reaction(
+                        enc_payload_b64=enc_payload_b64,
+                        enc_iv_b64=enc_iv_b64,
+                        target_message_id=target_message_id,
+                        target_creator_jid=key_jid,
+                        reactor_jid=reactor_jid,
+                        message_secret=secret,
+                    )
+                    encrypted_reaction["decrypted_reaction"] = dec
+                    encrypted_reaction["decrypted"] = True
+                    if not reaction and dec.get("text"):
+                        reaction = dec.get("text")
+                    if not reaction_target_id and target_message_id:
+                        reaction_target_id = target_message_id
+                except Exception as exc:  # pragma: no cover
+                    encrypted_reaction["decrypt_error"] = str(exc)
 
     if poll_update is not None:
         poll_creation_message_id = poll_update.get("poll_creation_message_id")
@@ -352,8 +414,18 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
     elif protocol_type is not None and kind == "unknown":
         kind = "protocol"
 
+    msg_id = node.attrs.get("id", "")
+    if message_secret_b64 and msg_id and hasattr(client, "set_message_secret"):
+        try:
+            client.set_message_secret(
+                msg_id,
+                base64.b64decode(message_secret_b64.encode("ascii")),
+            )
+        except Exception:
+            pass
+
     return Message(
-        id=node.attrs.get("id", ""),
+        id=msg_id,
         from_jid=node.attrs.get("from", ""),
         participant=node.attrs.get("participant"),
         text=text,
@@ -374,6 +446,7 @@ async def process_incoming_message(node: BinaryNode, client: WAClient) -> Messag
         content_type=content_type,
         content=content,
         message_secret_b64=message_secret_b64,
+        context_info=context_info,
         message_type=kind if kind != "unknown" else node.attrs.get("type", "unknown"),
         raw_node=node,
     )

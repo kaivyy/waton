@@ -1186,3 +1186,28 @@ def test_handle_success_uses_server_time_for_unified_session_id(monkeypatch: pyt
         assert unified_nodes[0].content[0].attrs.get("id") == expected_id
 
     _run(_case())
+
+
+def test_client_buffer_events_and_flush() -> None:
+    async def _case() -> None:
+        client = WAClient(_DummyStorage())
+        dispatched_events: list[dict[str, Any]] = []
+
+        async def _on_event(ev: dict[str, Any]) -> None:
+            dispatched_events.append(ev)
+
+        client.on_event = _on_event
+
+        assert hasattr(client, "event_buffer")
+        with client.buffer_events():
+            assert client.event_buffer.is_buffering is True
+            client.event_buffer.process("chats.upsert", [{"id": "123@s.whatsapp.net", "unreadCount": 1}])
+            assert len(dispatched_events) == 0
+
+        assert client.event_buffer.is_buffering is False
+        await asyncio.sleep(0)
+        assert len(dispatched_events) == 1
+        assert dispatched_events[0]["type"] == "chats.upsert"
+
+    _run(_case())
+

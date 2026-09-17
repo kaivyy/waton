@@ -1,9 +1,12 @@
 """Crypto wrappers and helpers using the Rust extension."""
 from __future__ import annotations
 
+import hashlib
 import os
 from collections.abc import Callable, Mapping
 from typing import Any, cast  # noqa: TC006
+
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 try:
     import waton._crypto as _rust_crypto
@@ -50,17 +53,27 @@ def generate_keypair() -> dict[str, bytes]:
     """Generates a Curve25519 keypair."""
     return curve25519_generate_keypair()
 
+def _normalize_pubkey(key: bytes) -> bytes:
+    """Strips 0x05 DJB prefix byte if 33-byte public key is provided."""
+    if len(key) == 33 and key[0] == 0x05:
+        return key[1:]
+    return key
+
+
 def shared_key(private_key: bytes, public_key: bytes) -> bytes:
     """Computes Curve25519 DH shared secret."""
-    return rust_shared_key(private_key, public_key)
+    return rust_shared_key(private_key, _normalize_pubkey(public_key))
+
 
 def sign(private_key: bytes, message: bytes) -> bytes:
     """Signs a message using Curve25519-compatible signature semantics."""
     return rust_sign(private_key, message)
 
+
 def verify(public_key: bytes, message: bytes, signature: bytes) -> bool:
     """Verifies a Curve25519-compatible signature."""
-    return rust_verify(public_key, message, signature)
+    return rust_verify(_normalize_pubkey(public_key), message, signature)
+
 
 def aes_encrypt(plaintext: bytes, key: bytes, iv: bytes, aad: bytes = b"") -> bytes:
     """AES-256-GCM encryption."""
@@ -69,6 +82,9 @@ def aes_encrypt(plaintext: bytes, key: bytes, iv: bytes, aad: bytes = b"") -> by
 def aes_decrypt(ciphertext: bytes, key: bytes, iv: bytes, aad: bytes = b"") -> bytes:
     """AES-256-GCM decryption."""
     return rust_aes_gcm_decrypt(ciphertext, key, iv, aad)
+
+aes_gcm_encrypt = aes_encrypt
+aes_gcm_decrypt = aes_decrypt
 
 def aes_cbc_encrypt(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
     return rust_aes_cbc_encrypt(plaintext, key, iv)
@@ -214,3 +230,42 @@ def group_encrypt(sender_key: bytes, plaintext: bytes) -> tuple[bytes, bytes]:
 def group_decrypt(sender_key: bytes, ciphertext: bytes) -> tuple[bytes, bytes]:
     res = rust_group_decrypt(sender_key, ciphertext)
     return bytes(res["plaintext"]), bytes(res["next_key"])
+
+
+CROCKFORD_CHARACTERS = "123456789ABCDEFGHJKLMNPQRSTVWXYZ"
+
+
+def bytes_to_crockford(data: bytes) -> str:
+    """Encodes arbitrary bytes to Crockford base32."""
+    value = 0
+    bit_count = 0
+    crockford: list[str] = []
+    for byte in data:
+        value = (value << 8) | (byte & 0xFF)
+        bit_count += 8
+        while bit_count >= 5:
+            crockford.append(CROCKFORD_CHARACTERS[(value >> (bit_count - 5)) & 31])
+            bit_count -= 5
+    if bit_count > 0:
+        crockford.append(CROCKFORD_CHARACTERS[(value << (5 - bit_count)) & 31])
+    return "".join(crockford)
+
+
+def derive_pairing_code_key(pairing_code: str, salt: bytes) -> bytes:
+    """Derives pairing code encryption key using PBKDF2-HMAC-SHA256 (131072 iterations)."""
+    return hashlib.pbkdf2_hmac("sha256", pairing_code.encode("utf-8"), salt, 131072, 32)
+
+
+def aes_ctr_encrypt(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
+    """AES-256-CTR encryption."""
+    cipher = Cipher(algorithms.AES(key), modes.CTR(iv))
+    encryptor = cipher.encryptor()
+    return encryptor.update(plaintext) + encryptor.finalize()
+
+
+def aes_ctr_decrypt(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
+    """AES-256-CTR decryption."""
+    cipher = Cipher(algorithms.AES(key), modes.CTR(iv))
+    decryptor = cipher.decryptor()
+    return decryptor.update(ciphertext) + decryptor.finalize()
+

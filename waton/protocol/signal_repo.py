@@ -139,11 +139,12 @@ class SignalRepository:
             kp = generate_keypair()
             # A real implementation serializes the prekey to libsignal format
             # Here we just mock the payload that WA needs
-            key_id = start_id + i
+            key_id = ((start_id + i - 1) % 0xFFFFFF) + 1
             new_keys.append({
                 "keyId": key_id,
                 "keyPair": kp
             })
+
             await self.storage.save_prekey(key_id, kp["private"])
 
         self.creds.next_pre_key_id += count
@@ -212,6 +213,7 @@ class SignalRepository:
 
             p_id = None
             sp_id = None
+            remote_identity_key = None
             i = 0
             while i < len(data):
                 if i >= len(data):
@@ -235,6 +237,9 @@ class SignalRepository:
                         p_id = val
                     elif tag in (2, 6):
                         sp_id = val
+                    elif tag == 5:
+                        remote_reg_id = val
+
                 elif wire_type == 2:
                     length = 0
                     shift = 0
@@ -245,7 +250,10 @@ class SignalRepository:
                         shift += 7
                         if not (b & 0x80):
                             break
+                    val_bytes = data[i : i + length]
                     i += length
+                    if tag == 3:
+                        remote_identity_key = val_bytes
                 elif wire_type == 1:
                     i += 8
                 elif wire_type == 5:
@@ -283,6 +291,8 @@ class SignalRepository:
             session_bytes = cast("bytes", res["session"])
             plaintext_bytes = cast("bytes", res["ciphertext"])
             await self.save_session(jid, session_bytes)
+            if remote_identity_key and hasattr(self.storage, "save_identity"):
+                await self.storage.save_identity(jid, remote_identity_key)
             return plaintext_bytes
 
         elif type_str == "msg":

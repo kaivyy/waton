@@ -167,9 +167,57 @@ def test_chat_modify_supported_actions_emit_query() -> None:
 def test_chat_modify_unknown_action_raises() -> None:
     async def _case() -> None:
         client = _FakeClient()
+    _run(_case())
+
+
+def test_app_patch_with_app_state_keys() -> None:
+    import base64
+    from types import SimpleNamespace
+
+    async def _case() -> None:
+        client = _FakeClient()
+        client.generate_message_tag = lambda: "msg-tag-1"
+        client.creds = SimpleNamespace(
+            my_app_state_key_id=base64.b64encode(b"my-key-id").decode("ascii"),
+            app_state_sync_key=b"k" * 32,
+        )
         api = ChatsAPI(client)
-        with pytest.raises(ValueError, match="Unsupported chat modify action"):
-            await api.chat_modify("123@s.whatsapp.net", "something-invalid")
+
+        await api.star("123@s.whatsapp.net", "MSG123", star=True)
+
+        assert len(client.sent) == 1
+        sent_iq = client.sent[0]
+        assert sent_iq.attrs.get("xmlns") == "w:sync:app:state"
+        sync_node = sent_iq.content[0]
+        col_node = sync_node.content[0]
+        assert col_node.tag == "collection"
+        assert col_node.attrs.get("name") == "regular_low"
+        assert len(col_node.content) == 1
+        patch_node = col_node.content[0]
+        assert patch_node.tag == "patch"
+        assert isinstance(patch_node.content, bytes)
+        assert len(patch_node.content) > 0
 
     _run(_case())
+
+
+def test_app_patch_without_keys_fallback() -> None:
+    async def _case() -> None:
+        client = _FakeClient()
+        client.generate_message_tag = lambda: "msg-tag-2"
+        client.creds = None
+        api = ChatsAPI(client)
+
+        await api.star("123@s.whatsapp.net", "MSG123", star=True)
+
+        assert len(client.sent) == 1
+        sent_iq = client.sent[0]
+        sync_node = sent_iq.content[0]
+        col_node = sync_node.content[0]
+        assert col_node.tag == "collection"
+        assert col_node.attrs.get("version") == "0"
+        assert col_node.content is None
+
+    _run(_case())
+
 

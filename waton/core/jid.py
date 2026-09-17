@@ -71,7 +71,8 @@ def is_jid_user(jid_str: str) -> bool:
 
 def is_lid_user(jid_str: str) -> bool:
     """Checks if a JID is a LID (Linked Identity Device) user."""
-    return jid_str.endswith(f"@{S_WHATSAPP_NET_LID}")
+    return jid_str.endswith(f"@{S_WHATSAPP_NET_LID}") or jid_str.endswith(f"@{S_WHATSAPP_NET_HOSTED_LID}")
+
 
 
 def is_hosted_pn_user(jid_str: str) -> bool:

@@ -19,19 +19,58 @@ if TYPE_CHECKING:
 PROTOCOL_TYPE_NAMES: dict[int, str] = {
     0: "REVOKE",
     3: "EPHEMERAL_SETTING",
+    4: "EPHEMERAL_SYNC_RESPONSE",
     5: "HISTORY_SYNC_NOTIFICATION",
     6: "APP_STATE_SYNC_KEY_SHARE",
+    7: "APP_STATE_SYNC_KEY_REQUEST",
+    8: "MSG_FANOUT_BACKFILL_REQUEST",
+    9: "INITIAL_SECURITY_NOTIFICATION_SETTING_SYNC",
+    10: "APP_STATE_FATAL_EXCEPTION_NOTIFICATION",
+    11: "SHARE_PHONE_NUMBER",
     14: "MESSAGE_EDIT",
+    16: "PEER_DATA_OPERATION_REQUEST_MESSAGE",
     17: "PEER_DATA_OPERATION_REQUEST_RESPONSE_MESSAGE",
+    18: "REQUEST_WELCOME_MESSAGE",
+    19: "BOT_FEEDBACK_MESSAGE",
+    20: "MEDIA_NOTIFY_MESSAGE",
+    21: "CLOUD_API_THREAD_CONTROL_NOTIFICATION",
+    22: "LID_MIGRATION_MAPPING_SYNC",
+    23: "REMINDER_MESSAGE",
+    24: "BOT_MEMU_ONBOARDING_MESSAGE",
+    25: "STATUS_MENTION_MESSAGE",
+    26: "STOP_GENERATION_MESSAGE",
+    27: "LIMIT_SHARING",
+    28: "AI_PSI_METADATA",
+    29: "AI_QUERY_FANOUT",
     30: "GROUP_MEMBER_LABEL_CHANGE",
 }
 
 PROTOCOL_EVENT_TYPES: dict[int, str] = {
     0: "messages.revoke",
     3: "messages.ephemeral_setting",
+    4: "messages.ephemeral_sync_response",
     5: "messages.history_sync",
     6: "messages.app_state_sync_key_share",
+    7: "messages.app_state_sync_key_request",
+    8: "messages.msg_fanout_backfill_request",
+    9: "messages.initial_security_notification_setting_sync",
+    10: "messages.app_state_fatal_exception_notification",
+    11: "messages.share_phone_number",
     14: "messages.edit",
+    16: "messages.peer_data_operation_request",
+    17: "messages.peer_data_operation_request_response",
+    18: "messages.request_welcome_message",
+    19: "messages.bot_feedback",
+    20: "messages.media_notify",
+    21: "messages.cloud_api_thread_control_notification",
+    22: "messages.lid_migration_mapping_sync",
+    23: "messages.reminder",
+    24: "messages.bot_memu_onboarding",
+    25: "messages.status_mention",
+    26: "messages.stop_generation",
+    27: "messages.limit_sharing",
+    28: "messages.ai_psi_metadata",
+    29: "messages.ai_query_fanout",
     30: "messages.group_member_label_change",
 }
 
@@ -132,7 +171,10 @@ def _decode_app_state_sync_key_share(payload: bytes) -> dict[str, Any]:
                 key_data_payload = bytes(nested_value)
                 for data_field_no, data_wire_type, data_value in iter_fields(key_data_payload):
                     if data_field_no == 1 and data_wire_type == 2:
-                        key_item["key_data_size"] = len(bytes(data_value))
+                        raw_key_data = bytes(data_value)
+                        key_item["key_data"] = raw_key_data
+                        key_item["key_data_b64"] = base64.b64encode(raw_key_data).decode("ascii")
+                        key_item["key_data_size"] = len(raw_key_data)
         if key_item:
             keys.append(key_item)
     return {
@@ -324,6 +366,46 @@ def decrypt_event_response(
     out = _decode_event_response_message(plaintext)
     out["sender_jid"] = responder_jid
     return out
+
+
+def _decode_reaction_message(payload: bytes) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for field_no, wire_type, value in iter_fields(payload):
+        if field_no == 1 and wire_type == 2:
+            out["key"] = _decode_message_key(bytes(value))
+        elif field_no == 2 and wire_type == 2:
+            out["text"] = bytes(value).decode("utf-8", errors="replace")
+        elif field_no == 3 and wire_type == 2:
+            out["grouping_key"] = bytes(value).decode("utf-8", errors="replace")
+        elif field_no == 4 and wire_type == 0:
+            out["sender_timestamp_ms"] = int(value)
+    return out
+
+
+def decrypt_enc_reaction(
+    *,
+    enc_payload_b64: str,
+    enc_iv_b64: str,
+    target_message_id: str,
+    target_creator_jid: str,
+    reactor_jid: str,
+    message_secret: bytes,
+) -> dict[str, Any]:
+    enc_payload = base64.b64decode(enc_payload_b64.encode("ascii"))
+    enc_iv = base64.b64decode(enc_iv_b64.encode("ascii"))
+    dec_key = _derive_message_addon_key(
+        addon_label="Enc Reaction",
+        message_id=target_message_id,
+        creator_jid=target_creator_jid,
+        actor_jid=reactor_jid,
+        message_secret=message_secret,
+    )
+    plaintext = aes_decrypt(enc_payload, dec_key, enc_iv, b"")
+    out = _decode_reaction_message(plaintext)
+    out["sender_jid"] = reactor_jid
+    out["target_message_id"] = target_message_id
+    return out
+
 
 
 def extract_protocol_message(payload: bytes) -> dict[str, Any] | None:

@@ -64,11 +64,21 @@ def test_ad_jid_hosted_domains() -> None:
     _write_ad_jid("12345", 0, "hosted", buf_hosted)
     assert buf_hosted[1] == 128
     stream_hosted = io.BytesIO(buf_hosted[1:])
-    assert _read_ad_jid(stream_hosted) == "12345:0@hosted"
+    assert _read_ad_jid(stream_hosted) == "12345@hosted"
+
 
     buf_hosted_lid = bytearray()
     _write_ad_jid("67890", 1, "hosted.lid", buf_hosted_lid)
     assert buf_hosted_lid[1] == 129
     stream_hosted_lid = io.BytesIO(buf_hosted_lid[1:])
     assert _read_ad_jid(stream_hosted_lid) == "67890:1@hosted.lid"
+
+
+def test_packed_nibble_and_hex_encoding_roundtrip() -> None:
+    for val in ["12345", "628123456789", "1700000000.12", "1A2B3C", "ABCDEF0123"]:
+        node = BinaryNode(tag="message", attrs={"id": val})
+        encoded = encode_binary_node(node)
+        decoded = decode_binary_node(encoded)
+        assert decoded.attrs["id"] == val
+
 

@@ -17,6 +17,11 @@ class GroupsAPI:
         )
         group_node = self._find_child(result, "group")
         if group_node is None:
+            error_node = self._find_child(result, "error")
+            if error_node is not None:
+                code = error_node.attrs.get("code", "500")
+                text = error_node.attrs.get("text", "group metadata query failed")
+                raise RuntimeError(f"Group metadata query failed ({code}): {text}")
             raise ValueError("group metadata response missing group node")
         return self._parse_group_node(group_node)
 
@@ -48,11 +53,12 @@ class GroupsAPI:
     async def create_group(self, subject: str, participants: list[str]) -> str:
         """Creates a new group and returns its JID from server response."""
         create_id = os.urandom(6).hex()
+        key = os.urandom(8).hex()
 
         participant_nodes = [BinaryNode(tag="participant", attrs={"jid": p}) for p in participants]
         group_node = BinaryNode(
             tag="create",
-            attrs={"subject": subject},
+            attrs={"subject": subject, "key": key},
             content=participant_nodes,
         )
 
@@ -66,6 +72,7 @@ class GroupsAPI:
         if not jid:
             raise ValueError("create_group response missing group jid")
         return jid
+
 
     async def group_update_subject(self, jid: str, subject: str) -> None:
         await self._group_query(jid, "set", [BinaryNode(tag="subject", attrs={}, content=subject.encode("utf-8"))])
@@ -199,6 +206,34 @@ class GroupsAPI:
             return None
         return self._normalize_group_jid(group_jid)
 
+    async def group_accept_invite_v4(
+        self,
+        group_jid: str,
+        invite_code: str,
+        invite_expiration: int | str,
+        admin_jid: str,
+    ) -> BinaryNode:
+        """Accepts a V4 group invite from an admin."""
+        accept_node = BinaryNode(
+            tag="accept",
+            attrs={
+                "code": str(invite_code),
+                "expiration": str(invite_expiration),
+                "admin": admin_jid,
+            },
+        )
+        node = BinaryNode(
+            tag="iq",
+            attrs={
+                "to": group_jid,
+                "type": "set",
+                "xmlns": "w:g2",
+                "id": os.urandom(6).hex(),
+            },
+            content=[accept_node],
+        )
+        return await self.client.query(node)
+
     async def group_get_invite_info(self, code: str) -> dict[str, Any]:
         result = await self._group_query("@g.us", "get", [BinaryNode(tag="invite", attrs={"code": code})])
         group_node = self._find_child(result, "group")
@@ -216,6 +251,7 @@ class GroupsAPI:
         )
         await self.client.send_node(node)
 
+
     async def add_participants(self, group_jid: str, participants: list[str]) -> None:
         """Adds participants to a group."""
         participant_nodes = [BinaryNode(tag="participant", attrs={"jid": p}) for p in participants]
@@ -227,6 +263,23 @@ class GroupsAPI:
             content=[add_node],
         )
         await self.client.send_node(node)
+
+    async def get_group_invite_link(self, group_jid: str) -> str:
+        """Returns the full https://chat.whatsapp.com/<code> invite link for a group."""
+        code = await self.group_invite_code(group_jid)
+        return f"https://chat.whatsapp.com/{code}"
+
+    async def join_group_with_link(self, link_or_code: str) -> str | None:
+        """Accepts an invite link or code and joins the group. Returns the joined group JID."""
+        clean_code = link_or_code.split("/")[-1]
+        return await self.group_accept_invite(clean_code)
+
+    async def set_group_picture(self, group_jid: str, picture_bytes: bytes) -> None:
+        """Updates group profile picture."""
+        from waton.client.chats import ChatsAPI
+
+        chats = getattr(self.client, "chats", None) or ChatsAPI(self.client)
+        await chats.update_profile_picture(group_jid, picture_bytes)
 
     async def _group_query(self, jid: str, request_type: str, content: list[BinaryNode]) -> BinaryNode:
         query_id = os.urandom(6).hex()
@@ -258,6 +311,7 @@ class GroupsAPI:
                     "admin": participant.attrs.get("type"),
                     "phone_number": participant.attrs.get("phone_number"),
                     "lid": participant.attrs.get("lid"),
+                    "username": participant.attrs.get("username"),
                 }
             )
 
@@ -265,16 +319,24 @@ class GroupsAPI:
 
         return {
             "id": group_id,
+            "addressing_mode": group_node.attrs.get("addressing_mode", "pn"),
             "notify": group_node.attrs.get("notify"),
             "subject_owner": group_node.attrs.get("s_o"),
+            "subject_owner_pn": group_node.attrs.get("s_o_pn"),
+            "subject_owner_username": group_node.attrs.get("s_o_username"),
             "subject_time": subject_time,
             "subject": group_node.attrs.get("subject", ""),
             "owner": group_node.attrs.get("creator"),
+            "owner_pn": group_node.attrs.get("creator_pn"),
+            "owner_username": group_node.attrs.get("creator_username"),
+            "owner_country_code": group_node.attrs.get("creator_country_code"),
             "size": size,
             "creation": cls._to_int(group_node.attrs.get("creation")),
             "description": description,
             "desc_id": description_node.attrs.get("id") if description_node else None,
             "desc_owner": description_node.attrs.get("participant") if description_node else None,
+            "desc_owner_pn": description_node.attrs.get("participant_pn") if description_node else None,
+            "desc_owner_username": description_node.attrs.get("participant_username") if description_node else None,
             "desc_time": desc_time if desc_time > 0 else None,
             "linked_parent": (
                 linked_parent.attrs.get("jid")
@@ -283,6 +345,7 @@ class GroupsAPI:
             ),
             "restrict": cls._find_child(group_node, "locked") is not None,
             "announce": cls._find_child(group_node, "announcement") is not None,
+
             "is_community": cls._find_child(group_node, "parent") is not None,
             "is_community_announce": cls._find_child(group_node, "default_sub_group") is not None,
             "join_approval_mode": cls._find_child(group_node, "membership_approval_mode") is not None,

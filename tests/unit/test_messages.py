@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from base64 import b64encode
 from typing import Any
 
@@ -12,6 +13,7 @@ from waton.protocol.protobuf.wire import _encode_len_delimited, _encode_string, 
 from waton.utils.auth import init_auth_creds
 from waton.utils.crypto import aes_encrypt, hmac_sha256
 from waton.utils.media_utils import derive_media_keys
+from waton.utils.message_content import parse_message_payload
 from waton.utils.process_message import process_incoming_message
 
 
@@ -288,6 +290,159 @@ def test_send_reaction_and_receipt() -> None:
         assert receipt_node.tag == "receipt"
         assert receipt_node.attrs["participant"] == "456@s.whatsapp.net"
         assert len(receipt_node.content) == 2
+
+    _run(_case())
+
+
+def test_send_reaction_group_participant_and_unreact() -> None:
+    async def _case() -> None:
+        client = _FakeClient()
+        api = MessagesAPI(client)
+
+        # 1. Group reaction with target participant
+        rid1 = await api.send_reaction(
+            "group123@g.us",
+            "target-mid-1",
+            "❤️",
+            participant="author@s.whatsapp.net",
+            from_me=False,
+        )
+        assert rid1.startswith("reaction_")
+        assert len(client.sent) == 1
+        node1 = client.sent[0]
+        assert node1.attrs["type"] == "reaction"
+        assert node1.attrs["to"] == "group123@g.us"
+
+        # 2. Unreact (reaction=None or "")
+        rid2 = await api.send_reaction(
+            "group123@g.us",
+            "target-mid-1",
+            None,
+            participant="author@s.whatsapp.net",
+        )
+        assert rid2.startswith("reaction_")
+        assert len(client.sent) == 2
+        node2 = client.sent[1]
+        assert node2.attrs["type"] == "reaction"
+
+    _run(_case())
+
+
+def test_send_reaction_with_message_secret() -> None:
+    async def _case() -> None:
+        client = _FakeClient()
+        api = MessagesAPI(client)
+        secret = os.urandom(32)
+
+        rid = await api.send_reaction(
+            "cag-group@g.us",
+            "mid-cag",
+            "🔥",
+            participant="author@s.whatsapp.net",
+            message_secret=secret,
+        )
+        assert rid.startswith("reaction_")
+        assert len(client.sent) == 1
+        node = client.sent[0]
+        assert node.attrs["type"] == "reaction"
+
+    _run(_case())
+
+
+def test_send_text_with_quoted_message_and_mentions() -> None:
+    async def _case() -> None:
+        client = _FakeClient()
+        api = MessagesAPI(client)
+
+        # Mock send_payload to capture payload directly
+        captured_payloads: list[tuple[str, bytes]] = []
+
+        async def _fake_send_payload(to_jid: str, payload: bytes, **kwargs: Any) -> str:
+            captured_payloads.append((to_jid, payload))
+            return "msg-reply-1"
+
+        api._send_payload = _fake_send_payload  # type: ignore[method-assign]
+
+        quoted_dict = {
+            "id": "quoted-123",
+            "participant": "user1@s.whatsapp.net",
+            "text": "Hello world",
+        }
+        mentions = ["user1@s.whatsapp.net", "user2@s.whatsapp.net"]
+
+        mid = await api.send_text(
+            "group@g.us",
+            "This is a reply",
+            quoted=quoted_dict,
+            mentions=mentions,
+        )
+        assert mid == "msg-reply-1"
+        assert len(captured_payloads) == 1
+        to_jid, raw_payload = captured_payloads[0]
+        assert to_jid == "group@g.us"
+
+        # Verify parsed message contains context_info
+        summary = parse_message_payload(raw_payload)
+        assert summary["text"] == "This is a reply"
+        assert summary["context_info"] is not None
+        ctx = summary["context_info"]
+        assert ctx["stanza_id"] == "quoted-123"
+        assert ctx["participant"] == "user1@s.whatsapp.net"
+        assert ctx["mentioned_jid"] == ["user1@s.whatsapp.net", "user2@s.whatsapp.net"]
+        assert ctx["quoted_message"]["text"] == "Hello world"
+
+    _run(_case())
+
+
+def test_send_media_with_quoted_context_info(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def _case() -> None:
+        client = _FakeClient()
+        api = MessagesAPI(client)
+
+        captured: list[bytes] = []
+
+        async def _fake_send_payload(to_jid: str, payload: bytes, **kwargs: Any) -> str:
+            captured.append(payload)
+            return "media-reply-mid"
+
+        api._send_payload = _fake_send_payload  # type: ignore[method-assign]
+
+        class FakeMediaManager:
+            async def encrypt_and_upload(self, media_type: str, data: bytes) -> dict[str, Any]:
+                return {
+                    "url": "https://cdn.example/doc.pdf",
+                    "fileSha256": b"s" * 32,
+                    "fileEncSha256": b"e" * 32,
+                    "mediaKey": b"k" * 32,
+                    "directPath": "/doc.pdf",
+                    "fileLength": len(data),
+                }
+
+        monkeypatch.setattr("waton.client.media.MediaManager", FakeMediaManager)
+
+        quoted = {
+            "id": "original-mid",
+            "participant": "sender@s.whatsapp.net",
+            "text": "Send me the file",
+        }
+
+        mid = await api.send_document(
+            "chat@s.whatsapp.net",
+            b"%PDF-sample",
+            file_name="invoice.pdf",
+            caption="Here is the invoice",
+            quoted=quoted,
+        )
+        assert mid == "media-reply-mid"
+        assert len(captured) == 1
+
+        summary = parse_message_payload(captured[0])
+        assert summary["content_type"] == "document"
+        assert summary["text"] == "Here is the invoice"
+        assert summary["context_info"] is not None
+        assert summary["context_info"]["stanza_id"] == "original-mid"
+        assert summary["context_info"]["participant"] == "sender@s.whatsapp.net"
+        assert summary["context_info"]["quoted_message"]["text"] == "Send me the file"
 
     _run(_case())
 
@@ -682,7 +837,106 @@ def test_send_contact_builds_message_node(monkeypatch: pytest.MonkeyPatch) -> No
     _run(_case())
 
 
+def test_send_group_invite_builds_message_node(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured_plaintexts: list[bytes] = []
+
+    def _fake_process(
+        session: bytes | None,
+        identity_private: bytes,
+        registration_id: int,
+        remote_name: str,
+        remote_device: int,
+        remote_registration_id: int,
+        remote_identity_key: bytes,
+        signed_prekey_id: int,
+        signed_prekey_public: bytes,
+        signed_prekey_signature: bytes,
+        prekey_id: int | None,
+        prekey_public: bytes | None,
+    ) -> bytes:
+        return b"session-for-" + remote_name.encode("utf-8") + b"-" + str(remote_device).encode("utf-8")
+
+    def _fake_encrypt(
+        session: bytes,
+        identity_private: bytes,
+        registration_id: int,
+        remote_name: str,
+        remote_device: int,
+        plaintext: bytes,
+    ) -> tuple[str, bytes, bytes]:
+        captured_plaintexts.append(plaintext)
+        return "msg", b"cipher-invite-" + remote_name.encode("utf-8"), session
+
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_process_prekey_bundle", _fake_process)
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_session_encrypt", _fake_encrypt)
+
+    async def _case() -> None:
+        client = _FakeClient()
+        api = MessagesAPI(client)
+        message_id = await api.send_group_invite(
+            "123@s.whatsapp.net",
+            group_jid="123456@g.us",
+            invite_code="CODE123",
+            group_name="Awesome Group",
+            caption="Come join us!",
+        )
+        assert message_id
+        message = client.sent[0]
+        assert message.attrs["type"] == "group_invite"
+        unpadded = [_unpad_random_max16(payload) for payload in captured_plaintexts]
+        assert any(any(field == 28 for field, _, _ in _iter_fields(payload)) for payload in unpadded)
+
+    _run(_case())
+
+
+def test_send_payment_invite_builds_message_node(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured_plaintexts: list[bytes] = []
+
+    def _fake_process(
+        session: bytes | None,
+        identity_private: bytes,
+        registration_id: int,
+        remote_name: str,
+        remote_device: int,
+        remote_registration_id: int,
+        remote_identity_key: bytes,
+        signed_prekey_id: int,
+        signed_prekey_public: bytes,
+        signed_prekey_signature: bytes,
+        prekey_id: int | None,
+        prekey_public: bytes | None,
+    ) -> bytes:
+        return b"session-for-" + remote_name.encode("utf-8") + b"-" + str(remote_device).encode("utf-8")
+
+    def _fake_encrypt(
+        session: bytes,
+        identity_private: bytes,
+        registration_id: int,
+        remote_name: str,
+        remote_device: int,
+        plaintext: bytes,
+    ) -> tuple[str, bytes, bytes]:
+        captured_plaintexts.append(plaintext)
+        return "msg", b"cipher-pay-" + remote_name.encode("utf-8"), session
+
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_process_prekey_bundle", _fake_process)
+    monkeypatch.setattr("waton.protocol.signal_repo.signal_session_encrypt", _fake_encrypt)
+
+    async def _case() -> None:
+        client = _FakeClient()
+        api = MessagesAPI(client)
+        message_id = await api.send_payment_invite("123@s.whatsapp.net")
+        assert message_id
+        message = client.sent[0]
+        assert message.attrs["type"] == "payment_invite"
+        unpadded = [_unpad_random_max16(payload) for payload in captured_plaintexts]
+        assert any(any(field == 44 for field, _, _ in _iter_fields(payload)) for payload in unpadded)
+
+    _run(_case())
+
+
 def test_send_poll_creation_builds_message_node(monkeypatch: pytest.MonkeyPatch) -> None:
+
     captured_plaintexts: list[bytes] = []
 
     def _fake_process(

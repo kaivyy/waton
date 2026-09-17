@@ -143,26 +143,32 @@ class RetryManager:
     def get_last_retry_ts(self, message_id: str) -> int | None:
         return self._entry(message_id).last_retry_ts
 
-    def parse_retry_error_code(self, error_attr: str | None) -> RetryReason | None:
-        if error_attr is None or error_attr == "":
+    def parse_retry_error_code(self, error_code: int | str | None) -> RetryReason | None:
+        if error_code is None or error_code == "":
             return None
         try:
-            code = int(error_attr)
-        except ValueError:
+            code = int(error_code)
+        except (TypeError, ValueError):
             return None
         if code in {reason.value for reason in RetryReason}:
             return RetryReason(code)
         return RetryReason.UnknownError
 
-    def is_mac_error(self, error_code: RetryReason | None) -> bool:
-        return error_code is not None and int(error_code) in MAC_ERROR_CODES
+
+
+    def is_mac_error(self, error_code: int | str | RetryReason | None) -> bool:
+        if isinstance(error_code, RetryReason):
+            return int(error_code) in MAC_ERROR_CODES
+        code = self.parse_retry_error_code(error_code)
+        return code is not None and int(code) in MAC_ERROR_CODES
+
 
     def should_recreate_session(
         self,
         jid: str,
+        error_code: int | str | None = None,
         *,
-        has_session: bool,
-        error_code: RetryReason | None = None,
+        has_session: bool = True,
         now_ms: int | None = None,
     ) -> dict[str, Any]:
         now = int(time.time() * 1000) if now_ms is None else now_ms
@@ -228,10 +234,15 @@ class RetryManager:
             self._statistics["phoneRequests"] += 1
             callback()
 
-        timer = threading.Timer(delay_ms / 1000.0, _fire)
-        self._pending_phone_requests[message_id] = timer
-        timer.daemon = True
-        timer.start()
+        try:
+            loop = asyncio.get_running_loop()
+            handle = loop.call_later(delay_ms / 1000.0, _fire)
+            self._pending_phone_requests[message_id] = handle
+        except RuntimeError:
+            timer = threading.Timer(delay_ms / 1000.0, _fire)
+            self._pending_phone_requests[message_id] = timer
+            timer.daemon = True
+            timer.start()
 
     def cancel_pending_phone_request(self, message_id: str) -> None:
         timer = self._pending_phone_requests.pop(message_id, None)

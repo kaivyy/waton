@@ -17,16 +17,17 @@ def _encode_node(node: BinaryNode, buf: bytearray) -> None:
     attrs = node.attrs
     content = node.content
 
-    # List size: tag + 2 * len(attrs) + (1 if content else 0)
+    valid_attrs = {str(k): str(v) for k, v in attrs.items() if v is not None}
     has_content = 1 if content is not None else 0
-    list_size = 1 + 2 * len(attrs) + has_content
+    list_size = 1 + 2 * len(valid_attrs) + has_content
 
     _write_list_start(list_size, buf)
-    _write_string(tag, buf)
+    _write_string(str(tag), buf)
 
-    for k, v in attrs.items():
+    for k, v in valid_attrs.items():
         _write_string(k, buf)
         _write_string(v, buf)
+
 
     if content is not None:
         if isinstance(content, str):
@@ -70,7 +71,61 @@ def _write_bytes(data: bytes | bytearray, buf: bytearray) -> None:
 
     buf.extend(data)
 
+def _is_nibble(s: str) -> bool:
+    if not s or len(s) > Tags.PACKED_MAX:
+        return False
+    return all(c in "0123456789-." for c in s)
+
+
+def _is_hex(s: str) -> bool:
+    if not s or len(s) > Tags.PACKED_MAX:
+        return False
+    return all(c in "0123456789ABCDEF" for c in s)
+
+
+def _pack_nibble(char: str) -> int:
+    if char == "-":
+        return 10
+    if char == ".":
+        return 11
+    if char == "\0":
+        return 15
+    if "0" <= char <= "9":
+        return ord(char) - ord("0")
+    raise ValueError(f"invalid byte for nibble '{char}'")
+
+
+def _pack_hex(char: str) -> int:
+    if "0" <= char <= "9":
+        return ord(char) - ord("0")
+    if "A" <= char <= "F":
+        return 10 + ord(char) - ord("A")
+    if "a" <= char <= "f":
+        return 10 + ord(char) - ord("a")
+    if char == "\0":
+        return 15
+    raise ValueError(f"invalid byte for hex '{char}'")
+
+
+def _write_packed_bytes(s: str, pack_type: str, buf: bytearray) -> None:
+    tag = Tags.NIBBLE_8 if pack_type == "nibble" else Tags.HEX_8
+    buf.append(tag)
+    rounded_len = (len(s) + 1) // 2
+    if len(s) % 2 != 0:
+        rounded_len |= 128
+    buf.append(rounded_len)
+    pack_fn = _pack_nibble if pack_type == "nibble" else _pack_hex
+    for i in range(len(s) // 2):
+        byte_val = (pack_fn(s[2 * i]) << 4) | pack_fn(s[2 * i + 1])
+        buf.append(byte_val)
+    if len(s) % 2 != 0:
+        buf.append((pack_fn(s[-1]) << 4) | pack_fn("\0"))
+
+
 def _write_string(s: str, buf: bytearray) -> None:
+    if not s:
+        _write_bytes(b"", buf)
+        return
 
     if s == "c.us":
         s = "s.whatsapp.net"
@@ -88,14 +143,32 @@ def _write_string(s: str, buf: bytearray) -> None:
     if jid_idx >= 0:  # pyright: ignore[reportUnnecessaryComparison]
         user_part = s[:jid_idx]
         server = s[jid_idx+1:]
-        # Check for device JID: "user:device@server"
+        # Check for device JID: "user:device@server" or "user_agent:device@server"
         colon_idx = user_part.find(":")
         if colon_idx != -1 and user_part[colon_idx+1:].isdigit():
-            user = user_part[:colon_idx]
+            user_agent = user_part[:colon_idx]
             device = int(user_part[colon_idx+1:])
-            _write_ad_jid(user, device, server, buf)
+            user, sep, agent_str = user_agent.partition("_")
+            if not sep:
+                user = user_agent
+                agent = None
+            else:
+                agent = int(agent_str) if agent_str.isdigit() else None
+            domain_type = _DOMAIN_TYPE_MAP.get(server, 0)
+            if domain_type == 0 and agent is not None:
+                domain_type = agent
+            _write_ad_jid(user, device, domain_type, buf)
         else:
             _write_jid(user_part, server, buf)
+
+        return
+
+    if _is_nibble(s):
+        _write_packed_bytes(s, "nibble", buf)
+        return
+
+    if _is_hex(s):
+        _write_packed_bytes(s, "hex", buf)
         return
 
     _write_bytes(s.encode('utf-8'), buf)
@@ -107,10 +180,13 @@ _DOMAIN_TYPE_MAP = {
     "hosted.lid": 129,
 }
 
-def _write_ad_jid(user: str, device: int, server: str, buf: bytearray) -> None:
+def _write_ad_jid(user: str, device: int, domain: int | str, buf: bytearray) -> None:
     """Write a device-specific JID using AD_JID format (tag 247)."""
     buf.append(Tags.AD_JID)
-    domain_type = _DOMAIN_TYPE_MAP.get(server, 0)
+    if isinstance(domain, str):
+        domain_type = _DOMAIN_TYPE_MAP.get(domain, 0)
+    else:
+        domain_type = domain
     buf.append(domain_type)
     buf.append(device)
     _write_string(user, buf)
@@ -174,9 +250,15 @@ def _read_list_size(stream: io.BytesIO) -> int:
     if b == Tags.LIST_EMPTY:
         return 0
     if b == Tags.LIST_8:
-        return stream.read(1)[0]
+        raw = stream.read(1)
+        if not raw:
+            raise EOFError("EOF reading LIST_8 size")
+        return raw[0]
     if b == Tags.LIST_16:
-        return struct.unpack(">H", stream.read(2))[0]
+        raw = stream.read(2)
+        if len(raw) != 2:
+            raise EOFError("EOF reading LIST_16 size")
+        return struct.unpack(">H", raw)[0]
     raise ValueError(f"Invalid list size tag: {b}")
 
 def _read_bytes(stream: io.BytesIO) -> bytes:
@@ -191,11 +273,19 @@ def _read_bytes(stream: io.BytesIO) -> bytes:
         length = length_raw[0]
         return stream.read(length)
     if b == Tags.BINARY_20:
-        length = (stream.read(1)[0] << 16) | struct.unpack(">H", stream.read(2))[0]
+        b1 = stream.read(1)
+        b2 = stream.read(2)
+        if not b1 or len(b2) != 2:
+            raise EOFError("EOF reading BINARY_20 length")
+        length = (b1[0] << 16) | struct.unpack(">H", b2)[0]
         return stream.read(length)
     if b == Tags.BINARY_32:
-        length = struct.unpack(">I", stream.read(4))[0]
+        raw = stream.read(4)
+        if len(raw) != 4:
+            raise EOFError("EOF reading BINARY_32 length")
+        length = struct.unpack(">I", raw)[0]
         return stream.read(length)
+
     raise ValueError(f"Invalid bytes tag: {b}")
 
 def _read_int(stream: io.BytesIO, n: int) -> int:
@@ -261,13 +351,17 @@ def _read_ad_jid(stream: io.BytesIO) -> str:
         raise EOFError("EOF reading AD_JID user tag")
     user = _read_string_from_tag(stream, user_tag[0])
     server = "s.whatsapp.net"
+    agent_str = ""
     if domain_type == 1:
         server = "lid"
     elif domain_type == 128:
         server = "hosted"
     elif domain_type == 129:
         server = "hosted.lid"
-    return f"{user}:{device}@{server}"
+    elif domain_type != 0:
+        agent_str = f"_{domain_type}"
+    device_str = f":{device}" if device != 0 else ""
+    return f"{user}{agent_str}{device_str}@{server}"
 
 def _read_fb_jid(stream: io.BytesIO) -> str:
     user_tag = stream.read(1)
@@ -308,6 +402,8 @@ def _read_string_from_tag(stream: io.BytesIO, b: int) -> str:
             raise EOFError("EOF reading double token index")
         idx = idx_raw[0]
         dict_idx = b - Tags.DICTIONARY_0
+        if dict_idx >= len(DOUBLE_BYTE_TOKENS) or idx >= len(DOUBLE_BYTE_TOKENS[dict_idx]):
+            raise ValueError(f"Double byte token out of bounds: {dict_idx},{idx}")
         token = DOUBLE_BYTE_TOKENS[dict_idx][idx]
         if token:
             return token
@@ -332,12 +428,10 @@ def _read_string_from_tag(stream: io.BytesIO, b: int) -> str:
         if not server_tag:
             raise EOFError("EOF reading JID_PAIR server tag")
         server = _read_string_from_tag(stream, server_tag[0])
-        if user == "":
+        if not user:
             return server
-        if user:
-            return f"{user}@{server}"
-        return server
         return f"{user}@{server}"
+
     if b == Tags.AD_JID:
         return _read_ad_jid(stream)
     if b == Tags.FB_JID:

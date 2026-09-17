@@ -7,9 +7,15 @@ from urllib.parse import urlparse
 
 import httpx
 
+from typing import Any
+
+from waton.protocol.binary_node import BinaryNode
+from waton.protocol.protobuf.wire import iter_fields
 from waton.utils.crypto import (
     aes_cbc_decrypt,
     aes_cbc_encrypt,
+    aes_decrypt,
+    aes_encrypt,
     generate_random_bytes,
     hkdf,
     hmac_sha256,
@@ -17,6 +23,7 @@ from waton.utils.crypto import (
 )
 from waton.client.media_upload import MediaUploadManager
 from waton.utils.media_utils import derive_media_keys, upload_once, verify_remote_checksum
+
 
 
 class MediaManager:
@@ -156,6 +163,84 @@ class MediaManager:
 
         actual_ciphertext = encrypted_data[:-10]
         return aes_cbc_decrypt(actual_ciphertext, cipher_key, iv)
+
+    @staticmethod
+    def encrypt_media_retry_receipt(message_id: str, media_key: bytes) -> tuple[bytes, bytes]:
+        """Encrypts ServerErrorReceipt protobuf for requesting media re-upload from sender."""
+        msg_bytes = message_id.encode("utf-8")
+        plaintext = b"\n" + bytes([len(msg_bytes)]) + msg_bytes
+        retry_key = hkdf(media_key, 32, salt=b"", info=b"WhatsApp Media Retry Notification")
+        iv = generate_random_bytes(12)
+        ciphertext = aes_encrypt(plaintext, retry_key, iv, aad=msg_bytes)
+        return ciphertext, iv
+
+    async def send_media_retry_receipt(
+        self,
+        *,
+        message_id: str,
+        chat_jid: str,
+        media_key: bytes,
+        is_from_me: bool = False,
+        participant: str | None = None,
+    ) -> None:
+        """Sends server-error retry receipt to re-download expired WhatsApp media."""
+        if self.client is None:
+            raise ValueError("Client instance required to send media retry receipt")
+
+        ciphertext, iv = self.encrypt_media_retry_receipt(message_id, media_key)
+        rmr_attrs: dict[str, str] = {
+            "jid": chat_jid,
+            "from_me": "true" if is_from_me else "false",
+        }
+        if participant:
+            rmr_attrs["participant"] = participant
+
+        to_jid = "s.whatsapp.net"
+        if hasattr(self.client, "creds") and self.client.creds and self.client.creds.me:
+            to_jid = self.client.creds.me.get("id", "s.whatsapp.net")
+
+        node = BinaryNode(
+            tag="receipt",
+            attrs={
+                "id": message_id,
+                "to": to_jid,
+                "type": "server-error",
+            },
+            content=[
+                BinaryNode(
+                    tag="encrypt",
+                    attrs={},
+                    content=[
+                        BinaryNode(tag="enc_p", attrs={}, content=ciphertext),
+                        BinaryNode(tag="enc_iv", attrs={}, content=iv),
+                    ],
+                ),
+                BinaryNode(tag="rmr", attrs=rmr_attrs),
+            ],
+        )
+        await self.client.send_node(node)
+
+    @staticmethod
+    def decrypt_media_retry_notification(
+        *,
+        media_key: bytes,
+        ciphertext: bytes,
+        iv: bytes,
+        message_id: str,
+    ) -> dict[str, Any]:
+        """Decrypts incoming mediaretry notification payload to get fresh direct_path."""
+        retry_key = hkdf(media_key, 32, salt=b"", info=b"WhatsApp Media Retry Notification")
+        plaintext = aes_decrypt(ciphertext, retry_key, iv, aad=message_id.encode("utf-8"))
+        out: dict[str, Any] = {"message_id": message_id}
+        for field_no, wire_type, value in iter_fields(plaintext):
+            if field_no == 1 and wire_type == 2:
+                out["stanza_id"] = bytes(value).decode("utf-8", errors="replace")
+            elif field_no == 2 and wire_type == 2:
+                out["direct_path"] = bytes(value).decode("utf-8", errors="replace")
+            elif field_no == 3 and wire_type == 0:
+                out["result"] = int(value)
+        return out
+
 
 
 def upload_with_retry(data: bytes, max_attempts: int = 3) -> dict[str, str | int | bool]:

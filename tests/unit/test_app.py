@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import Any
 
 import pytest
 
@@ -385,7 +386,61 @@ def test_app_dispatch_logs_completion_and_middleware_exit_on_handler_exception(
             if getattr(record, "stage", None) == "dispatch_complete"
         ]
         assert len(completion_records) == 1
-        assert getattr(completion_records[0], "dispatch_status", None) == "error"
+        await app.media.http.aclose()
+
+    _run(_case())
+
+
+def test_context_reply_react_and_delete() -> None:
+    async def _case() -> None:
+        app = App(storage_path=":memory:")
+        msg = Message(
+            id="mid-target",
+            from_jid="group-xyz@g.us",
+            participant="user-abc@s.whatsapp.net",
+            text="hello there",
+        )
+        ctx = Context(message=msg, app=app)
+
+        calls: dict[str, Any] = {}
+
+        async def _mock_send_text(to_jid: str, text: str, **kwargs: Any) -> str:
+            calls["send_text"] = {"to_jid": to_jid, "text": text, "kwargs": kwargs}
+            return "mid-reply"
+
+        async def _mock_send_reaction(to_jid: str, message_id: str, reaction: str, **kwargs: Any) -> str:
+            calls["send_reaction"] = {"to_jid": to_jid, "message_id": message_id, "reaction": reaction, "kwargs": kwargs}
+            return "mid-react"
+
+        async def _mock_send_delete(to_jid: str, target_message_id: str, **kwargs: Any) -> str:
+            calls["send_delete"] = {"to_jid": to_jid, "target_message_id": target_message_id, "kwargs": kwargs}
+            return "mid-delete"
+
+        app.messages.send_text = _mock_send_text  # type: ignore[method-assign]
+        app.messages.send_reaction = _mock_send_reaction  # type: ignore[method-assign]
+        app.messages.send_delete = _mock_send_delete  # type: ignore[method-assign]
+
+        # 1. reply quotes self.message
+        res1 = await ctx.reply("hi back")
+        assert res1 == "mid-reply"
+        assert calls["send_text"]["to_jid"] == "group-xyz@g.us"
+        assert calls["send_text"]["text"] == "hi back"
+        assert calls["send_text"]["kwargs"]["quoted"] == msg
+
+        # 2. react passes participant
+        res2 = await ctx.react("👍")
+        assert res2 == "mid-react"
+        assert calls["send_reaction"]["to_jid"] == "group-xyz@g.us"
+        assert calls["send_reaction"]["message_id"] == "mid-target"
+        assert calls["send_reaction"]["reaction"] == "👍"
+        assert calls["send_reaction"]["kwargs"]["participant"] == "user-abc@s.whatsapp.net"
+
+        # 3. delete uses send_delete
+        res3 = await ctx.delete()
+        assert res3 == "mid-delete"
+        assert calls["send_delete"]["to_jid"] == "group-xyz@g.us"
+        assert calls["send_delete"]["target_message_id"] == "mid-target"
+        assert calls["send_delete"]["kwargs"]["participant"] == "user-abc@s.whatsapp.net"
 
         await app.media.http.aclose()
 

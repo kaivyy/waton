@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import contextlib
 import copy
 import hashlib
 import logging
+import os
 import time
 from typing import TYPE_CHECKING, Any, cast
 
@@ -14,12 +16,33 @@ from waton.client.messages_recv import (
     build_call_reject_node,
     build_message_ack,
     build_placeholder_resend_request,
+    build_retry_keys_node,
     build_retry_receipt_node,
     classify_incoming_node,
     drain_nodes_with_buffer,
     normalize_incoming_node,
 )
 from waton.client.retry_manager import RetryManager
+from waton.client.prekey_manager import PreKeyManager
+from waton.client.business import BusinessAPI
+from waton.client.broadcast import BroadcastAPI
+from waton.client.mex import MexClient
+from waton.utils.cs_token import CSTokenManager
+from waton.utils.crypto import (
+    aes_ctr_decrypt,
+    aes_ctr_encrypt,
+    aes_encrypt,
+    bytes_to_crockford,
+    derive_pairing_code_key,
+    hkdf,
+    shared_key,
+)
+from waton.utils.tc_token import TCTokenManager, extract_tc_tokens
+from waton.utils.message_utils import build_receipt_node
+
+from waton.utils.event_buffer import BUFFERABLE_EVENTS, EventBuffer
+
+
 from waton.core.errors import ConnectionError as WatonConnectionError
 from waton.core.errors import DisconnectReason
 from waton.core.events import ConnectionEvent
@@ -95,18 +118,27 @@ class WAClient:
         self.on_event: Callable[[dict[str, Any]], Awaitable[None]] = self._default_event_handler
         self.on_disconnected: Callable[[Exception], Awaitable[None]] = self._default_disconnect_handler
         self.on_connection_update: Callable[[ConnectionEvent], Awaitable[None]] = self._default_connection_handler
+        self.event_buffer = EventBuffer(emit_callback=self._emit_buffered_event)
         retry_limit = int(self.config.get("max_retry_receipts", 3))
         recent_cache_limit = int(self.config.get("max_recent_sent_messages", 200))
         self.retry_manager = RetryManager(max_attempts=retry_limit, max_recent_messages=recent_cache_limit)
         decrypt_retry_limit = int(self.config.get("max_decrypt_retry_requests", 2))
         self.decrypt_retry_manager = RetryManager(max_attempts=decrypt_retry_limit)
         self._recent_sent_messages: dict[str, BinaryNode] = {}
+        self.message_secrets: dict[str, bytes] = {}
+        self.tc_token_manager = TCTokenManager(storage=self.storage)
+        self.prekey_manager = PreKeyManager(client=self)
+        self.business = BusinessAPI(client=self)
+        self.broadcast = BroadcastAPI(client=self)
+        self.mex = MexClient(client=self)
+        self.cs_token_manager = CSTokenManager()
 
         self.ws.on_message = self._handle_raw_ws_message
         self.ws.on_disconnect = self._handle_ws_disconnect
 
         self._raw_frame_queue: asyncio.Queue[bytes] = asyncio.Queue()
         self._pending_queries: dict[str, asyncio.Future[BinaryNode]] = {}
+        self._send_lock = asyncio.Lock()
         self._epoch = 1
         self._qr_task: asyncio.Task[None] | None = None
         self._keepalive_task: asyncio.Task[None] | None = None
@@ -115,6 +147,31 @@ class WAClient:
         self._explicit_disconnect = False
         self._server_time_offset_ms = 0
         self._requested_offline_batch = False
+        self._seen_message_ids: set[str] = set()
+        self._seen_message_ids_order: list[str] = []
+
+
+    def _emit_buffered_event(self, event_type: str, data: Any) -> None:
+        if isinstance(data, dict) and data.get("type") == event_type:
+            event = data
+        elif isinstance(data, dict) and "type" not in data:
+            event = {"type": event_type, **data}
+        else:
+            event = {"type": event_type, "data": data}
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self.on_event(event))
+        except RuntimeError:
+            pass
+
+    def buffer_events(self) -> contextlib.AbstractContextManager[None]:
+        """Context manager to buffer incoming events until flushed."""
+        return self.event_buffer.buffer()
+
+    def flush_events(self) -> bool:
+        """Flush any currently buffered events."""
+        return self.event_buffer.flush()
+
 
     async def connect(self) -> None:
         self._explicit_disconnect = False
@@ -176,13 +233,41 @@ class WAClient:
             self._keepalive_task = None
         await self.ws.disconnect()
 
+    async def logout(self) -> None:
+        """Logout and invalidate connection with WhatsApp server."""
+        if self.is_connected and self.creds and self.creds.me:
+            me_jid = self.creds.me.get("id")
+            if me_jid:
+                try:
+                    await self.send_node(
+                        BinaryNode(
+                            tag="iq",
+                            attrs={
+                                "to": S_WHATSAPP_NET,
+                                "type": "set",
+                                "id": self.generate_message_tag(),
+                                "xmlns": "md",
+                            },
+                            content=[
+                                BinaryNode(
+                                    tag="remove-companion-device",
+                                    attrs={"jid": me_jid, "reason": "user_initiated"},
+                                )
+                            ],
+                        )
+                    )
+                except Exception as exc:
+                    logger.warning("failed to send remove-companion-device during logout: %s", exc)
+        await self.disconnect()
+
     async def send_node(self, node: BinaryNode) -> None:
         if not self.is_connected or not self.noise:
             raise WatonConnectionError("Cannot send node: not connected")
         self._remember_sent_message(node)
         payload = encode_binary_node(node)
-        frame = self.noise.encode_frame(payload)
-        await self.ws.send(frame)
+        async with self._send_lock:
+            frame = self.noise.encode_frame(payload)
+            await self.ws.send(frame)
 
     async def query(self, node: BinaryNode, timeout: float | None = None) -> BinaryNode:
         timeout_s = timeout if timeout is not None else float(self.config["frame_timeout"])
@@ -213,6 +298,185 @@ class WAClient:
             ),
             timeout=float(self.config["frame_timeout"]),
         )
+
+    async def reject_call(self, call_id: str, call_from: str, call_to: str | None = None) -> None:
+        """Explicitly rejects an incoming call."""
+        node = build_call_reject_node(call_id=call_id, call_from=call_from, call_to=call_to)
+        await self.send_node(node)
+
+    async def request_pairing_code(
+        self,
+        phone_number: str,
+        custom_pairing_code: str | None = None,
+    ) -> str:
+        """Requests an 8-character pairing code for phone number authentication without QR code."""
+        cleaned_phone = "".join(ch for ch in phone_number if ch.isdigit())
+        if not cleaned_phone:
+            raise ValueError(f"Invalid phone number: {phone_number}")
+
+        if custom_pairing_code is not None:
+            code = custom_pairing_code.replace("-", "").upper()
+            if len(code) != 8:
+                raise ValueError("Custom pairing code must be exactly 8 characters")
+        else:
+            code = bytes_to_crockford(os.urandom(5))[:8]
+
+        if self.creds is None:
+            if self.storage:
+                self.creds = await self.storage.get_creds()
+            if self.creds is None:
+                from waton.utils.auth import init_auth_creds
+                self.creds = init_auth_creds()
+
+        self.creds.pairing_code = code
+        self.creds.me = {"id": f"{cleaned_phone}@{S_WHATSAPP_NET}", "name": "~"}
+        if self.storage:
+            await self.storage.save_creds(self.creds)
+
+        salt = os.urandom(32)
+        random_iv = os.urandom(16)
+        key = derive_pairing_code_key(code, salt)
+        pairing_pub = self.creds.pairing_ephemeral_key_pair["public"]
+        ciphered = aes_ctr_encrypt(pairing_pub, key, random_iv)
+        wrapped_companion_pub = salt + random_iv + ciphered
+
+        browser = self.config.get("browser", ("Waton", "Chrome", "1.0.0"))
+        iq = BinaryNode(
+            tag="iq",
+            attrs={
+                "to": S_WHATSAPP_NET,
+                "type": "set",
+                "id": self._generate_message_tag(),
+                "xmlns": "md",
+            },
+            content=[
+                BinaryNode(
+                    tag="link_code_companion_reg",
+                    attrs={
+                        "jid": self.creds.me["id"],
+                        "stage": "companion_hello",
+                        "should_show_push_notification": "true",
+                    },
+                    content=[
+                        BinaryNode(
+                            tag="link_code_pairing_wrapped_companion_ephemeral_pub",
+                            attrs={},
+                            content=wrapped_companion_pub,
+                        ),
+                        BinaryNode(
+                            tag="companion_server_auth_key_pub",
+                            attrs={},
+                            content=self.creds.noise_key["public"],
+                        ),
+                        BinaryNode(
+                            tag="companion_platform_id",
+                            attrs={},
+                            content="49",
+                        ),
+                        BinaryNode(
+                            tag="companion_platform_display",
+                            attrs={},
+                            content=f"{browser[1]} ({browser[0]})",
+                        ),
+                        BinaryNode(
+                            tag="link_code_pairing_nonce",
+                            attrs={},
+                            content="0",
+                        ),
+                    ],
+                )
+            ],
+        )
+        await self.send_node(iq)
+        return f"{code[:4]}-{code[4:]}"
+
+    async def _handle_link_code_companion_reg(self, node: BinaryNode) -> None:
+        link_reg = node if node.tag == "link_code_companion_reg" else None
+        if link_reg is None and isinstance(node.content, list):
+            for child in node.content:
+                if isinstance(child, BinaryNode) and child.tag == "link_code_companion_reg":
+                    link_reg = child
+                    break
+        if link_reg is None or not isinstance(link_reg.content, list):
+            return
+
+        ref = None
+        primary_identity_pub = None
+        wrapped_primary_pub = None
+
+        for child in link_reg.content:
+            if not isinstance(child, BinaryNode):
+                continue
+            if child.tag == "link_code_pairing_ref" and isinstance(child.content, (bytes, bytearray)):
+                ref = bytes(child.content)
+            elif child.tag == "primary_identity_pub" and isinstance(child.content, (bytes, bytearray)):
+                primary_identity_pub = bytes(child.content)
+            elif child.tag == "link_code_pairing_wrapped_primary_ephemeral_pub" and isinstance(child.content, (bytes, bytearray)):
+                wrapped_primary_pub = bytes(child.content)
+
+        if not ref or not primary_identity_pub or not wrapped_primary_pub or not self.creds.pairing_code:
+            return
+
+        salt = wrapped_primary_pub[:32]
+        iv = wrapped_primary_pub[32:48]
+        payload = wrapped_primary_pub[48:80]
+        secret_key = derive_pairing_code_key(self.creds.pairing_code, salt)
+        code_pairing_pub = aes_ctr_decrypt(payload, secret_key, iv)
+
+        companion_shared_key = shared_key(self.creds.pairing_ephemeral_key_pair["private"], code_pairing_pub)
+        random_val = os.urandom(32)
+        link_code_salt = os.urandom(32)
+        link_code_pairing_expanded = hkdf(companion_shared_key, 32, salt=link_code_salt, info=b"link_code_pairing_key_bundle_encryption_key")
+        encrypt_payload = self.creds.signed_identity_key["public"] + primary_identity_pub + random_val
+        encrypt_iv = os.urandom(12)
+        encrypted = aes_encrypt(encrypt_payload, link_code_pairing_expanded, encrypt_iv, b"")
+        encrypted_payload = link_code_salt + encrypt_iv + encrypted
+
+        identity_shared = shared_key(self.creds.signed_identity_key["private"], primary_identity_pub)
+        identity_payload = companion_shared_key + identity_shared + random_val
+        adv_secret = hkdf(identity_payload, 32, salt=b"", info=b"adv_secret")
+        self.creds.adv_secret_key = base64.b64encode(adv_secret).decode("utf-8")
+
+        me_jid = (self.creds.me or {}).get("id", "")
+        reply = BinaryNode(
+            tag="iq",
+            attrs={
+                "to": S_WHATSAPP_NET,
+                "type": "set",
+                "id": self._generate_message_tag(),
+                "xmlns": "md",
+            },
+            content=[
+                BinaryNode(
+                    tag="link_code_companion_reg",
+                    attrs={
+                        "jid": me_jid,
+                        "stage": "companion_finish",
+                    },
+                    content=[
+                        BinaryNode(
+                            tag="link_code_pairing_wrapped_key_bundle",
+                            attrs={},
+                            content=encrypted_payload,
+                        ),
+                        BinaryNode(
+                            tag="companion_identity_public",
+                            attrs={},
+                            content=self.creds.signed_identity_key["public"],
+                        ),
+                        BinaryNode(
+                            tag="link_code_pairing_ref",
+                            attrs={},
+                            content=ref,
+                        ),
+                    ],
+                )
+            ],
+        )
+        await self.send_node(reply)
+        self.creds.registered = True
+        if self.storage:
+            await self.storage.save_creds(self.creds)
 
     async def _handle_raw_ws_message(self, data: bytes) -> None:
         if self.noise is None:
@@ -298,16 +562,43 @@ class WAClient:
         if incoming_kind == "ib":
             await self._handle_ib_node(node)
 
-        if incoming_kind in {"message", "receipt", "notification", "call", "ack", "ib"}:
+        if incoming_kind in {"message", "receipt", "notification", "call", "ack", "ib", "presence"}:
             await self._handle_incoming_node(node, incoming_kind)
 
         await self.on_message(node)
 
     async def _handle_incoming_node(self, node: BinaryNode, incoming_kind: str) -> None:
-        if incoming_kind in {"message", "receipt", "notification", "call"} and self.config.get(
+        if incoming_kind == "message" and self.config.get("deduplicate_incoming_messages", False):
+            msg_id = node.attrs.get("id")
+            if msg_id:
+                if msg_id in self._seen_message_ids:
+                    if self.config.get("auto_delivery_receipt", True):
+                        await self._send_delivery_receipt(node)
+                    elif self.config.get("auto_ack_incoming", True):
+                        await self._maybe_send_ack(node)
+                    return
+                self._seen_message_ids.add(msg_id)
+                self._seen_message_ids_order.append(msg_id)
+                if len(self._seen_message_ids_order) > 2000:
+                    old_id = self._seen_message_ids_order.pop(0)
+                    self._seen_message_ids.discard(old_id)
+
+        if incoming_kind in {"receipt", "notification", "call"} and self.config.get(
             "auto_ack_incoming", True
         ):
             await self._maybe_send_ack(node)
+        elif incoming_kind == "message":
+            if self.config.get("auto_delivery_receipt", True):
+                await self._send_delivery_receipt(node)
+            elif self.config.get("auto_ack_incoming", True):
+                await self._maybe_send_ack(node)
+
+
+        try:
+            for tok in extract_tc_tokens(node):
+                self.tc_token_manager.save_token(tok["jid"], tok["token"], tok["timestamp"])
+        except Exception:
+            pass
 
         signal_repo: SignalRepository | None = None
         if self.creds:
@@ -326,9 +617,43 @@ class WAClient:
                 self._apply_ack_side_effects(event)
             if event.get("type") == "messages.call":
                 await self._maybe_reject_call(event, node)
+            if event.get("type") == "messages.notification":
+                notification = event.get("notification", {})
+                if notification.get("kind") == "link_code_companion_reg" or (
+                    node.tag == "notification" and node.attrs.get("type") == "link_code_companion_reg"
+                ):
+                    await self._handle_link_code_companion_reg(node)
+                elif node.tag == "notification" and node.attrs.get("type") == "encrypt":
+                    if isinstance(node.content, list):
+                        for child in node.content:
+                            if isinstance(child, BinaryNode) and child.tag == "count":
+                                val = child.attrs.get("value")
+                                if val is not None:
+                                    try:
+                                        self.prekey_manager.handle_prekey_count_notification(int(val))
+                                    except Exception as exc:
+                                        logger.warning("failed handling prekey count: %s", exc)
+                            elif isinstance(child, BinaryNode) and child.tag == "identity":
+                                try:
+                                    from waton.client.identity_change_handler import (
+                                        IdentityChangeContext,
+                                        handle_identity_change_node,
+                                    )
+                                    ctx = IdentityChangeContext(
+                                        me_id=self.creds.me.get("id") if self.creds and self.creds.me else None,
+                                        me_lid=self.creds.me.get("lid") if self.creds and self.creds.me else None,
+                                    )
+                                    asyncio.create_task(handle_identity_change_node(node, ctx))
+                                except Exception as exc:
+                                    logger.warning("failed handling identity change: %s", exc)
             await self._apply_protocol_event_side_effects(event)
             await self._apply_message_secret_side_effects(event)
-            await self.on_event(event)
+            event_type = event.get("type", "")
+            if self.event_buffer.is_buffering and event_type in BUFFERABLE_EVENTS:
+                self.event_buffer.process(event_type, event)
+            else:
+                await self.on_event(event)
+
 
     async def _maybe_reject_call(self, event: dict[str, Any], node: BinaryNode) -> None:
         if not self.config.get("auto_reject_calls", False):
@@ -449,14 +774,31 @@ class WAClient:
             self.creds.additional_data = additional_data
             await self.storage.save_creds(self.creds)
 
-    async def _apply_message_secret_side_effects(self, event: dict[str, Any]) -> None:
-        if self.creds is None:
-            return
+    def get_message_secret(self, message_id: str) -> bytes | None:
+        return self.message_secrets.get(message_id)
 
+    def set_message_secret(self, message_id: str, secret: bytes) -> None:
+        self.message_secrets[message_id] = secret
+
+    async def _apply_message_secret_side_effects(self, event: dict[str, Any]) -> None:
         message = event.get("message")
         if not isinstance(message, dict):
             return
         message_data = cast("dict[str, Any]", message)
+
+        message_id = message_data.get("id")
+        message_secret_b64 = message_data.get("message_secret_b64")
+        if isinstance(message_id, str) and isinstance(message_secret_b64, str):
+            try:
+                self.set_message_secret(
+                    message_id,
+                    base64.b64decode(message_secret_b64.encode("ascii")),
+                )
+            except Exception:
+                pass
+
+        if self.creds is None:
+            return
 
         content_type = message_data.get("content_type")
         if content_type not in {"poll_creation", "event"}:
@@ -499,12 +841,41 @@ class WAClient:
 
         sent = False
         if should_send and message_id and from_jid:
-            retry_node = build_retry_receipt_node(node, retry_count=attempt)
+            keys_node = None
+            if attempt > 1 and self.creds and self.creds.signed_pre_key:
+                signed_prekey = self.creds.signed_pre_key
+                spk_pair = signed_prekey.get("keyPair") or signed_prekey.get("key_pair") or {}
+                spk_pub = spk_pair.get("public") if isinstance(spk_pair, dict) else b""
+                spk_sig = signed_prekey.get("signature", b"")
+                spk_id = int(signed_prekey.get("keyId") or signed_prekey.get("key_id") or 1)
+
+                account_bytes = None
+                if self.creds.account and isinstance(self.creds.account.get("details"), str):
+                    try:
+                        account_bytes = base64.b64decode(self.creds.account["details"])
+                    except Exception:
+                        pass
+
+                keys_node = build_retry_keys_node(
+                    identity_key_public=self.creds.signed_identity_key["public"],
+                    signed_prekey_public=spk_pub,
+                    signed_prekey_id=spk_id,
+                    signed_prekey_signature=spk_sig,
+                    device_identity=account_bytes,
+                )
+
+            retry_node = build_retry_receipt_node(
+                node,
+                retry_count=attempt,
+                registration_id=self.creds.registration_id if self.creds else None,
+                keys_node=keys_node,
+            )
             try:
                 await self.send_node(retry_node)
                 sent = True
             except Exception as send_exc:  # pragma: no cover - network dependent
                 logger.debug("failed to send retry receipt for %s: %s", message_id, send_exc)
+
 
         placeholder_sent = False
         placeholder_error: str | None = None
@@ -651,6 +1022,27 @@ class WAClient:
             await self.send_node(build_message_ack(node))
         except Exception as exc:  # pragma: no cover - defensive logging
             logger.debug("failed to send ack for %s: %s", node.tag, exc)
+
+    async def _send_delivery_receipt(self, node: BinaryNode) -> None:
+        if not self.is_connected or not self.noise:
+            return
+        msg_id = node.attrs.get("id")
+        from_jid = node.attrs.get("from")
+        if not msg_id or not from_jid:
+            return
+        participant = node.attrs.get("participant")
+        receipt_type = "sender" if participant and from_jid.endswith("@g.us") else "delivery"
+        receipt_node = build_receipt_node(
+            jid=from_jid,
+            message_ids=[msg_id],
+            participant=participant,
+            receipt_type=receipt_type,
+        )
+        try:
+            await self.send_node(receipt_node)
+        except Exception as exc:  # pragma: no cover - defensive logging
+            logger.debug("failed to send delivery receipt for %s: %s", msg_id, exc)
+
 
     def _remember_sent_message(self, node: BinaryNode) -> None:
         if node.tag != "message":
@@ -1028,6 +1420,24 @@ class WAClient:
         if self._keepalive_task:
             self._keepalive_task.cancel()
             self._keepalive_task = None
+
+        if hasattr(self, "event_buffer") and self.event_buffer is not None:
+            try:
+                self.event_buffer.flush()
+            except Exception as flush_exc:
+                logger.warning("failed to flush event buffer on disconnect: %s", flush_exc)
+
+        while not self._raw_frame_queue.empty():
+            try:
+                self._raw_frame_queue.get_nowait()
+            except (asyncio.QueueEmpty, ValueError):
+                break
+
+        for query_id, future in list(self._pending_queries.items()):
+            if not future.done():
+                future.set_exception(WatonConnectionError(f"Connection closed while query {query_id} pending"))
+        self._pending_queries.clear()
+
         await self.on_connection_update(ConnectionEvent(status="close", reason=reason))
         if self._should_auto_restart(reason):
             self._restart_attempts += 1
@@ -1123,6 +1533,11 @@ class WAClient:
 
     async def _default_connection_handler(self, event: ConnectionEvent) -> None:
         logger.info("connection update: %s", event)
+
+    async def on_whatsapp(self, *phone_numbers: str) -> list[dict[str, Any]]:
+        """Check if phone numbers exist on WhatsApp."""
+        from waton.client.usync import USyncQuery
+        return await USyncQuery(self).on_whatsapp(*phone_numbers)
 
     async def send_message(self, jid: str, message: dict[str, Any]) -> Any:
         msg_id: Any = message.get("id", "generated-id")

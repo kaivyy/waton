@@ -139,6 +139,61 @@ class MediaUploadManager:
             raise last_error
         raise RuntimeError("failed to upload media to any WhatsApp MMS host")
 
+    async def upload_newsletter(
+        self,
+        client: WAClient,
+        plaintext_bytes: bytes,
+        media_type: str,
+        timeout: float = 60.0,
+    ) -> dict[str, str]:
+        """Uploads unencrypted media for public WhatsApp channels/newsletters."""
+        import hashlib
+
+        file_sha256 = hashlib.sha256(plaintext_bytes).digest()
+        token = encode_base64_for_upload(file_sha256)
+        conn_info = await self.refresh_media_conn(client)
+        auth = quote(conn_info.auth, safe="")
+
+        mms_type = media_type.lower()
+        if mms_type.startswith("newsletter-"):
+            mms_path = mms_type
+        else:
+            mms_path = f"newsletter-{mms_type}"
+
+        path = f"/newsletter/{mms_path}"
+        headers = {
+            "Content-Type": "application/octet-stream",
+            "Origin": DEFAULT_ORIGIN,
+        }
+
+        last_error: Exception | None = None
+        for host_info in conn_info.hosts:
+            hostname = host_info["hostname"]
+            upload_url = f"https://{hostname}{path}/{token}?auth={auth}&token={token}"
+            try:
+                async with httpx.AsyncClient(timeout=timeout) as http:
+                    response = await http.post(
+                        upload_url,
+                        content=plaintext_bytes,
+                        headers=headers,
+                    )
+                    if response.status_code in (200, 201):
+                        raw_data = response.json()
+                        data = (await raw_data) if hasattr(raw_data, "__await__") else raw_data
+                        return {
+                            "url": str(data.get("url", upload_url)),
+                            "direct_path": str(data.get("direct_path", "")),
+                            "file_sha256": base64.b64encode(file_sha256).decode("ascii"),
+                        }
+                    response.raise_for_status()
+            except Exception as exc:
+                last_error = exc
+                continue
+
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("failed to upload newsletter media to any host")
+
     @staticmethod
     def _get_child(node: BinaryNode | None, tag: str) -> BinaryNode | None:
         if node is None or not isinstance(node.content, list):

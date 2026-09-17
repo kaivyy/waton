@@ -15,7 +15,7 @@ class CommunitiesAPI:
             "get",
             [BinaryNode(tag="query", attrs={"request": "interactive"})],
         )
-        community = self._find_child(result, "community")
+        community = self._find_child(result, "community") or self._find_child(result, "group")
         if community is None:
             raise ValueError("community metadata response missing community node")
         return self._parse_community_node(community)
@@ -48,23 +48,35 @@ class CommunitiesAPI:
     async def create_community(self, name: str, description: str = "") -> str:
         """Creates a WhatsApp Community and returns its JID."""
         create_id = os.urandom(6).hex()
+        desc_id = os.urandom(6).hex()
 
-        create_node = BinaryNode(
-            tag="create",
-            attrs={"subject": name},
-            content=[BinaryNode(tag="description", attrs={}, content=description)],
-        )
+        content: list[BinaryNode] = [
+            BinaryNode(
+                tag="description",
+                attrs={"id": desc_id},
+                content=[BinaryNode(tag="body", attrs={}, content=description.encode("utf-8"))],
+            )
+            if description
+            else BinaryNode(tag="description", attrs={"id": desc_id}),
+            BinaryNode(
+                tag="parent",
+                attrs={"default_membership_approval_mode": "request_required"},
+            ),
+            BinaryNode(tag="allow_non_admin_sub_group_creation", attrs={}),
+            BinaryNode(tag="create_general_chat", attrs={}),
+        ]
 
         node = BinaryNode(
             tag="iq",
             attrs={"to": "@g.us", "type": "set", "xmlns": "w:g2", "id": create_id},
-            content=[create_node],
+            content=[BinaryNode(tag="create", attrs={"subject": name}, content=content)],
         )
         res = await self.client.query(node)
         jid = self._extract_community_jid(res)
         if not jid:
             raise ValueError("create_community response missing community jid")
         return jid
+
 
     async def community_create_group(
         self,
@@ -278,25 +290,30 @@ class CommunitiesAPI:
             "linked_groups": linked_groups,
         }
 
-    async def link_groups(self, community_jid: str, group_jids: list[str]) -> None:
+    async def link_groups(self, community_jid: str, group_jids: list[str]) -> BinaryNode:
         """Links existing WhatsApp groups to a parent community."""
-        links = [BinaryNode(tag="group", attrs={"jid": jid}) for jid in group_jids]
-
-        node = BinaryNode(
-            tag="iq",
-            attrs={"to": community_jid, "type": "set", "xmlns": "w:g2"},
-            content=[BinaryNode(tag="links", attrs={}, content=links)],
+        link_nodes = [
+            BinaryNode(
+                tag="link",
+                attrs={"link_type": "sub_group"},
+                content=[BinaryNode(tag="group", attrs={"jid": jid})],
+            )
+            for jid in group_jids
+        ]
+        return await self._community_query(
+            community_jid,
+            "set",
+            [BinaryNode(tag="links", attrs={}, content=link_nodes)],
         )
-        await self.client.send_node(node)
 
-    async def deactivate_community(self, community_jid: str) -> None:
+    async def deactivate_community(self, community_jid: str) -> BinaryNode:
         """Deactivates a WhatsApp community."""
-        node = BinaryNode(
-            tag="iq",
-            attrs={"to": community_jid, "type": "set", "xmlns": "w:g2"},
-            content=[BinaryNode(tag="deactivate", attrs={})],
+        return await self._community_query(
+            community_jid,
+            "set",
+            [BinaryNode(tag="deactivate", attrs={})],
         )
-        await self.client.send_node(node)
+
 
     async def _community_query(self, jid: str, request_type: str, content: list[BinaryNode]) -> BinaryNode:
         query_id = os.urandom(6).hex()
@@ -351,7 +368,10 @@ class CommunitiesAPI:
             "restrict": cls._find_child(community_node, "locked") is not None,
             "announce": cls._find_child(community_node, "announcement") is not None,
             "is_community": cls._find_child(community_node, "parent") is not None,
-            "is_community_announce": cls._find_child(community_node, "default_sub_community") is not None,
+            "is_community_announce": (
+                cls._find_child(community_node, "default_sub_group") is not None
+                or cls._find_child(community_node, "default_sub_community") is not None
+            ),
             "join_approval_mode": cls._find_child(community_node, "membership_approval_mode") is not None,
             "member_add_mode": cls._content_to_str(member_add_mode.content) == "all_member_add"
             if member_add_mode is not None
