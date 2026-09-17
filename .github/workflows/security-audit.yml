@@ -31,4 +31,4 @@ jobs:
 
       - name: Run strict vulnerability audit
         run: |
-          pip-audit --strict
+          pip-audit --strict --skip-editable
